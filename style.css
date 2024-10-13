@@ -3,7 +3,6 @@ body {
     color: white;
     font-family: 'Arial', sans-serif;
     margin: 0;
-    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -11,9 +10,9 @@ body {
 }
 
 #app-container {
+    text-align: center;
     width: 100%;
     max-width: 400px;
-    text-align: center;
 }
 
 header {
@@ -23,7 +22,6 @@ header {
 
 .coin-logo {
     width: 50px;
-    height: 50px;
 }
 
 #coin-balance {
@@ -36,14 +34,8 @@ header {
     color: #aaa;
 }
 
-main {
-    display: flex;
-    justify-content: space-between;
+#main-content {
     padding: 20px;
-}
-
-#tasks, #game {
-    width: 45%;
 }
 
 .game-banner {
@@ -55,9 +47,11 @@ footer {
     display: flex;
     justify-content: space-around;
     padding: 10px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
 }
 
 .tab-icon {
     width: 50px;
-    height: 50px;
 }
