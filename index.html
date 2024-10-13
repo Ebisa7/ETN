@@ -11,30 +11,23 @@
         <header>
             <div class="coin-display">
                 <img src="etnlogo.png" alt="Coin Logo" class="coin-logo">
-                <h1 id="coin-balance">200</h1>
-                <p id="username">@telegram_username</p>
+                <h1 id="coin-balance">0</h1>
+                <p id="username">@guest</p>
             </div>
         </header>
-        <main>
-            <section id="tasks">
-                <h2>Tasks</h2>
-                <ul>
-                    <li><input type="checkbox" id="task1"> Join $ETN</li>
-                    <li><input type="checkbox" id="task2"> Add $ETN to username</li>
-                </ul>
-            </section>
-            <section id="game">
-                <h2>Drop Game</h2>
-                <img src="playbanner.png" alt="Play the Game" class="game-banner">
-                <button id="play-game">Play</button>
-            </section>
+
+        <main id="main-content">
+            <h2>Drop Game</h2>
+            <img src="playbanner.png" alt="Play the Game" class="game-banner">
+            <button id="play-game">Play</button>
         </main>
+
         <footer>
-            <img src="home.png" alt="Home" class="tab-icon">
-            <img src="task.png" alt="Tasks" class="tab-icon">
+            <img src="home.png" alt="Home" class="tab-icon" id="home-tab">
+            <img src="task.png" alt="Tasks" class="tab-icon" id="tasks-tab">
         </footer>
     </div>
-    <script src="app.js"></script>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
-
