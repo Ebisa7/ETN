@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to the Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      padding: 50px;
+    }
+    #welcome-message {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    #start-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #start-button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div id="welcome-message">
+    <h1>Welcome to the Game!</h1>
+    <p>We're glad to have you here. Press the button to start playing!</p>
+    <button id="start-button">Start Game</button>
+  </div>
+
+  <script>
+    document.getElementById('start-button').addEventListener('click', function() {
+      // Redirect to the main game page or start game logic
+      window.location.href = "game.html"; // Change this to your game URL
+    });
+  </script>
+</body>
+</html>
