@@ -8,51 +8,24 @@
 </head>
 <body>
 
- <!-- Loading Screen -->
-<div id="loading-screen">
-  <div class="loading-content">
-    <img src="well1.png" alt="Loading..." class="tutorial-img">
-    <p>Loading...</p> <!-- Add this line for loading text -->
-  </div>
-</div>
-
-  <!-- Introduction Tutorial -->
-  <div id="tutorial-container">
-    <!-- Page 1 -->
-    <div class="page" id="page1">
-      <img src="well1.png" alt="Well 1" class="tutorial-img">
-      <h1>Welcome to ETN Coin Airdrop!</h1>
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 2 -->
-    <div class="page" id="page2">
-      <img src="well2.png" alt="Well 2" class="tutorial-img">
-      <h1>What is ETN?</h1>
-      <p>ETN is the first Habesha coin developed with the ET Netsa Community.</p>
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 3 -->
-    <div class="page" id="page3">
-      <img src="well3.png" alt="Well 3" class="tutorial-img">
-      <h1>What Now?</h1>
-      <p>Now, let's start earning $ETN tokens!</p>
-      <button class="continue-button">Let’s Go!</button>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <img src="well1.png" alt="Well 1" class="loading-img">
+      <p class="loading-text">Loading...</p>
     </div>
   </div>
 
   <!-- Main Game Page -->
-  <div id="game-container">
-    <div class="coin-balance">
-      <h2>Coin Balance: 0 ETN</h2>
-    </div>
+  <div id="game-container" style="display: none;">
+    <h2>Coin Balance: 0 ETN</h2>
     <div class="tabs">
       <button class="tab">Tab 1</button>
       <button class="tab">Tab 2</button>
     </div>
+    <!-- Your game content will go here -->
   </div>
 
-  <script src="app.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
