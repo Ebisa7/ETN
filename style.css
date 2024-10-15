@@ -8,26 +8,16 @@ body {
 
 #loading-screen {
   display: flex;
+  flex-direction: column; /* Stack children vertically */
   justify-content: center;
-  align-items: center;
+  align-items: center; /* Center items horizontally */
   height: 100vh;
   background-color: black;
   color: white;
 }
 
-#tutorial-container {
-  display: none;
-}
-
-.page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  height: 100vh;
-  padding: 20px;
-  text-align: center;
-  background-color: black;
+.loading-content {
+  text-align: center; /* Center align the text */
 }
 
 .tutorial-img {
@@ -59,6 +49,21 @@ p {
 
 .continue-button:hover {
   background-color: lightgray;
+}
+
+#tutorial-container {
+  display: none;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100vh;
+  padding: 20px;
+  text-align: center;
+  background-color: black;
 }
 
 #game-container {
