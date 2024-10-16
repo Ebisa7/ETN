@@ -1,24 +1,27 @@
-/* Rest of your CSS */
-#loading-screen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: black;
-  color: white;
-}
+/* Add these styles to your existing CSS */
 
-.loading-content {
+.loading-content p {
+  color: white;
   text-align: center;
+  margin-top: 20px;
 }
 
-.loading-img {
-  width: 150px;
-  height: auto;
-  margin-bottom: 20px;
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 50px;
 }
 
-.loading-text {
-  font-size: 1.5em;
-  color: white;
+.tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.tab img {
+  width: 30px; /* Adjust as needed */
+}
+
+.tab.active img {
+  filter: brightness(1.2); /* Makes the active tab icon glow */
 }
