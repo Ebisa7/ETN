@@ -1,9 +1,83 @@
-/* Add these styles to your existing CSS */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: black;
+  color: white;
+}
+
+#loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: black;
+  color: white;
+}
 
 .loading-content p {
   color: white;
   text-align: center;
   margin-top: 20px;
+}
+
+#tutorial-container {
+  display: none;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100vh;
+  padding: 20px;
+  text-align: center;
+  background-color: black;
+}
+
+.tutorial-img {
+  max-width: 80%;
+  height: auto;
+  margin-top: 50px;
+}
+
+h1 {
+  margin-top: 20px;
+  font-size: 2em;
+}
+
+p {
+  font-size: 1.2em;
+  margin: 20px 0;
+}
+
+.continue-button {
+  padding: 15px 125px;
+  background-color: white;
+  color: black;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.continue-button:hover {
+  background-color: lightgray;
+}
+
+#game-container {
+  display: none;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.coin-balance h2 {
+  margin-top: 50px;
+  font-size: 1.5em;
 }
 
 .tabs {
