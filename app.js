@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('page' + pageNumber).style.display = 'flex';
   }
 
-  // Triple tap to show welcome page
+  // Triple tap on Home tab to show welcome page
   const homeTab = document.getElementById('home-tab');
   homeTab.addEventListener('click', function() {
     const currentTime = new Date().getTime();
@@ -46,18 +46,19 @@ document.addEventListener('DOMContentLoaded', function() {
         gameContainer.style.display = 'none';
       }
     } else {
-      tapCount = 1; // Reset the tap count if too much time has passed
+      tapCount = 1;
     }
     lastTapTime = currentTime;
-    highlightActiveTab();
+    highlightActiveTab(homeTab);
   });
 
-  function highlightActiveTab() {
+  // Highlight active tab
+  function highlightActiveTab(activeTab) {
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
       tab.classList.remove('active');
     });
-    homeTab.classList.add('active');
+    activeTab.classList.add('active');
   }
 
   // Start with page 1 visible
