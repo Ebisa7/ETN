@@ -1,14 +1,12 @@
 @font-face {
-  font-family: 'Nebulica'; /* Name you want to use for this font */
-  src: url('Nebulica-Regular.ttf') format('truetype'); /* Direct path to your .ttf file */
-  font-weight: normal; /* Adjust if your font has different weights */
-  font-style: normal; /* Adjust if your font has different styles */
+  font-family: 'Nebulica';
+  src: url('Nebulica-Regular.ttf') format('truetype');
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Nebulica', Arial, sans-serif; /* Use the custom font */
+  font-family: 'Nebulica', Arial, sans-serif;
   background-color: #133A2A;
   color: white;
 }
@@ -25,7 +23,6 @@ body {
 .loading-content p {
   color: white;
   text-align: center;
-  margin-top: 20px;
 }
 
 #tutorial-container {
@@ -47,10 +44,9 @@ body {
   max-width: 80%;
   height: auto;
   margin-top: 50px;
-  animation: fadeInScale 1.2s ease forwards, bounce 1.5s ease infinite; /* Combined animations */
+  animation: fadeInScale 1.2s ease forwards, bounce 1.5s ease infinite;
 }
 
-/* Keyframes for fade in and scale effect */
 @keyframes fadeInScale {
   0% {
     opacity: 0;
@@ -62,13 +58,12 @@ body {
   }
 }
 
-/* Keyframes for bounce effect */
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% {
     transform: translateY(0);
   }
   40% {
-    transform: translateY(-20px); /* Bounce height */
+    transform: translateY(-20px);
   }
   60% {
     transform: translateY(-10px);
@@ -94,7 +89,7 @@ p {
   cursor: pointer;
   margin-bottom: 20px;
   border-radius: 10px;
-  font-family: 'Nebulica', Arial, sans-serif; /* Ensure button text uses Nebulica */
+  font-family: 'Nebulica', Arial, sans-serif;
 }
 
 .continue-button:hover {
@@ -109,15 +104,33 @@ p {
   padding: 20px;
 }
 
+.coin-balance {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+}
+
 .coin-balance h2 {
-  margin-top: 50px;
-  font-size: 1.5em;
+  font-size: 2em;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.well-image {
+  width: auto;
+  height: 2em;
 }
 
 .tabs {
   display: flex;
   justify-content: space-around;
-  margin-top: 50px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #1f4e3b;
+  padding: 10px 0;
 }
 
 .tab {
@@ -127,9 +140,15 @@ p {
 }
 
 .tab img {
-  width: 30px; /* Adjust as needed */
+  width: 30px;
 }
 
 .tab.active img {
-  filter: brightness(1.2); /* Makes the active tab icon glow */
+  filter: brightness(1.2);
+}
+
+.play-image {
+  width: 60px;
+  margin-top: 30px;
+  cursor: pointer;
 }
