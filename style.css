@@ -110,8 +110,8 @@ p {
   }
 }
 
-/* Apply animation to the specific well2.png */
-.tab img[src="well2.png"]:hover {
+/* Apply animation to the specific well2.png using the class */
+.well2-img:hover {
   animation: hoverUpDown 0.6s infinite ease-in-out; /* Infinite up and down animation */
 }
 
