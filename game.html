@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Drop Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nebulica', Arial, sans-serif;
+            background-color: #133A2A;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            text-align: center;
+        }
+
+        #game-area {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            border: 2px solid #F2C94C;
+            overflow: hidden;
+            background-color: #0D3B24; /* Darker background for better contrast */
+        }
+
+        .coin, .bomb {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .coin {
+            background-color: yellow;
+        }
+
+        .bomb {
+            background-color: black;
+        }
+
+        #start-button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #F2C94C;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #start-button:hover {
+            background-color: #F2C94D;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Coin Drop Game</h1>
+        <p>Score: <span id="score">0</span></p>
+        <div id="game-area"></div>
+        <button id="start-button">Start Game</button>
+    </div>
+    <script>
+        let score = 0;
+        let gameInterval;
+        const gameArea = document.getElementById('game-area');
+        const scoreDisplay = document.getElementById('score');
+        const startButton = document.getElementById('start-button');
+
+        startButton.addEventListener('click', startGame);
+
+        function startGame() {
+            score = 0;
+            scoreDisplay.textContent = score;
+            startButton.style.display = 'none';
+            gameArea.innerHTML = ''; // Clear previous game state
+            gameInterval = setInterval(dropItems, 750); // Drop items every 750ms
+        }
+
+        function dropItems() {
+            const itemType = Math.random() < 0.8 ? 'coin' : 'bomb'; // 80% chance for coin, 20% for bomb
+            const item = document.createElement('div');
+            item.classList.add(itemType);
+            item.style.width = '30px';
+            item.style.height = '30px';
+            item.style.left = Math.random() * (gameArea.offsetWidth - 30) + 'px';
+            item.style.top = '-30px'; // Start above the visible game area
+            gameArea.appendChild(item);
+
+            // Animate falling effect using setInterval
+            let position = -30;
+            const fallingSpeed = Math.random() * 3 + 2; // Random speed for falling
+            const fallingInterval = setInterval(() => {
+                position += fallingSpeed;
+                item.style.top = `${position}px`;
+
+                if (position >= gameArea.offsetHeight) {
+                    clearInterval(fallingInterval);
+                    item.remove(); // Remove item if it reaches the bottom without being clicked
+                }
+            }, 20);
+
+            // Handle clicks
+            item.addEventListener('click', () => {
+                if (itemType === 'coin') {
+                    score++;
+                    scoreDisplay.textContent = score;
+                } else {
+                    // Bomb clicked: reset score and end game
+                    alert('Boom! Your score has been reset.');
+                    clearInterval(gameInterval);
+                    clearInterval(fallingInterval);
+                    gameArea.innerHTML = ''; // Clear all items
+                    startButton.style.display = 'block'; // Show start button again
+                    return;
+                }
+                item.remove(); // Remove the item after click
+                clearInterval(fallingInterval);
+            });
+        }
+    </script>
+</body>
+</html>
