@@ -3,198 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ETN Coin Game</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-      background-color: #133A2A;
-    }
-    canvas {
-      display: block;
-    }
-    #score {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: #f2c94c;
-      font-size: 24px;
-    }
-    #timer {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #f2c94c;
-      font-size: 24px;
-    }
-  </style>
+  <title>ETN Coin Drop Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="score">Score: 0</div>
-  <div id="timer">Time: 60</div>
-  <canvas id="gameCanvas" width="475" height="898"></canvas>
+  <div id="game-container">
+    <h1>ETN Coin Drop Game</h1>
+    <p>Catch coins, avoid bombs, and earn $ETN!</p>
+    
+    <div class="game-area">
+      <!-- Your game logic and display here -->
+      <p>Playing game... (replace this with actual game logic)</p>
+      <button id="end-game-button">End Game</button> <!-- This button will simulate game completion -->
+    </div>
+  </div>
 
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    document.addEventListener('DOMContentLoaded', function() {
+      const endGameButton = document.getElementById('end-game-button');
 
-    let score = 0;
-    let timeLeft = 60; // 60 seconds duration
-    let gameOver = false;
-    const coins = [];
-    const bombs = [];
-    const gravity = 6;
-    const coinImage = new Image();
-    coinImage.src = 'https://etn.ethio-tech.com/brand-assets/logos/coin_full.png';
+      // Simulate the game ending and earning coins
+      endGameButton.addEventListener('click', function() {
+        let coinsEarned = 100; // This should be dynamically generated based on game results
+        alert('Game Over! You earned ' + coinsEarned + ' ETN');
+        
+        // Send the coins back to the parent window (index.html)
+        window.opener.postMessage({ coinsEarned: coinsEarned }, '*');
 
-    const bombImage = new Image();
-    bombImage.src = 'https://etn.ethio-tech.com/brand-assets/logos/jebena1.png';
-
-    function createCoin() {
-      const size = Math.random() * 40 + 10;
-      const x = Math.random() * (canvas.width - size);
-      coins.push({ x, y: -size, size, tapped: false });
-    }
-
-    function createBomb() {
-      const size = 50; // Keep bomb size consistent
-      const x = Math.random() * (canvas.width - size);
-      bombs.push({ x, y: -size, size, explode: false });
-    }
-
-    function drawGrid() {
-      ctx.strokeStyle = '#F2C94C';
-      ctx.lineWidth = 0.5;
-      const gridSize = 50;
-
-      for (let x = 0; x < canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      for (let y = 0; y < canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-    }
-
-    function drawCoins() {
-      coins.forEach((coin, index) => {
-        if (!coin.tapped) {
-          ctx.drawImage(coinImage, coin.x, coin.y, coin.size, coin.size);
-        } else {
-          ctx.fillStyle = 'yellow';
-          ctx.beginPath();
-          ctx.arc(coin.x + coin.size / 2, coin.y + coin.size / 2, coin.size / 2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        coin.y += gravity;
-        if (coin.y > canvas.height) coins.splice(index, 1);
-      });
-    }
-
-    function drawBombs() {
-      bombs.forEach((bomb, index) => {
-        if (!bomb.explode) {
-          ctx.drawImage(bombImage, bomb.x, bomb.y, bomb.size, bomb.size);
-        } else {
-          ctx.fillStyle = 'red';
-          ctx.beginPath();
-          ctx.arc(bomb.x + bomb.size / 2, bomb.y + bomb.size / 2, bomb.size, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Sparks animation for bombs
-          for (let i = 0; i < 6; i++) {
-            ctx.beginPath();
-            const sparkX = bomb.x + bomb.size / 2 + (Math.random() - 0.5) * 30;
-            const sparkY = bomb.y + bomb.size / 2 + (Math.random() - 0.5) * 30;
-            ctx.arc(sparkX, sparkY, 3, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-        bomb.y += gravity;
-        if (bomb.y > canvas.height) bombs.splice(index, 1);
-      });
-    }
-
-    function handleTap(e) {
-      const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-      const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-
-      coins.forEach((coin, index) => {
-        if (x >= coin.x && x <= coin.x + coin.size && y >= coin.y && y <= coin.y + coin.size) {
-          score += 0.5;
-          coin.tapped = true;
-          setTimeout(() => coins.splice(index, 1), 150);
-          updateScore();
-        }
-      });
-
-      bombs.forEach((bomb, index) => {
-        if (x >= bomb.x && x <= bomb.x + bomb.size && y >= bomb.y && y <= bomb.y + bomb.size) {
-          score -= 1;
-          bomb.explode = true;
-          setTimeout(() => bombs.splice(index, 1), 150);
-          updateScore();
-        }
-      });
-    }
-
-    function updateScore() {
-      document.getElementById('score').innerText = `Score: ${score}`;
-    }
-
-    function updateTimer() {
-      document.getElementById('timer').innerText = `Time: ${timeLeft}`;
-    }
-
-    function endGame() {
-      gameOver = true;
-      clearInterval(coinInterval);
-      clearInterval(bombInterval);
-      clearInterval(timerInterval);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      alert(`Game over! Final Score: ${score}`);
-      
-      // Store the score in local storage
-      localStorage.setItem('coinBalance', score);
-      
-      // Redirect to index.html after a short delay
-      setTimeout(() => {
+        // Redirect back to index.html
         window.location.href = 'index.html';
-      }, 2000); // 2 seconds delay
-    }
-
-    function gameLoop() {
-      if (gameOver) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawGrid();
-      drawCoins();
-      drawBombs();
-    }
-
-    const coinInterval = setInterval(createCoin, 500);
-    const bombInterval = setInterval(createBomb, 1000);
-    const timerInterval = setInterval(() => {
-      timeLeft--;
-      updateTimer();
-      if (timeLeft <= 0) endGame();
-    }, 1000);
-
-    canvas.addEventListener('click', handleTap);
-    canvas.addEventListener('touchstart', handleTap);
-    setInterval(gameLoop, 30);
-
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      });
     });
   </script>
 </body>
