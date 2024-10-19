@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const tutorialContainer = document.getElementById('tutorial-container');
   const gameContainer = document.getElementById('game-container');
   const continueButtons = document.querySelectorAll('.continue-button');
+  const coinBalanceDisplay = document.getElementById('coinBalance');
+  const playGameImage = document.getElementById('playGame');
+
   let currentPage = 1;
   let tapCount = 0;
   let lastTapTime = 0;
@@ -33,25 +36,38 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('page' + pageNumber).style.display = 'flex';
   }
 
-  // Triple tap on Home tab to show welcome page
-  const homeTab = document.getElementById('home-tab');
-  homeTab.addEventListener('click', function() {
-    const currentTime = new Date().getTime();
-    if (currentTime - lastTapTime < 300) {
-      tapCount++;
-      if (tapCount === 3) {
-        tapCount = 0;
-        tutorialContainer.style.display = 'block';
-        gameContainer.style.display = 'none';
-      }
-    } else {
-      tapCount = 1;
-    }
-    lastTapTime = currentTime;
-    highlightActiveTab(homeTab);
+  // Display coin balance from local storage
+  let coinBalance = localStorage.getItem('coinBalance') || 0;
+  coinBalanceDisplay.textContent = `${coinBalance} ETN`;
+
+  // Play game image click (navigates to game.html)
+  playGameImage.addEventListener('click', function() {
+    window.location.href = 'game.html';
   });
 
-  // Highlight active tab
+  // Tabs functionality
+  const homeTab = document.getElementById('home-tab');
+  const tasksTab = document.getElementById('tasks-tab');
+  const inviteTab = document.getElementById('invite-tab');
+  const airdropTab = document.getElementById('airdrop-tab');
+
+  homeTab.addEventListener('click', function() {
+    window.location.href = 'index.html';
+  });
+
+  tasksTab.addEventListener('click', function() {
+    window.location.href = 'tasks.html';
+  });
+
+  inviteTab.addEventListener('click', function() {
+    window.location.href = 'invite.html';
+  });
+
+  airdropTab.addEventListener('click', function() {
+    window.location.href = 'airdrop.html';
+  });
+
+  // Highlight active tab (for future functionality)
   function highlightActiveTab(activeTab) {
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
@@ -59,17 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     activeTab.classList.add('active');
   }
-
-  // Handle message received from the game.html for coins earned
-  window.addEventListener('message', function(event) {
-    const coinsEarned = event.data.coinsEarned || 0;
-    let currentBalance = parseInt(localStorage.getItem('coinBalance')) || 0;
-    currentBalance += coinsEarned;
-    localStorage.setItem('coinBalance', currentBalance);
-
-    // Update the balance in the HTML
-    document.getElementById('coin-balance').innerText = currentBalance;
-  });
 
   // Start with page 1 visible
   showPage(1);
