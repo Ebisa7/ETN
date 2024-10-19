@@ -40,25 +40,32 @@ body {
   max-width: 80%;
   height: auto;
   margin-top: 50px;
-  transition: transform 0.3s ease; /* Smooth transition */
+  animation: fadeInScale 1.2s ease forwards, bounce 1.5s ease infinite; /* Combined animations */
 }
 
-/* Keyframes for the hover animation */
-@keyframes hoverUpDown {
+/* Keyframes for fade in and scale effect */
+@keyframes fadeInScale {
   0% {
-    transform: translateY(0); /* Start position */
-  }
-  50% {
-    transform: translateY(-10px); /* Move up */
+    opacity: 0;
+    transform: scale(0.8);
   }
   100% {
-    transform: translateY(0); /* Back to start */
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-/* Apply the animation on hover */
-.tutorial-img:hover {
-  animation: hoverUpDown 0.6s ease-in-out; /* Play animation on hover */
+/* Keyframes for bounce effect */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px); /* Bounce height */
+  }
+  60% {
+    transform: translateY(-10px);
+  }
 }
 
 h1 {
