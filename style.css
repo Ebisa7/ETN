@@ -94,6 +94,25 @@ p {
 
 .tab img {
   width: 30px; /* Adjust as needed */
+  transition: transform 0.3s ease; /* Smooth transition for non-hover states */
+}
+
+/* Add animation for hovering well2.png */
+@keyframes hoverUpDown {
+  0% {
+    transform: translateY(0); /* Starting position */
+  }
+  50% {
+    transform: translateY(-10px); /* Move up */
+  }
+  100% {
+    transform: translateY(0); /* Move back to original position */
+  }
+}
+
+/* Apply animation to the specific well2.png */
+.tab img[src="well2.png"]:hover {
+  animation: hoverUpDown 0.6s infinite ease-in-out; /* Infinite up and down animation */
 }
 
 .tab.active img {
