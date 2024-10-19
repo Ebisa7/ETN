@@ -49,6 +49,14 @@
     </div>
     <img src="game.png" alt="Play Game" class="play-image" id="playGame">
     
+    <script>
+  // Retrieve the final score from localStorage
+  const finalScore = localStorage.getItem('finalScore') || 0;
+
+  // Display the score in the span
+  document.getElementById('displayScore').innerText = finalScore;
+</script>
+    
     <div class="tabs">
       <button class="tab" id="home-tab">
         <img src="home.png" alt="Home">
