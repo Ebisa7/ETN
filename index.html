@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <!-- Loading Screen -->
   <div id="loading-screen">
     <div class="loading-content">
@@ -42,9 +43,20 @@
 
   <!-- Main Game Page -->
   <div id="game-container">
+    <!-- Coin Balance and Well2 -->
     <div class="coin-balance">
-      <h2>Coin Balance: <span id="coin-balance">0</span> ETN</h2>
+      <h2 id="coinBalance"></h2>
+      <img src="well2.png" alt="Well 2" class="well-image">
     </div>
+
+    <!-- Play Game Image -->
+    <div class="play-game">
+      <a href="game.html">
+        <img src="game.png" alt="Play Game" class="play-game-img">
+      </a>
+    </div>
+
+    <!-- Navigation Tabs -->
     <div class="tabs">
       <button class="tab" id="home-tab">
         <img src="home.png" alt="Home">
