@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(function() {
     loadingScreen.style.display = 'none';
     tutorialContainer.style.display = 'block';
-  }, 2000); // 2 seconds loading
+  }, 5000); // 5 seconds loading
 
   // Tutorial swipe/continue functionality
   continueButtons.forEach(button => {
