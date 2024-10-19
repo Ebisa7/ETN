@@ -1,7 +1,14 @@
+@font-face {
+  font-family: 'Nebulica'; /* Name you want to use for this font */
+  src: url('Nebulica-Regular.ttf') format('truetype'); /* Direct path to your .ttf file */
+  font-weight: normal; /* Adjust if your font has different weights */
+  font-style: normal; /* Adjust if your font has different styles */
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Nebulica', Arial, sans-serif; /* Use the custom font */
   background-color: #133A2A;
   color: white;
 }
