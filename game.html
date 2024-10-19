@@ -31,8 +31,8 @@
   </style>
 </head>
 <body>
-  <div id="score">Score: 5</div>
-  <div id="timer">Time: 0</div>
+  <div id="score">Score: 0</div>
+  <div id="timer">Time: 60</div>
   <canvas id="gameCanvas" width="475" height="898"></canvas>
 
   <script>
@@ -162,7 +162,14 @@
       clearInterval(timerInterval);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       alert(`Game over! Final Score: ${score}`);
-      window.location.href = 'index.html'; // Redirect to index.html
+      
+      // Store the score in local storage
+      localStorage.setItem('coinBalance', score);
+      
+      // Redirect to index.html after a short delay
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000); // 2 seconds delay
     }
 
     function gameLoop() {
