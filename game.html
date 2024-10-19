@@ -3,187 +3,257 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coin Drop Game</title>
+  <title>ETN Coin Game</title>
+  <link rel="icon" href="path/to/favicon.ico" type="image/x-icon">
   <style>
     body {
       margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #133A2A;
-      color: white;
       overflow: hidden;
-    }
-
-    #game-screen {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
+      font-family: sans-serif;
       background-color: #133A2A;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
-
-    .coin, .bomb, .freeze {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
+    canvas {
+      display: block;
+    }
+    #score {
       position: absolute;
-      cursor: pointer;
-    }
-
-    .coin {
-      background-color: yellow;
-    }
-
-    .bomb {
-      background-color: black;
-    }
-
-    .freeze {
-      background-color: blue;
-    }
-
-    #play-btn {
+      top: 10px;
+      left: 10px;
+      color: #f2c94c;
       font-size: 24px;
-      padding: 10px 20px;
-      background-color: #F2C94C;
-      border: none;
-      cursor: pointer;
+    }
+    #timer {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #f2c94c;
+      font-size: 24px;
+    }
+    #instructions {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-    }
-
-    #timer, #score {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 24px;
       color: white;
+      text-align: center;
+      display: none; /* Initially hidden */
+    }
+    #restartButton {
+      display: none; /* Initially hidden */
+      background-color: #f2c94c;
+      border: none;
+      padding: 10px 20px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #133A2A;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <div id="game-screen">
-    <button id="play-btn">Play</button>
-    <div id="timer">Timer: 30</div>
-    <div id="score">Score: 0</div>
+  <div id="score">Score: -0.5</div>
+  <div id="timer">Time: 0</div>
+  <canvas id="gameCanvas" width="694" height="697"></canvas>
+  <div id="instructions">
+    <h2>Instructions</h2>
+    <p>Tap on coins to collect them and avoid bombs!</p>
+    <button onclick="startGame()">Start Game</button>
   </div>
+  <button id="restartButton" onclick="restartGame()">Restart Game</button>
+
+  <audio id="coinSound" src="path/to/coin-sound.mp3"></audio>
+  <audio id="bombSound" src="path/to/bomb-sound.mp3"></audio>
 
   <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
     let score = 0;
-    let timer = 30;
-    let gameInterval;
-    let isFrozen = false;
-    const freezeDuration = 3000; // Freeze for 3 seconds
-    const numCircles = 75; // Total circles to drop
-    const numBombs = 5; // Total bombs
-    const numFreezes = 5; // Total freeze circles
+    let timeLeft = 60; // 60 seconds duration
+    let gameOver = false;
+    const coins = [];
+    const bombs = [];
+    const gravity = 6;
+    const coinImage = new Image();
+    coinImage.src = 'https://etn.ethio-tech.com/brand-assets/logos/coin_full.png';
 
-    // Handle play button
-    document.getElementById('play-btn').addEventListener('click', startGame);
+    const bombImage = new Image();
+    bombImage.src = 'https://etn.ethio-tech.com/brand-assets/logos/jebena1.png';
 
-    // Create coins, bombs, and freezes
-    function startGame() {
-      document.getElementById('play-btn').style.display = 'none'; // Hide play button
-
-      gameInterval = setInterval(() => {
-        if (!isFrozen && timer > 0) {
-          timer--;
-          document.getElementById('timer').textContent = `Timer: ${timer}`;
-        } else if (timer === 0) {
-          clearInterval(gameInterval);
-          alert('Game Over!');
-        }
-      }, 1000);
-
-      // Drop circles, bombs, and freezes
-      for (let i = 0; i < numCircles; i++) {
-        setTimeout(createCircle, i * 500);
-      }
-      for (let i = 0; i < numBombs; i++) {
-        setTimeout(createBomb, Math.random() * 30000); // Random bomb timing
-      }
-      for (let i = 0; i < numFreezes; i++) {
-        setTimeout(createFreeze, Math.random() * 30000); // Random freeze timing
-      }
-    }
-
-    function createCircle() {
-      const circle = document.createElement('div');
-      circle.classList.add('coin');
-      circle.style.left = Math.random() * 80 + 'vw';
-      document.getElementById('game-screen').appendChild(circle);
-
-      animateDrop(circle);
-
-      circle.addEventListener('click', function () {
-        if (!isFrozen) {
-          score++;
-          document.getElementById('score').textContent = `Score: ${score}`;
-          this.remove();
-        }
-      });
+    function createCoin() {
+      const size = Math.random() * 40 + 10;
+      const x = Math.random() * (canvas.width - size);
+      coins.push({ x, y: -size, size, tapped: false });
     }
 
     function createBomb() {
-      const bomb = document.createElement('div');
-      bomb.classList.add('bomb');
-      bomb.style.left = Math.random() * 80 + 'vw';
-      document.getElementById('game-screen').appendChild(bomb);
+      const size = 50; // Keep bomb size consistent
+      const x = Math.random() * (canvas.width - size);
+      bombs.push({ x, y: -size, size, explode: false });
+    }
 
-      animateDrop(bomb);
+    function drawGrid() {
+      ctx.strokeStyle = '#F2C94C';
+      ctx.lineWidth = 0.5;
+      const gridSize = 50;
 
-      bomb.addEventListener('click', function () {
-        if (!isFrozen) {
-          score = 0; // Reset score if bomb is clicked
-          document.getElementById('score').textContent = `Score: ${score}`;
-          this.remove();
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+
+    function drawCoins() {
+      coins.forEach((coin, index) => {
+        if (!coin.tapped) {
+          ctx.drawImage(coinImage, coin.x, coin.y, coin.size, coin.size);
+        } else {
+          ctx.fillStyle = 'yellow';
+          ctx.beginPath();
+          ctx.arc(coin.x + coin.size / 2, coin.y + coin.size / 2, coin.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        coin.y += gravity;
+        if (coin.y > canvas.height) coins.splice(index, 1);
+      });
+    }
+
+    function drawBombs() {
+      bombs.forEach((bomb, index) => {
+        if (!bomb.explode) {
+          ctx.drawImage(bombImage, bomb.x, bomb.y, bomb.size, bomb.size);
+        } else {
+          ctx.fillStyle = 'red';
+          ctx.beginPath();
+          ctx.arc(bomb.x + bomb.size / 2, bomb.y + bomb.size / 2, bomb.size, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Sparks animation for bombs
+          for (let i = 0; i < 6; i++) {
+            ctx.beginPath();
+            const sparkX = bomb.x + bomb.size / 2 + (Math.random() - 0.5) * 30;
+            const sparkY = bomb.y + bomb.size / 2 + (Math.random() - 0.5) * 30;
+            ctx.arc(sparkX, sparkY, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        bomb.y += gravity;
+        if (bomb.y > canvas.height) bombs.splice(index, 1);
+      });
+    }
+
+    function handleTap(e) {
+      const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+      const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+
+      coins.forEach((coin, index) => {
+        if (x >= coin.x && x <= coin.x + coin.size && y >= coin.y && y <= coin.y + coin.size) {
+          score += 0.5;
+          coin.tapped = true;
+          setTimeout(() => coins.splice(index, 1), 150);
+          document.getElementById('coinSound').play(); // Play coin sound
+          updateScore();
+        }
+      });
+
+      bombs.forEach((bomb, index) => {
+        if (x >= bomb.x && x <= bomb.x + bomb.size && y >= bomb.y && y <= bomb.y + bomb.size) {
+          score -= 1;
+          bomb.explode = true;
+          setTimeout(() => bombs.splice(index, 1), 150);
+          document.getElementById('bombSound').play(); // Play bomb sound
+          updateScore();
         }
       });
     }
 
-    function createFreeze() {
-      const freeze = document.createElement('div');
-      freeze.classList.add('freeze');
-      freeze.style.left = Math.random() * 80 + 'vw';
-      document.getElementById('game-screen').appendChild(freeze);
-
-      animateDrop(freeze);
-
-      freeze.addEventListener('click', function () {
-        if (!isFrozen) {
-          freezeGame();
-          this.remove();
-        }
-      });
+    function updateScore() {
+      document.getElementById('score').innerText = `Score: ${score}`;
     }
 
-    function animateDrop(element) {
-      element.style.position = 'absolute';
-      element.style.top = '-10vh';
-
-      let dropInterval = setInterval(() => {
-        if (isFrozen) return; // Pause dropping during freeze
-
-        let currentTop = parseFloat(element.style.top);
-        element.style.top = currentTop + 2 + 'vh';
-
-        if (currentTop > 100) {
-          clearInterval(dropInterval);
-          element.remove(); // Remove element if it reaches the bottom
-        }
-      }, 50);
+    function updateTimer() {
+      document.getElementById('timer').innerText = `Time: ${timeLeft}`;
+      if (timeLeft <= 10) {
+        document.getElementById('timer').style.color = 'red'; // Change color to red for urgency
+      }
     }
 
-    function freezeGame() {
-      isFrozen = true;
-      setTimeout(() => {
-        isFrozen = false;
-      }, freezeDuration); // Resume game after freeze duration
+    function endGame() {
+      gameOver = true;
+      clearInterval(coinInterval);
+      clearInterval(bombInterval);
+      clearInterval(timerInterval);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('restartButton').style.display = 'block'; // Show restart button
+      alert(`Game over! Final Score: ${score}`);
     }
+
+    function gameLoop() {
+      if (gameOver) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid();
+      drawCoins();
+      drawBombs();
+    }
+
+    function startGame() {
+      score = 0;
+      timeLeft = 60;
+      gameOver = false;
+      coins.length = 0;
+      bombs.length = 0;
+      updateScore();
+      updateTimer();
+      document.getElementById('instructions').style.display = 'none'; // Hide instructions
+      startIntervals(); // Start intervals for coins and bombs
+      gameLoop(); // Start the game loop
+    }
+
+    function restartGame() {
+      score = 0;
+      timeLeft = 60;
+      gameOver = false;
+      coins.length = 0;
+      bombs.length = 0;
+      updateScore();
+      updateTimer();
+      document.getElementById('restartButton').style.display = 'none'; // Hide restart button
+      startIntervals(); // Restart intervals for coins and bombs
+      gameLoop(); // Restart the game loop
+    }
+
+    function startIntervals() {
+      coinInterval = setInterval(createCoin, 500);
+      bombInterval = setInterval(createBomb, 1000);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) endGame();
+      }, 1000);
+    }
+
+    const coinInterval = setInterval(createCoin, 500);
+    const bombInterval = setInterval(createBomb, 1000);
+    const timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+
+    window.addEventListener('click', handleTap);
+    window.addEventListener('touchstart', handleTap);
+    document.getElementById('instructions').style.display = 'block'; // Show instructions on page load
   </script>
 </body>
 </html>
