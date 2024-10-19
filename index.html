@@ -4,102 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ETN Coin Airdrop Game</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    /* Additional CSS for loading screen */
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #133A2A; /* Same background color for consistency */
-    }
-    
-    #loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 24px;
-      z-index: 9999; /* Ensure loading screen is on top */
-    }
-
-    #coin-balance {
-      display: flex;
-      align-items: center;
-      margin-top: 20px;
-      font-size: 24px;
-      color: #fff;
-    }
-
-    #coin-balance img {
-      width: 40px; /* Adjust as needed */
-      height: 40px; /* Adjust as needed */
-      margin-left: 10px;
-    }
-
-    .tabs {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .tab {
-      background: none;
-      border: none;
-      cursor: pointer;
-      margin: 0 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css"> <!-- Link to existing CSS -->
 </head>
 <body>
 
   <!-- Loading Screen -->
   <div id="loading-screen">
-    <p>Loading...</p>
+    <div class="loading-content">
+      <p>Loading...</p>
+    </div>
   </div>
 
-  <!-- Coin Balance -->
-  <div id="coin-balance">
-    Coin Balance: <span id="balance">0</span> ETN <img src="well2.png" alt="Coin Image">
+  <!-- Coin Balance Display -->
+  <div id="coin-balance" style="text-align: center; margin-top: 20px;">
+    <h2>Coin Balance: <span id="balance">0</span> ETN</h2>
+    <img src="well2.png" alt="Coin" style="width: 40px; height: 40px; margin-left: 10px;">
   </div>
 
   <!-- Navigation Tabs -->
   <div class="tabs">
-    <button class="tab" id="home-tab" onclick="location.href='index.html'">
+    <button class="tab" id="home-tab" onclick="navigateTo('index.html')">
       <img src="home.png" alt="Home">
     </button>
-    <button class="tab" id="tasks-tab" onclick="location.href='tasks.html'">
+    <button class="tab" id="tasks-tab" onclick="navigateTo('tasks.html')">
       <img src="tasks.png" alt="Tasks">
     </button>
-    <button class="tab" id="invite-tab" onclick="location.href='invite.html'">
+    <button class="tab" id="invite-tab" onclick="navigateTo('invite.html')">
       <img src="invite.png" alt="Invite">
     </button>
-    <button class="tab" id="airdrop-tab" onclick="location.href='airdrop.html'">
+    <button class="tab" id="airdrop-tab" onclick="navigateTo('airdrop.html')">
       <img src="airdrop.png" alt="Airdrop">
     </button>
   </div>
 
-  <!-- Game Image Navigation -->
-  <button class="tab" id="game-tab" onclick="location.href='game.html'">
-    <img src="game.png" alt="Game">
-  </button>
+  <!-- Game Button -->
+  <div style="text-align: center; margin-top: 20px;">
+    <button onclick="navigateTo('game.html')">
+      <img src="game.png" alt="Play Game" style="width: 50px; height: 50px;">
+    </button>
+  </div>
 
+  <script src="app.js"></script> <!-- Link to existing JavaScript -->
   <script>
-    // Retrieve coin balance from local storage
+    // Add navigation function
+    function navigateTo(page) {
+      window.location.href = page;
+    }
+
+    // Load coin balance from local storage
     window.onload = function() {
       const balance = localStorage.getItem('coinBalance') || 0; // Default to 0 if no balance found
       document.getElementById('balance').innerText = balance;
 
-      // Hide loading screen after a short delay or when loading is done
+      // Hide loading screen after a short delay
       setTimeout(() => {
         document.getElementById('loading-screen').style.display = 'none';
       }, 500); // Adjust timeout as needed
