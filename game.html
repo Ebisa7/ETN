@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ETN Coin Game</title>
-  <link rel="icon" href="path/to/favicon.ico" type="image/x-icon">
   <style>
     body {
       margin: 0;
@@ -29,40 +28,12 @@
       color: #f2c94c;
       font-size: 24px;
     }
-    #instructions {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      text-align: center;
-      display: none; /* Initially hidden */
-    }
-    #restartButton {
-      display: none; /* Initially hidden */
-      background-color: #f2c94c;
-      border: none;
-      padding: 10px 20px;
-      font-size: 20px;
-      cursor: pointer;
-      color: #133A2A;
-      border-radius: 5px;
-    }
   </style>
 </head>
 <body>
-  <div id="score">Score: -0.5</div>
+  <div id="score">Score: 5</div>
   <div id="timer">Time: 0</div>
-  <canvas id="gameCanvas" width="694" height="697"></canvas>
-  <div id="instructions">
-    <h2>Instructions</h2>
-    <p>Tap on coins to collect them and avoid bombs!</p>
-    <button onclick="startGame()">Start Game</button>
-  </div>
-  <button id="restartButton" onclick="restartGame()">Restart Game</button>
-
-  <audio id="coinSound" src="path/to/coin-sound.mp3"></audio>
-  <audio id="bombSound" src="path/to/bomb-sound.mp3"></audio>
+  <canvas id="gameCanvas" width="475" height="898"></canvas>
 
   <script>
     const canvas = document.getElementById('gameCanvas');
@@ -162,7 +133,6 @@
           score += 0.5;
           coin.tapped = true;
           setTimeout(() => coins.splice(index, 1), 150);
-          document.getElementById('coinSound').play(); // Play coin sound
           updateScore();
         }
       });
@@ -172,7 +142,6 @@
           score -= 1;
           bomb.explode = true;
           setTimeout(() => bombs.splice(index, 1), 150);
-          document.getElementById('bombSound').play(); // Play bomb sound
           updateScore();
         }
       });
@@ -184,9 +153,6 @@
 
     function updateTimer() {
       document.getElementById('timer').innerText = `Time: ${timeLeft}`;
-      if (timeLeft <= 10) {
-        document.getElementById('timer').style.color = 'red'; // Change color to red for urgency
-      }
     }
 
     function endGame() {
@@ -195,8 +161,8 @@
       clearInterval(bombInterval);
       clearInterval(timerInterval);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      document.getElementById('restartButton').style.display = 'block'; // Show restart button
       alert(`Game over! Final Score: ${score}`);
+      window.location.href = 'index.html'; // Redirect to index.html
     }
 
     function gameLoop() {
@@ -207,42 +173,6 @@
       drawBombs();
     }
 
-    function startGame() {
-      score = 0;
-      timeLeft = 60;
-      gameOver = false;
-      coins.length = 0;
-      bombs.length = 0;
-      updateScore();
-      updateTimer();
-      document.getElementById('instructions').style.display = 'none'; // Hide instructions
-      startIntervals(); // Start intervals for coins and bombs
-      gameLoop(); // Start the game loop
-    }
-
-    function restartGame() {
-      score = 0;
-      timeLeft = 60;
-      gameOver = false;
-      coins.length = 0;
-      bombs.length = 0;
-      updateScore();
-      updateTimer();
-      document.getElementById('restartButton').style.display = 'none'; // Hide restart button
-      startIntervals(); // Restart intervals for coins and bombs
-      gameLoop(); // Restart the game loop
-    }
-
-    function startIntervals() {
-      coinInterval = setInterval(createCoin, 500);
-      bombInterval = setInterval(createBomb, 1000);
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        updateTimer();
-        if (timeLeft <= 0) endGame();
-      }, 1000);
-    }
-
     const coinInterval = setInterval(createCoin, 500);
     const bombInterval = setInterval(createBomb, 1000);
     const timerInterval = setInterval(() => {
@@ -251,9 +181,14 @@
       if (timeLeft <= 0) endGame();
     }, 1000);
 
-    window.addEventListener('click', handleTap);
-    window.addEventListener('touchstart', handleTap);
-    document.getElementById('instructions').style.display = 'block'; // Show instructions on page load
+    canvas.addEventListener('click', handleTap);
+    canvas.addEventListener('touchstart', handleTap);
+    setInterval(gameLoop, 30);
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
   </script>
 </body>
 </html>
