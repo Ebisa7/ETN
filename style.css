@@ -2,7 +2,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background-color: black;
+  background-color: #133A2A;
   color: white;
 }
 
@@ -11,7 +11,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: black;
+  background-color: #133A2A;
   color: white;
 }
 
@@ -33,7 +33,7 @@ body {
   height: 100vh;
   padding: 20px;
   text-align: center;
-  background-color: black;
+  background-color: #133A2A;
 }
 
 .tutorial-img {
@@ -54,7 +54,7 @@ p {
 
 .continue-button {
   padding: 15px 125px;
-  background-color: white;
+  background-color: #F2C94C;
   color: black;
   border: none;
   font-size: 1.2em;
@@ -64,12 +64,12 @@ p {
 }
 
 .continue-button:hover {
-  background-color: lightgray;
+  background-color: #F2C94D;
 }
 
 #game-container {
   display: none;
-  background-color: black;
+  background-color: #133A2A;
   color: white;
   text-align: center;
   padding: 20px;
