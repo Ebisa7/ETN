@@ -5,6 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ETN Coin Airdrop Game</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      text-align: center;
+      background-color: #f0f0f0; /* Background color for visibility */
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .tab {
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin: 0 10px;
+    }
+    .coin-balance {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .coin-balance h2 {
+      margin: 0 10px;
+    }
+    #game-image {
+      cursor: pointer;
+      margin: 20px 0;
+    }
+  </style>
 </head>
 <body>
 
@@ -17,22 +47,17 @@
 
   <!-- Introduction Tutorial -->
   <div id="tutorial-container">
-    <!-- Page 1 -->
     <div class="page" id="page1">
       <img src="well1.gif" alt="Well 1" class="tutorial-img">
       <h1>Welcome to ETN Coin Airdrop!</h1>
       <button class="continue-button">Continue</button>
     </div>
-
-    <!-- Page 2 -->
     <div class="page" id="page2">
       <img src="well2.png" alt="Well 2" class="tutorial-img">
       <h1>What is ETN?</h1>
       <p>$ETN - ET NETSA COIN is the lifeblood of the ETN Ecosystem</p>
       <button class="continue-button">Continue</button>
     </div>
-
-    <!-- Page 3 -->
     <div class="page" id="page3">
       <img src="well3.gif" alt="Well 3" class="tutorial-img">
       <h1>What Now?</h1>
@@ -44,24 +69,35 @@
   <!-- Main Game Page -->
   <div id="game-container">
     <div class="coin-balance">
-      <h2>Coin Balance: 0 ETN</h2>
+      <img src="well2.png" alt="Well 2" class="tutorial-img">
+      <h2 id="coin-balance">Coin Balance: 0 ETN</h2>
     </div>
+    <img id="game-image" src="game.png" alt="Game" onclick="location.href='game.html'">
     <div class="tabs">
-      <button class="tab" id="home-tab">
+      <button class="tab" id="home-tab" onclick="location.href='index.html'">
         <img src="home.png" alt="Home">
       </button>
-      <button class="tab" id="tasks-tab">
-        <img src="tasks.png" alt="Tasks">
-      </button>
-      <button class="tab" id="invite-tab">
+      <button class="tab" id="invite-tab" onclick="location.href='invite.html'">
         <img src="invite.png" alt="Invite">
       </button>
-      <button class="tab" id="airdrop-tab">
+      <button class="tab" id="airdrop-tab" onclick="location.href='airdrop.html'">
         <img src="airdrop.png" alt="Airdrop">
+      </button>
+      <button class="tab" id="tasks-tab" onclick="location.href='tasks.html'">
+        <img src="tasks.png" alt="Tasks">
       </button>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script>
+    // Function to load coin balance from local storage
+    function loadCoinBalance() {
+      const balance = localStorage.getItem('coinBalance') || 0;
+      document.getElementById('coin-balance').innerText = `Coin Balance: ${balance} ETN`;
+    }
+
+    // Call the function to load the balance on page load
+    loadCoinBalance();
+  </script>
 </body>
 </html>
