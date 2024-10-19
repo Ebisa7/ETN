@@ -36,14 +36,28 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('page' + pageNumber).style.display = 'flex';
   }
 
-  // Display coin balance from local storage
-  let coinBalance = localStorage.getItem('coinBalance') || 0;
-  coinBalanceDisplay.textContent = `${coinBalance} ETN`;
+  // Retrieve and display coin balance from local storage
+  let coinBalance = parseFloat(localStorage.getItem('coinBalance')) || 0;
+  coinBalanceDisplay.textContent = `${coinBalance.toFixed(1)} ETN`;
 
   // Play game image click (navigates to game.html)
   playGameImage.addEventListener('click', function() {
     window.location.href = 'game.html';
   });
+
+  // Check if new coin balance exists from game.html (using sessionStorage for this session's score)
+  let newCoinsEarned = parseFloat(sessionStorage.getItem('newCoins')) || 0;
+
+  if (newCoinsEarned > 0) {
+    // Update the total coin balance
+    coinBalance += newCoinsEarned;
+    // Save the new total balance in localStorage
+    localStorage.setItem('coinBalance', coinBalance);
+    // Update the displayed balance
+    coinBalanceDisplay.textContent = `${coinBalance.toFixed(1)} ETN`;
+    // Clear the session data
+    sessionStorage.removeItem('newCoins');
+  }
 
   // Tabs functionality
   const homeTab = document.getElementById('home-tab');
