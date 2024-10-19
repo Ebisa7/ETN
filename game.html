@@ -1,131 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coin Drop Game</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Nebulica', Arial, sans-serif;
-            background-color: #133A2A;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coin Drop Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #133A2A;
+      color: white;
+      text-align: center;
+      overflow: hidden;
+    }
 
-        #game-container {
-            text-align: center;
-        }
+    #game-screen {
+      display: none;
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
 
-        #game-area {
-            position: relative;
-            width: 400px;
-            height: 600px;
-            border: 2px solid #F2C94C;
-            overflow: hidden;
-            background-color: #0D3B24; /* Darker background for better contrast */
-        }
+    .coin, .bomb, .freeze {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+    }
 
-        .coin, .bomb {
-            position: absolute;
-            border-radius: 50%;
-            cursor: pointer;
-        }
+    .coin {
+      width: 30px;
+      height: 30px;
+      background-color: yellow;
+    }
 
-        .coin {
-            background-color: yellow;
-        }
+    .bomb {
+      width: 30px;
+      height: 30px;
+      background-color: black;
+    }
 
-        .bomb {
-            background-color: black;
-        }
+    .freeze {
+      width: 30px;
+      height: 30px;
+      background-color: blue;
+    }
 
-        #start-button {
-            padding: 10px 20px;
-            font-size: 1.2em;
-            background-color: #F2C94C;
-            color: black;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
+    #score {
+      font-size: 2em;
+      margin: 20px 0;
+    }
 
-        #start-button:hover {
-            background-color: #F2C94D;
-        }
-    </style>
+    #timer {
+      font-size: 2em;
+      margin: 10px 0;
+    }
+
+    #start-button {
+      padding: 15px 30px;
+      background-color: #F2C94C;
+      color: black;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+      margin-top: 50px;
+      border-radius: 10px;
+    }
+
+    #start-button:hover {
+      background-color: #F2C94D;
+    }
+
+      #game-screen {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.coin, .bomb, .freeze {
+  width: 5vw;  /* Adjusts size relative to the viewport width */
+  height: 5vw; /* Adjusts size relative to the viewport width */
+}
+
+h1, #score, #timer {
+  font-size: 4vw; /* Adjust font size relative to viewport width */
+}
+
+  </style>
 </head>
 <body>
-    <div id="game-container">
-        <h1>Coin Drop Game</h1>
-        <p>Score: <span id="score">0</span></p>
-        <div id="game-area"></div>
-        <button id="start-button">Start Game</button>
-    </div>
-    <script>
-        let score = 0;
-        let gameInterval;
-        const gameArea = document.getElementById('game-area');
-        const scoreDisplay = document.getElementById('score');
-        const startButton = document.getElementById('start-button');
 
-        startButton.addEventListener('click', startGame);
+  <div id="start-screen">
+    <h1>Coin Drop Game</h1>
+    <p>Click the coins to collect them, avoid bombs, and use freezes to stop time!</p>
+    <button id="start-button">Play</button>
+  </div>
 
-        function startGame() {
-            score = 0;
-            scoreDisplay.textContent = score;
-            startButton.style.display = 'none';
-            gameArea.innerHTML = ''; // Clear previous game state
-            gameInterval = setInterval(dropItems, 750); // Drop items every 750ms
+  <div id="game-screen">
+    <div id="score">Score: 0</div>
+    <div id="timer">Time: 30</div>
+  </div>
+
+  <script>
+    let score = 0;
+    let timeRemaining = 30;
+    let gameInterval, coinInterval, freezeTimeout;
+    let gameActive = true;
+
+    const startButton = document.getElementById('start-button');
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+
+    // Random position generator
+    function getRandomPosition(element) {
+      const x = Math.floor(Math.random() * (window.innerWidth - element.offsetWidth));
+      const y = Math.floor(Math.random() * (window.innerHeight - element.offsetHeight));
+      return { x, y };
+    }
+
+    // Start the game
+    startButton.addEventListener('click', () => {
+      startScreen.style.display = 'none';
+      gameScreen.style.display = 'block';
+      startGame();
+    });
+
+    // Start game logic
+    function startGame() {
+      gameInterval = setInterval(() => {
+        if (timeRemaining > 0) {
+          timeRemaining--;
+          timerDisplay.innerText = `Time: ${timeRemaining}`;
+        } else {
+          endGame();
+        }
+      }, 1000);
+
+      coinInterval = setInterval(dropCircles, 700); // Drops every 0.7 seconds
+    }
+
+    // Drop coins, bombs, and freeze circles
+    function dropCircles() {
+      if (!gameActive) return;
+
+      const elementsToDrop = Math.floor(Math.random() * 4) + 1; // Between 1 and 4 circles
+      for (let i = 0; i < elementsToDrop; i++) {
+        const elementType = Math.random();
+        let element;
+
+        if (elementType < 0.7) { // 70% chance for coin
+          element = createCircle('coin');
+        } else if (elementType < 0.9) { // 20% chance for bomb
+          element = createCircle('bomb');
+        } else { // 10% chance for freeze
+          element = createCircle('freeze');
         }
 
-        function dropItems() {
-            const itemType = Math.random() < 0.8 ? 'coin' : 'bomb'; // 80% chance for coin, 20% for bomb
-            const item = document.createElement('div');
-            item.classList.add(itemType);
-            item.style.width = '30px';
-            item.style.height = '30px';
-            item.style.left = Math.random() * (gameArea.offsetWidth - 30) + 'px';
-            item.style.top = '-30px'; // Start above the visible game area
-            gameArea.appendChild(item);
+        const { x, y } = getRandomPosition(element);
+        element.style.left = `${x}px`;
+        element.style.top = `${y}px`;
+        gameScreen.appendChild(element);
 
-            // Animate falling effect using setInterval
-            let position = -30;
-            const fallingSpeed = Math.random() * 3 + 2; // Random speed for falling
-            const fallingInterval = setInterval(() => {
-                position += fallingSpeed;
-                item.style.top = `${position}px`;
+        // Animate falling
+        let fallInterval = setInterval(() => {
+          let top = parseInt(element.style.top);
+          if (top < window.innerHeight) {
+            element.style.top = `${top + 5}px`; // Adjust speed as needed
+          } else {
+            element.remove();
+            clearInterval(fallInterval);
+          }
+        }, 50);
+      }
+    }
 
-                if (position >= gameArea.offsetHeight) {
-                    clearInterval(fallingInterval);
-                    item.remove(); // Remove item if it reaches the bottom without being clicked
-                }
-            }, 20);
+    // Create circles (coin, bomb, or freeze)
+    function createCircle(type) {
+      const element = document.createElement('div');
+      element.classList.add(type);
+      element.addEventListener('click', () => handleCircleClick(type, element));
+      return element;
+    }
 
-            // Handle clicks
-            item.addEventListener('click', () => {
-                if (itemType === 'coin') {
-                    score++;
-                    scoreDisplay.textContent = score;
-                } else {
-                    // Bomb clicked: reset score and end game
-                    alert('Boom! Your score has been reset.');
-                    clearInterval(gameInterval);
-                    clearInterval(fallingInterval);
-                    gameArea.innerHTML = ''; // Clear all items
-                    startButton.style.display = 'block'; // Show start button again
-                    return;
-                }
-                item.remove(); // Remove the item after click
-                clearInterval(fallingInterval);
-            });
-        }
-    </script>
+    // Handle circle clicks
+    function handleCircleClick(type, element) {
+      if (type === 'coin') {
+        score++;
+        scoreDisplay.innerText = `Score: ${score}`;
+      } else if (type === 'bomb') {
+        score = 0; // Reset score
+        scoreDisplay.innerText = `Score: ${score}`;
+      } else if (type === 'freeze') {
+        freezeGame();
+      }
+      element.remove(); // Remove element after clicking
+    }
+
+    // Freeze game for 3 seconds
+    function freezeGame() {
+      clearTimeout(freezeTimeout);
+      gameActive = false;
+      freezeTimeout = setTimeout(() => {
+        gameActive = true;
+      }, 3000);
+    }
+
+    // End game logic
+    function endGame() {
+      clearInterval(gameInterval);
+      clearInterval(coinInterval);
+      alert(`Game Over! Your score is: ${score}`);
+      location.reload(); // Reload to restart the game
+    }
+  </script>
+
 </body>
 </html>
