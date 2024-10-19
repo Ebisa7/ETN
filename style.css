@@ -1,10 +1,28 @@
-/* Existing styles */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
   background-color: #133A2A;
   color: white;
+}
+
+#loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #133A2A;
+  color: white;
+}
+
+.loading-content p {
+  color: white;
+  text-align: center;
+  margin-top: 20px;
+}
+
+#tutorial-container {
+  display: none;
 }
 
 .page {
@@ -22,7 +40,7 @@ body {
   max-width: 80%;
   height: auto;
   margin-top: 50px;
-  transition: transform 0.3s ease; /* Ensures smooth animation */
+  transition: transform 0.3s ease; /* Smooth transition */
 }
 
 /* Keyframes for the hover animation */
@@ -40,5 +58,63 @@ body {
 
 /* Apply the animation on hover */
 .tutorial-img:hover {
-  animation: hoverUpDown 0.6s ease-in-out forwards; /* Play animation on hover */
+  animation: hoverUpDown 0.6s ease-in-out; /* Play animation on hover */
+}
+
+h1 {
+  margin-top: 20px;
+  font-size: 2em;
+}
+
+p {
+  font-size: 1.2em;
+  margin: 20px 0;
+}
+
+.continue-button {
+  padding: 15px 125px;
+  background-color: #F2C94C;
+  color: black;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.continue-button:hover {
+  background-color: #F2C94D;
+}
+
+#game-container {
+  display: none;
+  background-color: #133A2A;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.coin-balance h2 {
+  margin-top: 50px;
+  font-size: 1.5em;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 50px;
+}
+
+.tab {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.tab img {
+  width: 30px; /* Adjust as needed */
+}
+
+.tab.active img {
+  filter: brightness(1.2); /* Makes the active tab icon glow */
 }
