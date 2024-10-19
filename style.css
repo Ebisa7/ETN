@@ -1,3 +1,5 @@
+/* Existing styles */
+
 body {
   margin: 0;
   padding: 0;
@@ -40,6 +42,7 @@ body {
   max-width: 80%;
   height: auto;
   margin-top: 50px;
+  transition: transform 0.3s ease-in-out; /* Smooth hover transition */
 }
 
 h1 {
@@ -93,28 +96,27 @@ p {
 }
 
 .tab img {
-  width: 30px; /* Adjust as needed */
-  transition: transform 0.3s ease; /* Smooth transition for non-hover states */
+  width: 30px;
+  transition: transform 0.3s ease;
 }
 
-/* Add animation for hovering well2.png */
+/* Debug hover border to check hover is working */
+.tutorial-img:hover {
+  border: 2px solid red;
+}
+
+/* Animation for hovering well2.png */
 @keyframes hoverUpDown {
   0% {
-    transform: translateY(0); /* Starting position */
+    transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px); /* Move up */
+    transform: translateY(-10px);
   }
   100% {
-    transform: translateY(0); /* Move back to original position */
-  }
+    transform: translateY(0);
 }
 
-/* Apply animation to the specific well2.png using the class */
-.well2-img:hover {
-  animation: hoverUpDown 0.6s infinite ease-in-out; /* Infinite up and down animation */
-}
-
-.tab.active img {
-  filter: brightness(1.2); /* Makes the active tab icon glow */
+.tutorial-img:hover {
+  animation: hoverUpDown 1s infinite ease-in-out;
 }
