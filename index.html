@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ETN Coin Airdrop Game</title>
-  <link rel="stylesheet" href="style.css"> <!-- Link to existing CSS -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <!-- Loading Screen -->
   <div id="loading-screen">
     <div class="loading-content">
@@ -15,52 +14,53 @@
     </div>
   </div>
 
-  <!-- Coin Balance Display -->
-  <div id="coin-balance" style="text-align: center; margin-top: 20px;">
-    <h2>Coin Balance: <span id="balance">0</span> ETN</h2>
-    <img src="well2.png" alt="Coin" style="width: 40px; height: 40px; margin-left: 10px;">
+  <!-- Introduction Tutorial -->
+  <div id="tutorial-container">
+    <!-- Page 1 -->
+    <div class="page" id="page1">
+      <img src="well1.gif" alt="Well 1" class="tutorial-img">
+      <h1>Welcome to ETN Coin Airdrop!</h1>
+      <button class="continue-button">Continue</button>
+    </div>
+
+    <!-- Page 2 -->
+    <div class="page" id="page2">
+      <img src="well2.png" alt="Well 2" class="tutorial-img">
+      <h1>What is ETN?</h1>
+      <p>$ETN - ET NETSA COIN is the lifeblood of the ETN Ecosystem</p>
+      <button class="continue-button">Continue</button>
+    </div>
+
+    <!-- Page 3 -->
+    <div class="page" id="page3">
+      <img src="well3.gif" alt="Well 3" class="tutorial-img">
+      <h1>What Now?</h1>
+      <p>Now, let's start earning $ETN tokens!</p>
+      <button class="continue-button">Let’s Go!</button>
+    </div>
   </div>
 
-  <!-- Navigation Tabs -->
-  <div class="tabs">
-    <button class="tab" id="home-tab" onclick="navigateTo('index.html')">
-      <img src="home.png" alt="Home">
-    </button>
-    <button class="tab" id="tasks-tab" onclick="navigateTo('tasks.html')">
-      <img src="tasks.png" alt="Tasks">
-    </button>
-    <button class="tab" id="invite-tab" onclick="navigateTo('invite.html')">
-      <img src="invite.png" alt="Invite">
-    </button>
-    <button class="tab" id="airdrop-tab" onclick="navigateTo('airdrop.html')">
-      <img src="airdrop.png" alt="Airdrop">
-    </button>
+  <!-- Main Game Page -->
+  <div id="game-container">
+    <div class="coin-balance">
+      <h2>Coin Balance: <span id="coin-balance">0</span> ETN</h2>
+    </div>
+    <div class="tabs">
+      <button class="tab" id="home-tab">
+        <img src="home.png" alt="Home">
+      </button>
+      <button class="tab" id="tasks-tab">
+        <img src="tasks.png" alt="Tasks">
+      </button>
+      <button class="tab" id="invite-tab">
+        <img src="invite.png" alt="Invite">
+      </button>
+      <button class="tab" id="airdrop-tab">
+        <img src="airdrop.png" alt="Airdrop">
+      </button>
+    </div>
   </div>
 
-  <!-- Game Button -->
-  <div style="text-align: center; margin-top: 20px;">
-    <button onclick="navigateTo('game.html')">
-      <img src="game.png" alt="Play Game" style="width: 50px; height: 50px;">
-    </button>
-  </div>
-
-  <script src="app.js"></script> <!-- Link to existing JavaScript -->
-  <script>
-    // Add navigation function
-    function navigateTo(page) {
-      window.location.href = page;
-    }
-
-    // Load coin balance from local storage
-    window.onload = function() {
-      const balance = localStorage.getItem('coinBalance') || 0; // Default to 0 if no balance found
-      document.getElementById('balance').innerText = balance;
-
-      // Hide loading screen after a short delay
-      setTimeout(() => {
-        document.getElementById('loading-screen').style.display = 'none';
-      }, 500); // Adjust timeout as needed
-    };
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
