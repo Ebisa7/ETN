@@ -3,21 +3,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const tutorialContainer = document.getElementById('tutorial-container');
   const gameContainer = document.getElementById('game-container');
   const continueButtons = document.querySelectorAll('.continue-button');
-  const coinBalanceElement = document.querySelector('.coin-balance h2');
-  const wellImage = document.createElement('img');
-  wellImage.src = 'well2.png'; // well2 image
-  wellImage.classList.add('well-image'); // Add a class for styling if needed
   let currentPage = 1;
   let tapCount = 0;
   let lastTapTime = 0;
-
-  // Check if there's a saved coin balance in localStorage and display it
-  let savedCoinBalance = localStorage.getItem('coinBalance');
-  if (savedCoinBalance) {
-    coinBalanceElement.textContent = `Coin Balance: ${savedCoinBalance} ETN`;
-  } else {
-    coinBalanceElement.textContent = 'Coin Balance: 0 ETN';
-  }
 
   // Simulate loading
   setTimeout(function() {
@@ -53,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
       tapCount++;
       if (tapCount === 3) {
         tapCount = 0;
-        window.location.href = 'game.html'; // Redirect to game.html
+        tutorialContainer.style.display = 'block';
+        gameContainer.style.display = 'none';
       }
     } else {
       tapCount = 1;
@@ -71,18 +60,15 @@ document.addEventListener('DOMContentLoaded', function() {
     activeTab.classList.add('active');
   }
 
-  // Store coins earned in game.html
+  // Handle message received from the game.html for coins earned
   window.addEventListener('message', function(event) {
-    if (event.data && event.data.coinsEarned) {
-      let newCoinBalance = parseInt(savedCoinBalance || 0) + parseInt(event.data.coinsEarned);
-      localStorage.setItem('coinBalance', newCoinBalance);
-      coinBalanceElement.textContent = `Coin Balance: ${newCoinBalance} ETN`;
+    const coinsEarned = event.data.coinsEarned || 0;
+    let currentBalance = parseInt(localStorage.getItem('coinBalance')) || 0;
+    currentBalance += coinsEarned;
+    localStorage.setItem('coinBalance', currentBalance);
 
-      // Display well2 image next to the coin balance
-      if (!document.querySelector('.well-image')) {
-        coinBalanceElement.parentNode.appendChild(wellImage);
-      }
-    }
+    // Update the balance in the HTML
+    document.getElementById('coin-balance').innerText = currentBalance;
   });
 
   // Start with page 1 visible
