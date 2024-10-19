@@ -41,9 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
       tapCount++;
       if (tapCount === 3) {
         tapCount = 0;
-        loadingScreen.style.display = 'flex';
-        tutorialContainer.style.display = 'block';
-        gameContainer.style.display = 'none';
+       window.location.href = 'game.html'; // Redirect to game.html
       }
     } else {
       tapCount = 1;
