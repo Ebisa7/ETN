@@ -11,210 +11,179 @@
       font-family: Arial, sans-serif;
       background-color: #133A2A;
       color: white;
-      text-align: center;
       overflow: hidden;
     }
 
     #game-screen {
-      display: none;
-      position: relative;
       width: 100vw;
       height: 100vh;
+      position: relative;
+      background-color: #133A2A;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .coin, .bomb, .freeze {
-      position: absolute;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
+      position: absolute;
       cursor: pointer;
     }
 
     .coin {
-      width: 30px;
-      height: 30px;
       background-color: yellow;
     }
 
     .bomb {
-      width: 30px;
-      height: 30px;
       background-color: black;
     }
 
     .freeze {
-      width: 30px;
-      height: 30px;
       background-color: blue;
     }
 
-    #score {
-      font-size: 2em;
-      margin: 20px 0;
-    }
-
-    #timer {
-      font-size: 2em;
-      margin: 10px 0;
-    }
-
-    #start-button {
-      padding: 15px 30px;
+    #play-btn {
+      font-size: 24px;
+      padding: 10px 20px;
       background-color: #F2C94C;
-      color: black;
       border: none;
-      font-size: 1.2em;
       cursor: pointer;
-      margin-top: 50px;
-      border-radius: 10px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
 
-    #start-button:hover {
-      background-color: #F2C94D;
+    #timer, #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      color: white;
     }
-
-      #game-screen {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
-}
-
-.coin, .bomb, .freeze {
-  width: 5vw;  /* Adjusts size relative to the viewport width */
-  height: 5vw; /* Adjusts size relative to the viewport width */
-}
-
-h1, #score, #timer {
-  font-size: 4vw; /* Adjust font size relative to viewport width */
-}
-
   </style>
 </head>
 <body>
-
-  <div id="start-screen">
-    <h1>Coin Drop Game</h1>
-    <p>Click the coins to collect them, avoid bombs, and use freezes to stop time!</p>
-    <button id="start-button">Play</button>
-  </div>
-
   <div id="game-screen">
+    <button id="play-btn">Play</button>
+    <div id="timer">Timer: 30</div>
     <div id="score">Score: 0</div>
-    <div id="timer">Time: 30</div>
   </div>
 
   <script>
     let score = 0;
-    let timeRemaining = 30;
-    let gameInterval, coinInterval, freezeTimeout;
-    let gameActive = true;
+    let timer = 30;
+    let gameInterval;
+    let isFrozen = false;
+    const freezeDuration = 3000; // Freeze for 3 seconds
+    const numCircles = 75; // Total circles to drop
+    const numBombs = 5; // Total bombs
+    const numFreezes = 5; // Total freeze circles
 
-    const startButton = document.getElementById('start-button');
-    const startScreen = document.getElementById('start-screen');
-    const gameScreen = document.getElementById('game-screen');
-    const scoreDisplay = document.getElementById('score');
-    const timerDisplay = document.getElementById('timer');
+    // Handle play button
+    document.getElementById('play-btn').addEventListener('click', startGame);
 
-    // Random position generator
-    function getRandomPosition(element) {
-      const x = Math.floor(Math.random() * (window.innerWidth - element.offsetWidth));
-      const y = Math.floor(Math.random() * (window.innerHeight - element.offsetHeight));
-      return { x, y };
-    }
-
-    // Start the game
-    startButton.addEventListener('click', () => {
-      startScreen.style.display = 'none';
-      gameScreen.style.display = 'block';
-      startGame();
-    });
-
-    // Start game logic
+    // Create coins, bombs, and freezes
     function startGame() {
+      document.getElementById('play-btn').style.display = 'none'; // Hide play button
+
       gameInterval = setInterval(() => {
-        if (timeRemaining > 0) {
-          timeRemaining--;
-          timerDisplay.innerText = `Time: ${timeRemaining}`;
-        } else {
-          endGame();
+        if (!isFrozen && timer > 0) {
+          timer--;
+          document.getElementById('timer').textContent = `Timer: ${timer}`;
+        } else if (timer === 0) {
+          clearInterval(gameInterval);
+          alert('Game Over!');
         }
       }, 1000);
 
-      coinInterval = setInterval(dropCircles, 700); // Drops every 0.7 seconds
+      // Drop circles, bombs, and freezes
+      for (let i = 0; i < numCircles; i++) {
+        setTimeout(createCircle, i * 500);
+      }
+      for (let i = 0; i < numBombs; i++) {
+        setTimeout(createBomb, Math.random() * 30000); // Random bomb timing
+      }
+      for (let i = 0; i < numFreezes; i++) {
+        setTimeout(createFreeze, Math.random() * 30000); // Random freeze timing
+      }
     }
 
-    // Drop coins, bombs, and freeze circles
-    function dropCircles() {
-      if (!gameActive) return;
+    function createCircle() {
+      const circle = document.createElement('div');
+      circle.classList.add('coin');
+      circle.style.left = Math.random() * 80 + 'vw';
+      document.getElementById('game-screen').appendChild(circle);
 
-      const elementsToDrop = Math.floor(Math.random() * 4) + 1; // Between 1 and 4 circles
-      for (let i = 0; i < elementsToDrop; i++) {
-        const elementType = Math.random();
-        let element;
+      animateDrop(circle);
 
-        if (elementType < 0.7) { // 70% chance for coin
-          element = createCircle('coin');
-        } else if (elementType < 0.9) { // 20% chance for bomb
-          element = createCircle('bomb');
-        } else { // 10% chance for freeze
-          element = createCircle('freeze');
+      circle.addEventListener('click', function () {
+        if (!isFrozen) {
+          score++;
+          document.getElementById('score').textContent = `Score: ${score}`;
+          this.remove();
         }
-
-        const { x, y } = getRandomPosition(element);
-        element.style.left = `${x}px`;
-        element.style.top = `${y}px`;
-        gameScreen.appendChild(element);
-
-        // Animate falling
-        let fallInterval = setInterval(() => {
-          let top = parseInt(element.style.top);
-          if (top < window.innerHeight) {
-            element.style.top = `${top + 5}px`; // Adjust speed as needed
-          } else {
-            element.remove();
-            clearInterval(fallInterval);
-          }
-        }, 50);
-      }
+      });
     }
 
-    // Create circles (coin, bomb, or freeze)
-    function createCircle(type) {
-      const element = document.createElement('div');
-      element.classList.add(type);
-      element.addEventListener('click', () => handleCircleClick(type, element));
-      return element;
+    function createBomb() {
+      const bomb = document.createElement('div');
+      bomb.classList.add('bomb');
+      bomb.style.left = Math.random() * 80 + 'vw';
+      document.getElementById('game-screen').appendChild(bomb);
+
+      animateDrop(bomb);
+
+      bomb.addEventListener('click', function () {
+        if (!isFrozen) {
+          score = 0; // Reset score if bomb is clicked
+          document.getElementById('score').textContent = `Score: ${score}`;
+          this.remove();
+        }
+      });
     }
 
-    // Handle circle clicks
-    function handleCircleClick(type, element) {
-      if (type === 'coin') {
-        score++;
-        scoreDisplay.innerText = `Score: ${score}`;
-      } else if (type === 'bomb') {
-        score = 0; // Reset score
-        scoreDisplay.innerText = `Score: ${score}`;
-      } else if (type === 'freeze') {
-        freezeGame();
-      }
-      element.remove(); // Remove element after clicking
+    function createFreeze() {
+      const freeze = document.createElement('div');
+      freeze.classList.add('freeze');
+      freeze.style.left = Math.random() * 80 + 'vw';
+      document.getElementById('game-screen').appendChild(freeze);
+
+      animateDrop(freeze);
+
+      freeze.addEventListener('click', function () {
+        if (!isFrozen) {
+          freezeGame();
+          this.remove();
+        }
+      });
     }
 
-    // Freeze game for 3 seconds
+    function animateDrop(element) {
+      element.style.position = 'absolute';
+      element.style.top = '-10vh';
+
+      let dropInterval = setInterval(() => {
+        if (isFrozen) return; // Pause dropping during freeze
+
+        let currentTop = parseFloat(element.style.top);
+        element.style.top = currentTop + 2 + 'vh';
+
+        if (currentTop > 100) {
+          clearInterval(dropInterval);
+          element.remove(); // Remove element if it reaches the bottom
+        }
+      }, 50);
+    }
+
     function freezeGame() {
-      clearTimeout(freezeTimeout);
-      gameActive = false;
-      freezeTimeout = setTimeout(() => {
-        gameActive = true;
-      }, 3000);
-    }
-
-    // End game logic
-    function endGame() {
-      clearInterval(gameInterval);
-      clearInterval(coinInterval);
-      alert(`Game Over! Your score is: ${score}`);
-      location.reload(); // Reload to restart the game
+      isFrozen = true;
+      setTimeout(() => {
+        isFrozen = false;
+      }, freezeDuration); // Resume game after freeze duration
     }
   </script>
-
 </body>
 </html>
