@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Account Info</title>
+  <style>
+    body {
+      background-color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    p {
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+  </style>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+  <h1>Telegram Account Information</h1>
+  <p id="name">Name: Fetching...</p>
+  <p id="userId">User ID: Fetching...</p>
+  <p id="username">Username: Fetching...</p>
+  <p id="isPremium">Premium User: Fetching...</p>
+  <p id="creationDate">Creation Date: Fetching...</p>
+  <p id="accountAge">Account Age: Fetching...</p>
+
+  <script>
+    // Initialize the Telegram Web App
+    Telegram.WebApp.ready();
+
+    // Get the user's Telegram details
+    const user = Telegram.WebApp.initDataUnsafe.user;
+    const telegramID = user.id;
+    const firstName = user.first_name;
+    const lastName = user.last_name;
+    const username = user.username;
+    const isPremium = user.is_premium ? 'Yes' : 'No';
+
+    // Function to estimate creation date based on Telegram ID
+    function estimateCreationDate(id) {
+      const referenceID = 100000000;  // Example ID reference
+      const referenceDate = new Date(2015, 0, 1);  // Starting ID date (estimation)
+      const idGrowthPerDay = 10000;  // Estimated ID growth per day
+
+      const daysSinceReference = (id - referenceID) / idGrowthPerDay;
+      const creationDate = new Date(referenceDate.getTime() + daysSinceReference * 24 * 60 * 60 * 1000);
+
+      return creationDate;
+    }
+
+    // Calculate account age
+    function calculateAccountAge(creationDate) {
+      const now = new Date();
+      const years = now.getFullYear() - creationDate.getFullYear();
+      const months = now.getMonth() - creationDate.getMonth();
+      const totalYears = years + (months / 12);
+      return totalYears >= 1 ? Math.floor(totalYears) : 1;  // Minimum of 1 year
+    }
+
+    const creationDate = estimateCreationDate(telegramID);
+    const accountAge = calculateAccountAge(creationDate);
+
+    // Display the user information
+    document.getElementById('name').textContent = `Name: ${firstName} ${lastName}`;
+    document.getElementById('userId').textContent = `User ID: ${telegramID}`;
+    document.getElementById('username').textContent = `Username: ${username ? username : 'N/A'}`;
+    document.getElementById('isPremium').textContent = `Premium User: ${isPremium}`;
+    document.getElementById('creationDate').textContent = `Creation Date: ${creationDate.toLocaleDateString()}`;
+    document.getElementById('accountAge').textContent = `Account Age: ${accountAge} years`;
+
+  </script>
+
+</body>
+</html>
