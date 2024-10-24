@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Airdrop User Info</title>
+  <title>User Info</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -50,9 +50,8 @@
   <h1>User Info</h1>
   <div class="user-info">
     <img id="profilePic" class="profile-pic" alt="Profile Picture" />
-    <p id="username"></p>
+    <p id="fullName"></p>
     <p id="user-id"></p>
-    <p id="creation-date"></p>
     <p id="account-age"></p>
     <p id="is-premium"></p>
     <button class="close-button" id="closeButton">Close</button>
@@ -66,25 +65,16 @@
 
       if (user) {
         // Display user info
-        document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        document.getElementById('fullName').textContent = `Full Name: ${fullName || 'N/A'}`;
         document.getElementById('user-id').textContent = `User ID: ${user.id}`;
         document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Use real profile picture
 
-        // Estimate creation date and account age
-        const userId = user.id;
-        const startingId = 1_000_000_000; // Rough estimate for when Telegram started assigning IDs
-        const currentYear = new Date().getFullYear();
+        // Estimate account age based on user ID
+        const accountAge = estimateAccountAge(user.id);
+        document.getElementById('account-age').textContent = `Account Age: ${accountAge}`;
 
-        // Calculate approximate creation year based on user ID
-        const idDifference = userId - startingId;
-        const estimatedCreationYear = currentYear - Math.floor(idDifference / 1_000_000); // Assuming about 1M users per year
-
-        // Set creation date and account age text
-        document.getElementById('creation-date').textContent = `Creation Year: ${estimatedCreationYear}`;
-        const accountAge = currentYear - estimatedCreationYear;
-        document.getElementById('account-age').textContent = `Account Age: ${accountAge >= 1 ? accountAge + ' years' : 'Less than a year'}`;
-
-        // Premium status (assuming it exists in the user object)
+        // Check for premium status
         document.getElementById('is-premium').textContent = `Premium Account: ${user.is_premium ? 'Yes' : 'No'}`;
       } else {
         alert('Unable to fetch user data');
@@ -95,6 +85,14 @@
         tg.close();
       });
     };
+
+    function estimateAccountAge(userId) {
+      // Assuming user IDs in the 6 billion range are created in late 2023
+      const creationYear = 2023;
+      const currentYear = new Date().getFullYear();
+      const accountAge = currentYear - creationYear;
+      return accountAge < 1 ? "Less than a year" : `${accountAge} year(s)`;
+    }
   </script>
 </body>
 </html>
