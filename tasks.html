@@ -76,7 +76,7 @@
     // Check membership status when the "Check" button is clicked
     checkButton.onclick = function() {
       const userId = tg.initDataUnsafe.user.id;
-      fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
+      fetch(`https://api.telegram.org/bot7278739263:AAHt34uP3TLIUUOt_0lgHPLsIgtk68SGsSo/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
         .then(response => response.json())
         .then(data => {
           if (data.result.status === 'member' || data.result.status === 'administrator') {
