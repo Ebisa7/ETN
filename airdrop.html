@@ -50,7 +50,10 @@
         const tg = window.Telegram.WebApp;
 
         if (tg) {
+            console.log('Telegram WebApp is initialized:', tg);
             const user = tg.initDataUnsafe?.user;
+
+            console.log('Init Data:', tg.initDataUnsafe); // Debugging initData
 
             if (user) {
                 // Display user data
@@ -60,18 +63,17 @@
                 document.getElementById('first-name').textContent = `First Name: ${user.first_name || 'N/A'}`;
                 document.getElementById('last-name').textContent = `Last Name: ${user.last_name || 'N/A'}`;
             } else {
-                console.log('Unable to fetch user data.');
-                alert('User data not available.');
+                console.log('User data is not available.');
+                alert('Unable to fetch user data.');
             }
 
             // Apply Telegram theme
             document.body.style.backgroundColor = tg.themeParams?.bg_color || '#f0f0f0';
             document.body.style.color = tg.themeParams?.text_color || '#000';
         } else {
-            console.error('Telegram WebApp API not available.');
+            console.error('Telegram WebApp API is not available.');
         }
     };
 </script>
-
 </body>
 </html>
