@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   airdropTab.addEventListener('click', function() {
-    window.location.href = 'airdrop.html';
+    window.location.href = 'https://etndrop.netlify.app/airdrop.html';
   });
 
   // Highlight active tab (for future functionality)
