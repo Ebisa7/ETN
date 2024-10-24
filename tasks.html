@@ -9,7 +9,6 @@
       font-family: Arial, sans-serif;
       text-align: center;
       background-color: white; /* Set the body background color to white */
-      --tg-theme-header-bg-color: #0088cc;
     }
     button {
       background-color: #0088cc;
@@ -22,7 +21,7 @@
     }
     /* Style for the header to match Telegram's interface */
     .telegram-header {
-      background-color: white; /* White header color */
+      background-color: var(--tg-theme-header-bg-color, #0088cc); /* Default to blue if variable is not set */
       padding: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional shadow for better visibility */
     }
