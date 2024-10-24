@@ -6,76 +6,55 @@
   <title>Telegram Account Info</title>
   <style>
     body {
-      background-color: white;
       font-family: Arial, sans-serif;
+      background-color: white;
+      color: black;
       text-align: center;
-      padding: 50px;
+      padding: 20px;
     }
     h1 {
       font-size: 2em;
     }
     p {
       font-size: 1.2em;
-      margin-top: 10px;
     }
   </style>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-
   <h1>Telegram Account Information</h1>
-  <p id="name">Name: Fetching...</p>
-  <p id="userId">User ID: Fetching...</p>
-  <p id="username">Username: Fetching...</p>
-  <p id="isPremium">Premium User: Fetching...</p>
-  <p id="creationDate">Creation Date: Fetching...</p>
-  <p id="accountAge">Account Age: Fetching...</p>
+  <p><strong>First Name:</strong> <span id="first_name"></span></p>
+  <p><strong>Last Name:</strong> <span id="last_name"></span></p>
+  <p><strong>Username:</strong> <span id="username"></span></p>
+  <p><strong>User ID:</strong> <span id="user_id"></span></p>
+  <p><strong>Premium User:</strong> <span id="is_premium"></span></p>
+  <p><strong>Creation Date:</strong> <span id="creation_date"></span></p>
+  <p><strong>Account Age:</strong> <span id="account_age"></span> years</p>
 
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    // Initialize the Telegram Web App
-    Telegram.WebApp.ready();
+    // Initialize Telegram WebApp
+    const tg = window.Telegram.WebApp;
 
-    // Get the user's Telegram details
-    const user = Telegram.WebApp.initDataUnsafe.user;
-    const telegramID = user.id;
-    const firstName = user.first_name;
-    const lastName = user.last_name;
-    const username = user.username;
-    const isPremium = user.is_premium ? 'Yes' : 'No';
+    // Get user information
+    const user = tg.initDataUnsafe.user;
+    if (user) {
+      document.getElementById("first_name").innerText = user.first_name || "N/A";
+      document.getElementById("last_name").innerText = user.last_name || "N/A";
+      document.getElementById("username").innerText = user.username || "N/A";
+      document.getElementById("user_id").innerText = user.id || "N/A";
+      document.getElementById("is_premium").innerText = user.is_premium ? "Yes" : "No";
 
-    // Function to estimate creation date based on Telegram ID
-    function estimateCreationDate(id) {
-      const referenceID = 100000000;  // Example ID reference
-      const referenceDate = new Date(2015, 0, 1);  // Starting ID date (estimation)
-      const idGrowthPerDay = 10000;  // Estimated ID growth per day
+      // Calculate account age based on approximate creation date
+      const creationTimestamp = user.id / 1000000 + 1385856000; // ID-based estimate
+      const creationDate = new Date(creationTimestamp * 1000);
+      const today = new Date();
+      const ageInYears = Math.floor((today - creationDate) / (365.25 * 24 * 60 * 60 * 1000));
 
-      const daysSinceReference = (id - referenceID) / idGrowthPerDay;
-      const creationDate = new Date(referenceDate.getTime() + daysSinceReference * 24 * 60 * 60 * 1000);
-
-      return creationDate;
+      document.getElementById("creation_date").innerText = creationDate.toLocaleDateString();
+      document.getElementById("account_age").innerText = ageInYears >= 1 ? ageInYears : 1;
+    } else {
+      alert("User data not available.");
     }
-
-    // Calculate account age
-    function calculateAccountAge(creationDate) {
-      const now = new Date();
-      const years = now.getFullYear() - creationDate.getFullYear();
-      const months = now.getMonth() - creationDate.getMonth();
-      const totalYears = years + (months / 12);
-      return totalYears >= 1 ? Math.floor(totalYears) : 1;  // Minimum of 1 year
-    }
-
-    const creationDate = estimateCreationDate(telegramID);
-    const accountAge = calculateAccountAge(creationDate);
-
-    // Display the user information
-    document.getElementById('name').textContent = `Name: ${firstName} ${lastName}`;
-    document.getElementById('userId').textContent = `User ID: ${telegramID}`;
-    document.getElementById('username').textContent = `Username: ${username ? username : 'N/A'}`;
-    document.getElementById('isPremium').textContent = `Premium User: ${isPremium}`;
-    document.getElementById('creationDate').textContent = `Creation Date: ${creationDate.toLocaleDateString()}`;
-    document.getElementById('accountAge').textContent = `Account Age: ${accountAge} years`;
-
   </script>
-
 </body>
 </html>
