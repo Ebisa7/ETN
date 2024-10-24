@@ -10,7 +10,6 @@
       text-align: center;
       background-color: white; /* Set the body background color to white */
     }
-    /* Container for the buttons */
     .button-container {
       position: absolute;
       bottom: 20px;
@@ -31,11 +30,6 @@
       border-radius: 10px;
       transition: background-color 0.3s;
     }
-    .telegram-header {
-      background-color: var(--tg-theme-header-bg-color, #0088cc); /* Default to blue if variable is not set */
-      padding: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional shadow for better visibility */
-    }
   </style>
 </head>
 <body>
@@ -45,13 +39,16 @@
   <p id="status">Welcome! Please join the channel.</p>
 
   <div class="button-container">
-    <button class="button" id="joinChannel">Join Channel</button>
-    <button class="button" id="checkMembership" style="display:none;">Check Membership</button>
+    <button class="button" id="joinChannel">Join</button>
+    <button class="button" id="checkMembership" style="display:none;">Check</button>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     window.Telegram.WebApp.ready();
+
+    // Set the header background color to match Telegram's app
+    document.querySelector('.telegram-header').style.backgroundColor = window.Telegram.WebApp.headerBgColor || '#FFFFFF';
 
     const tg = window.Telegram.WebApp;
     const joinButton = document.getElementById('joinChannel');
