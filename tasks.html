@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Channel Membership Check</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    button {
+      background-color: #0088cc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Membership Status</h1>
+  <p id="status">Checking your membership...</p>
+  <button id="joinChannel" style="display:none;">Join Channel</button>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    window.Telegram.WebApp.ready();
+
+    const tg = window.Telegram.WebApp;
+    const userId = tg.initDataUnsafe.user.id;
+
+    // Call the bot API to check membership status
+    fetch(`https://api.telegram.org/bot<YOUR_BOT_API_TOKEN>/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
+      .then(response => response.json())
+      .then(data => {
+        const statusElement = document.getElementById('status');
+        const joinButton = document.getElementById('joinChannel');
+
+        if (data.result.status === 'member' || data.result.status === 'administrator') {
+          statusElement.textContent = 'You are a member!';
+        } else {
+          statusElement.textContent = 'You are not a member!';
+          joinButton.style.display = 'block';
+          joinButton.onclick = function() {
+            window.open('https://t.me/lt_coin', '_blank');
+          };
+        }
+      })
+      .catch(error => {
+        document.getElementById('status').textContent = 'Error checking membership.';
+      });
+  </script>
+</body>
+</html>
