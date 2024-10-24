@@ -10,18 +10,29 @@
       text-align: center;
       background-color: white; /* Set the body background color to white */
     }
-    button {
-      background-color: #0088cc;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 10px;
+    /* Container for the buttons */
+    .button-container {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column; /* Ensure buttons are in a column */
+      gap: 10px; /* Space between buttons */
+      left: 50%;
+      transform: translateX(-50%); /* Center align the container */
     }
-    /* Style for the header to match Telegram's interface */
+    .button {
+      background-color: #f2c94c;
+      color: #133A2A;
+      border: none;
+      padding: 15px 125px; /* Responsive padding */
+      font-size: 18px;
+      cursor: pointer;
+      font-family: 'Nebulica', Arial, sans-serif;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
     .telegram-header {
-      background-color: var(--tg-theme-header-bg-color, #FFFFFF); /* Default to blue if variable is not set */
+      background-color: var(--tg-theme-header-bg-color, #0088cc); /* Default to blue if variable is not set */
       padding: 10px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional shadow for better visibility */
     }
@@ -31,41 +42,46 @@
   <div class="telegram-header">
     <h1>Membership Status</h1>
   </div>
-  <p id="status">Checking your membership...</p>
-  <button id="checkMembership">Check Membership</button>
-  <button id="joinChannel" style="display:none;">Join Channel</button>
+  <p id="status">Welcome! Please join the channel.</p>
+
+  <div class="button-container">
+    <button class="button" id="joinChannel">Join Channel</button>
+    <button class="button" id="checkMembership" style="display:none;">Check Membership</button>
+  </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     window.Telegram.WebApp.ready();
 
     const tg = window.Telegram.WebApp;
-    const userId = tg.initDataUnsafe.user.id;
     const joinButton = document.getElementById('joinChannel');
+    const checkButton = document.getElementById('checkMembership');
     const statusElement = document.getElementById('status');
 
+    // Join channel button functionality
+    joinButton.onclick = function() {
+      const joinUrl = 'https://t.me/lt_coin';
+      window.open(joinUrl, '_blank'); // Open the channel in a new tab
+      checkButton.style.display = 'block'; // Show the Check Membership button after joining
+      statusElement.textContent = 'Please check your membership status.'; // Update status text
+    };
+
     // Check membership status when the "Check Membership" button is clicked
-    document.getElementById('checkMembership').onclick = function() {
-      // Call the bot API to check membership status
+    checkButton.onclick = function() {
+      const userId = tg.initDataUnsafe.user.id;
       fetch(`https://api.telegram.org/bot7278739263:AAHt34uP3TLIUUOt_0lgHPLsIgtk68SGsSo/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
         .then(response => response.json())
         .then(data => {
           if (data.result.status === 'member' || data.result.status === 'administrator') {
             statusElement.textContent = 'You are a member!';
-            joinButton.style.display = 'none'; // Hide join button if member
+            checkButton.style.display = 'none'; // Hide check button if member
           } else {
             statusElement.textContent = 'You are not a member!';
-            joinButton.style.display = 'block'; // Show join button if not a member
           }
         })
         .catch(error => {
           statusElement.textContent = 'Error checking membership.';
         });
-    };
-
-    // Change the join button to redirect to the channel directly
-    joinButton.onclick = function() {
-      window.open('https://t.me/lt_coin', '_blank'); // Open the channel in a new tab
     };
   </script>
 </body>
