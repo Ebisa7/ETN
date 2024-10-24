@@ -8,6 +8,7 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
+      background-color: white; /* Set the body background color to white */
     }
     button {
       background-color: #0088cc;
@@ -18,10 +19,18 @@
       cursor: pointer;
       margin: 10px;
     }
+    /* Style for the header to match Telegram's interface */
+    .telegram-header {
+      background-color: white; /* White header color */
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional shadow for better visibility */
+    }
   </style>
 </head>
 <body>
-  <h1>Membership Status</h1>
+  <div class="telegram-header">
+    <h1>Membership Status</h1>
+  </div>
   <p id="status">Checking your membership...</p>
   <button id="checkMembership">Check Membership</button>
   <button id="joinChannel" style="display:none;">Join Channel</button>
