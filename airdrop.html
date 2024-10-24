@@ -3,57 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram Account Info</title>
+  <title>Telegram User Info</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: white;
-      color: black;
       text-align: center;
-      padding: 20px;
+      margin: 50px;
+      background-color: #f9f9f9;
     }
     h1 {
-      font-size: 2em;
+      font-size: 24px;
     }
-    p {
-      font-size: 1.2em;
+    .user-info {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Telegram Account Information</h1>
-  <p><strong>First Name:</strong> <span id="first_name"></span></p>
-  <p><strong>Last Name:</strong> <span id="last_name"></span></p>
-  <p><strong>Username:</strong> <span id="username"></span></p>
-  <p><strong>User ID:</strong> <span id="user_id"></span></p>
-  <p><strong>Premium User:</strong> <span id="is_premium"></span></p>
-  <p><strong>Creation Date:</strong> <span id="creation_date"></span></p>
-  <p><strong>Account Age:</strong> <span id="account_age"></span> years</p>
+  <h1>Your Telegram Details</h1>
+  <div id="user-info" class="user-info">
+    <p>First Name: <span id="first-name">Loading...</span></p>
+    <p>Last Name: <span id="last-name">Loading...</span></p>
+    <p>Username: <span id="username">Loading...</span></p>
+    <p>User ID: <span id="user-id">Loading...</span></p>
+    <p>Premium User: <span id="is-premium">Loading...</span></p>
+  </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    // Initialize Telegram WebApp
-    const tg = window.Telegram.WebApp;
+    window.Telegram.WebApp.ready();
 
-    // Get user information
-    const user = tg.initDataUnsafe.user;
+    const user = window.Telegram.WebApp.initDataUnsafe.user;
     if (user) {
-      document.getElementById("first_name").innerText = user.first_name || "N/A";
-      document.getElementById("last_name").innerText = user.last_name || "N/A";
-      document.getElementById("username").innerText = user.username || "N/A";
-      document.getElementById("user_id").innerText = user.id || "N/A";
-      document.getElementById("is_premium").innerText = user.is_premium ? "Yes" : "No";
-
-      // Calculate account age based on approximate creation date
-      const creationTimestamp = user.id / 1000000 + 1385856000; // ID-based estimate
-      const creationDate = new Date(creationTimestamp * 1000);
-      const today = new Date();
-      const ageInYears = Math.floor((today - creationDate) / (365.25 * 24 * 60 * 60 * 1000));
-
-      document.getElementById("creation_date").innerText = creationDate.toLocaleDateString();
-      document.getElementById("account_age").innerText = ageInYears >= 1 ? ageInYears : 1;
+      document.getElementById('first-name').innerText = user.first_name;
+      document.getElementById('last-name').innerText = user.last_name || 'N/A';
+      document.getElementById('username').innerText = user.username || 'N/A';
+      document.getElementById('user-id').innerText = user.id;
+      document.getElementById('is-premium').innerText = user.is_premium ? 'Yes' : 'No';
     } else {
-      alert("User data not available.");
+      alert("No data available. Make sure you are running this within Telegram Web App.");
     }
   </script>
 </body>
