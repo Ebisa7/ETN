@@ -4,44 +4,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Telegram User Info</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
+      background-color: white;
+      color: black;
       font-family: Arial, sans-serif;
       text-align: center;
-      margin: 50px;
-      background-color: #f9f9f9;
+      padding: 50px;
     }
     h1 {
       font-size: 24px;
     }
     .user-info {
       margin-top: 20px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <h1>Your Telegram Details</h1>
-  <div id="user-info" class="user-info">
-    <p>First Name: <span id="first-name">Loading...</span></p>
-    <p>Last Name: <span id="last-name">Loading...</span></p>
-    <p>Username: <span id="username">Loading...</span></p>
-    <p>User ID: <span id="user-id">Loading...</span></p>
-    <p>Premium User: <span id="is-premium">Loading...</span></p>
+  <h1>Telegram Account Details</h1>
+  <div class="user-info" id="user-info">
+    <!-- Details will be populated here -->
   </div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     window.Telegram.WebApp.ready();
 
+    const userInfoDiv = document.getElementById('user-info');
+
+    // Check if Telegram Web App data is available
     const user = window.Telegram.WebApp.initDataUnsafe.user;
+
     if (user) {
-      document.getElementById('first-name').innerText = user.first_name;
-      document.getElementById('last-name').innerText = user.last_name || 'N/A';
-      document.getElementById('username').innerText = user.username || 'N/A';
-      document.getElementById('user-id').innerText = user.id;
-      document.getElementById('is-premium').innerText = user.is_premium ? 'Yes' : 'No';
+      const firstName = user.first_name || 'N/A';
+      const lastName = user.last_name || 'N/A';
+      const userName = user.username || 'N/A';
+      const userId = user.id;
+      const isPremium = user.is_premium ? 'Yes' : 'No';
+
+      userInfoDiv.innerHTML = `
+        <p><strong>First Name:</strong> ${firstName}</p>
+        <p><strong>Last Name:</strong> ${lastName}</p>
+        <p><strong>Username:</strong> ${userName}</p>
+        <p><strong>User ID:</strong> ${userId}</p>
+        <p><strong>Is Premium:</strong> ${isPremium}</p>
+      `;
     } else {
-      alert("No data available. Make sure you are running this within Telegram Web App.");
+      alert("No data available. Please try again.");
     }
   </script>
 </body>
