@@ -48,6 +48,8 @@
     window.onload = function () {
         const tg = window.Telegram.WebApp;
 
+        console.log(tg.initDataUnsafe); // Debugging: log the initDataUnsafe object
+
         // Check if the Telegram WebApp API is available
         if (tg) {
             const user = tg.initDataUnsafe?.user;
@@ -60,6 +62,7 @@
                 document.getElementById('first-name').textContent = `First Name: ${user.first_name || 'N/A'}`;
                 document.getElementById('last-name').textContent = `Last Name: ${user.last_name || 'N/A'}`;
             } else {
+                console.log('User data is missing or WebApp is not initialized properly.');
                 alert('Unable to fetch user data.');
             }
 
