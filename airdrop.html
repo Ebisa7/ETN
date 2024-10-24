@@ -51,7 +51,6 @@
   <div class="user-info">
     <img id="profilePic" class="profile-pic" alt="Profile Picture" />
     <p id="username"></p>
-    <p id="frist-name"></p>
     <p id="user-id"></p>
     <p id="creation-date"></p>
     <p id="account-age"></p>
@@ -69,16 +68,23 @@
         // Display user info
         document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
         document.getElementById('user-id').textContent = `User ID: ${user.id}`;
-        document.getElementById('frist-name').textContent = `Frist name: ${user.frist_name}`;
         document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Use real profile picture
 
-        // Fetch additional data from initDataUnsafe
-        const creationDate = new Date(user.creation_date * 1000); // creation_date is a Unix timestamp
-        const now = new Date();
-        const ageInYears = Math.floor((now - creationDate) / (1000 * 60 * 60 * 24 * 365));
+        // Estimate creation date and account age
+        const userId = user.id;
+        const startingId = 1_000_000_000; // Rough estimate for when Telegram started assigning IDs
+        const currentYear = new Date().getFullYear();
 
-        document.getElementById('creation-date').textContent = `Creation Date: ${creationDate.toDateString()}`;
-        document.getElementById('account-age').textContent = `Account Age: ${ageInYears >= 1 ? ageInYears + ' years' : 'Less than a year'}`;
+        // Calculate approximate creation year based on user ID
+        const idDifference = userId - startingId;
+        const estimatedCreationYear = currentYear - Math.floor(idDifference / 1_000_000); // Assuming about 1M users per year
+
+        // Set creation date and account age text
+        document.getElementById('creation-date').textContent = `Creation Year: ${estimatedCreationYear}`;
+        const accountAge = currentYear - estimatedCreationYear;
+        document.getElementById('account-age').textContent = `Account Age: ${accountAge >= 1 ? accountAge + ' years' : 'Less than a year'}`;
+
+        // Premium status (assuming it exists in the user object)
         document.getElementById('is-premium').textContent = `Premium Account: ${user.is_premium ? 'Yes' : 'No'}`;
       } else {
         alert('Unable to fetch user data');
