@@ -1,98 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Info</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f0f0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Account Age</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
 
-    h1 {
-      color: #333;
-    }
+        h1 {
+            color: #333;
+        }
 
-    .user-info {
-      margin: 20px;
-      padding: 10px;
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+        .user-info {
+            margin: 20px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-    img.profile-pic {
-      border-radius: 50%;
-      width: 100px;
-      height: 100px;
-    }
+        .profile-pic {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+        }
 
-    .close-button {
-      background-color: var(--tg-theme-button-color);
-      color: var(--tg-theme-button-text-color);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 20px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
+        .close-button {
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
 
-    .close-button:hover {
-      opacity: 0.8;
-    }
-  </style>
+        .close-button:hover {
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body>
-  <h1>User Info</h1>
-  <div class="user-info">
-    <img id="profilePic" class="profile-pic" alt="Profile Picture" />
-    <p id="fullName"></p>
-    <p id="user-id"></p>
-    <p id="account-age"></p>
-    <p id="is-premium"></p>
-    <button class="close-button" id="closeButton">Close</button>
-  </div>
+    <h1>User Info</h1>
+    <div class="user-info">
+        <img id="profilePic" class="profile-pic" alt="Profile Picture" />
+        <p id="fullName"></p>
+        <p id="user-id"></p>
+        <p id="account-age"></p>
+        <p id="is-premium"></p>
+        <button class="close-button" id="closeButton">Close</button>
+    </div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    window.onload = function () {
-      const tg = window.Telegram.WebApp;
-      const user = tg.initDataUnsafe?.user;
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        window.onload = function () {
+            const tg = window.Telegram.WebApp;
+            const user = tg.initDataUnsafe?.user;
 
-      if (user) {
-        // Display user info
-        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-        document.getElementById('fullName').textContent = `Full Name: ${fullName || 'N/A'}`;
-        document.getElementById('user-id').textContent = `User ID: ${user.id}`;
-        document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Use real profile picture
+            if (user) {
+                // Display user info
+                const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                document.getElementById('fullName').textContent = `Full Name: ${fullName || 'N/A'}`;
+                document.getElementById('user-id').textContent = `User ID: ${user.id}`;
 
-        // Estimate account age based on user ID
-        const accountAge = estimateAccountAge(user.id);
-        document.getElementById('account-age').textContent = `Account Age: ${accountAge}`;
+                // Calculate account age using ID ranges
+                const userId = user.id;
+                let creationYear = 2024; // Default to this year in case of unrecognized ID
 
-        // Check for premium status
-        document.getElementById('is-premium').textContent = `Premium Account: ${user.is_premium ? 'Yes' : 'No'}`;
-      } else {
-        alert('Unable to fetch user data');
-      }
+                if (userId < 1000000) {
+                    creationYear = 2013;
+                } else if (userId < 100000000) {
+                    creationYear = 2016;
+                } else if (userId < 500000000) {
+                    creationYear = 2020;
+                } else if (userId < 700000000) {
+                    creationYear = 2023;
+                }
 
-      // Close button
-      document.getElementById('closeButton').addEventListener('click', () => {
-        tg.close();
-      });
-    };
+                const currentYear = new Date().getFullYear();
+                const accountAge = currentYear - creationYear;
 
-    function estimateAccountAge(userId) {
-      // Assuming user IDs in the 6 billion range are created in late 2023
-      const creationYear = 2023;
-      const currentYear = new Date().getFullYear();
-      const accountAge = currentYear - creationYear;
-      return accountAge < 1 ? "Less than a year" : `${accountAge} year(s)`;
-    }
-  </script>
+                document.getElementById('account-age').textContent = `Account Age: ${accountAge} years`;
+
+                // Check premium status
+                document.getElementById('is-premium').textContent = `Premium Account: ${user.is_premium ? 'Yes' : 'No'}`;
+
+                // Profile picture
+                document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Placeholder if no picture
+            } else {
+                alert('Unable to fetch user data.');
+            }
+
+            // Close button functionality
+            document.getElementById('closeButton').addEventListener('click', () => {
+                tg.close();
+            });
+        };
+    </script>
 </body>
 </html>
