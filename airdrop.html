@@ -51,7 +51,7 @@
   <div class="user-info">
     <img id="profilePic" class="profile-pic" alt="Profile Picture" />
     <p id="username"></p>
-    <p id="frist_name"></p>
+    <p id="frist-name"></p>
     <p id="user-id"></p>
     <p id="creation-date"></p>
     <p id="account-age"></p>
@@ -69,6 +69,7 @@
         // Display user info
         document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
         document.getElementById('user-id').textContent = `User ID: ${user.id}`;
+        document.getElementById('frist-name').textContent = `Frist name: ${user.frist_name}`;
         document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Use real profile picture
 
         // Fetch additional data from initDataUnsafe
