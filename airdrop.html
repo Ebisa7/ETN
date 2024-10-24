@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram User Info</title>
+    <title>Telegram User Information</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,6 +41,7 @@
     <p id="user-id"></p>
     <p id="first-name"></p>
     <p id="last-name"></p>
+    <button onclick="Telegram.WebApp.close()">Close</button>
 </div>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -48,9 +49,6 @@
     window.onload = function () {
         const tg = window.Telegram.WebApp;
 
-        console.log(tg.initDataUnsafe); // Debugging: log the initDataUnsafe object
-
-        // Check if the Telegram WebApp API is available
         if (tg) {
             const user = tg.initDataUnsafe?.user;
 
@@ -62,15 +60,15 @@
                 document.getElementById('first-name').textContent = `First Name: ${user.first_name || 'N/A'}`;
                 document.getElementById('last-name').textContent = `Last Name: ${user.last_name || 'N/A'}`;
             } else {
-                console.log('User data is missing or WebApp is not initialized properly.');
-                alert('Unable to fetch user data.');
+                console.log('Unable to fetch user data.');
+                alert('User data not available.');
             }
 
-            // Match the Telegram theme
+            // Apply Telegram theme
             document.body.style.backgroundColor = tg.themeParams?.bg_color || '#f0f0f0';
             document.body.style.color = tg.themeParams?.text_color || '#000';
         } else {
-            console.error('Telegram WebApp API is not available.');
+            console.error('Telegram WebApp API not available.');
         }
     };
 </script>
