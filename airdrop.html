@@ -1,58 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram User Info</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      background-color: white;
-      color: black;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-    }
-    h1 {
-      font-size: 24px;
-    }
-    .user-info {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Telegram Account Details</h1>
-  <div class="user-info" id="user-info">
-    <!-- Details will be populated here -->
-  </div>
+// Ensure that the code runs after the Telegram WebApp initializes
+window.onload = function () {
+    const tg = window.Telegram.WebApp;
 
-  <script>
-    window.Telegram.WebApp.ready();
+    // Check if the Telegram WebApp API is available
+    if (tg) {
+        const user = tg.initDataUnsafe?.user;
 
-    const userInfoDiv = document.getElementById('user-info');
+        if (user) {
+            // Display user data
+            document.getElementById('profile-pic').src = user.photo_url || 'https://via.placeholder.com/100';
+            document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
+            document.getElementById('user-id').textContent = `User ID: ${user.id}`;
+            document.getElementById('first-name').textContent = `First Name: ${user.first_name || 'N/A'}`;
+            document.getElementById('last-name').textContent = `Last Name: ${user.last_name || 'N/A'}`;
+        } else {
+            alert('Unable to fetch user data.');
+        }
 
-    // Check if Telegram Web App data is available
-    const user = window.Telegram.WebApp.initDataUnsafe.user;
-
-    if (user) {
-      const firstName = user.first_name || 'N/A';
-      const lastName = user.last_name || 'N/A';
-      const userName = user.username || 'N/A';
-      const userId = user.id;
-      const isPremium = user.is_premium ? 'Yes' : 'No';
-
-      userInfoDiv.innerHTML = `
-        <p><strong>First Name:</strong> ${firstName}</p>
-        <p><strong>Last Name:</strong> ${lastName}</p>
-        <p><strong>Username:</strong> ${userName}</p>
-        <p><strong>User ID:</strong> ${userId}</p>
-        <p><strong>Is Premium:</strong> ${isPremium}</p>
-      `;
+        // Match the Telegram theme
+        document.body.style.backgroundColor = tg.themeParams?.bg_color || '#f0f0f0';
+        document.body.style.color = tg.themeParams?.text_color || '#000';
     } else {
-      alert("No data available. Please try again.");
+        console.error('Telegram WebApp API is not available.');
     }
-  </script>
-</body>
-</html>
+};
