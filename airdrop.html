@@ -1,79 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram User Information</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #f0f0f0);
-            color: var(--tg-theme-text-color, #000);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-            background-color: var(--tg-theme-secondary-bg-color, #fff);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        img {
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-        }
-        p {
-            margin: 10px 0;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Airdrop User Info</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .user-info {
+      margin: 20px;
+      padding: 10px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    img.profile-pic {
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+    }
+
+    .close-button {
+      background-color: var(--tg-theme-button-color);
+      color: var(--tg-theme-button-text-color);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .close-button:hover {
+      opacity: 0.8;
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>User Information</h1>
-    <img id="profile-pic" src="" alt="Profile Picture">
+  <h1>User Info</h1>
+  <div class="user-info">
+    <img id="profilePic" class="profile-pic" alt="Profile Picture" />
     <p id="username"></p>
     <p id="user-id"></p>
-    <p id="first-name"></p>
-    <p id="last-name"></p>
-    <button onclick="Telegram.WebApp.close()">Close</button>
-</div>
+    <p id="creation-date"></p>
+    <p id="account-age"></p>
+    <p id="is-premium"></p>
+    <button class="close-button" id="closeButton">Close</button>
+  </div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
     window.onload = function () {
-        const tg = window.Telegram.WebApp;
+      const tg = window.Telegram.WebApp;
+      const user = tg.initDataUnsafe?.user;
 
-        if (tg) {
-            console.log('Telegram WebApp is initialized:', tg);
-            const user = tg.initDataUnsafe?.user;
+      if (user) {
+        // Display user info
+        document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
+        document.getElementById('user-id').textContent = `User ID: ${user.id}`;
+        document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Use real profile picture
 
-            console.log('Init Data:', tg.initDataUnsafe); // Debugging initData
+        // Fetch additional data from initDataUnsafe
+        const creationDate = new Date(user.creation_date * 1000); // creation_date is a Unix timestamp
+        const now = new Date();
+        const ageInYears = Math.floor((now - creationDate) / (1000 * 60 * 60 * 24 * 365));
 
-            if (user) {
-                // Display user data
-                document.getElementById('profile-pic').src = user.photo_url || 'https://via.placeholder.com/100';
-                document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
-                document.getElementById('user-id').textContent = `User ID: ${user.id}`;
-                document.getElementById('first-name').textContent = `First Name: ${user.first_name || 'N/A'}`;
-                document.getElementById('last-name').textContent = `Last Name: ${user.last_name || 'N/A'}`;
-            } else {
-                console.log('User data is not available.');
-                alert('Unable to fetch user data.');
-            }
+        document.getElementById('creation-date').textContent = `Creation Date: ${creationDate.toDateString()}`;
+        document.getElementById('account-age').textContent = `Account Age: ${ageInYears >= 1 ? ageInYears + ' years' : 'Less than a year'}`;
+        document.getElementById('is-premium').textContent = `Premium Account: ${user.is_premium ? 'Yes' : 'No'}`;
+      } else {
+        alert('Unable to fetch user data');
+      }
 
-            // Apply Telegram theme
-            document.body.style.backgroundColor = tg.themeParams?.bg_color || '#f0f0f0';
-            document.body.style.color = tg.themeParams?.text_color || '#000';
-        } else {
-            console.error('Telegram WebApp API is not available.');
-        }
+      // Close button
+      document.getElementById('closeButton').addEventListener('click', () => {
+        tg.close();
+      });
     };
-</script>
+  </script>
 </body>
 </html>
