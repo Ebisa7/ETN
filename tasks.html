@@ -40,25 +40,29 @@
 </head>
 <body>
   <div class="telegram-header">
-    <h1>Membership Status</h1>
+    <h1 style="background:none;">Membership Status</h1>
   </div>
   <p id="status">Welcome! Please join the channel.</p>
 
   <div class="button-container">
     <button class="button" id="joinChannel">Join</button>
     <button class="button" id="checkMembership" style="display:none;">Check</button>
+    <button class="button" id="finishTask" style="display:none;">Finish</button>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
+    const tg = window.Telegram.WebApp;
+
     window.Telegram.WebApp.ready();
 
-    // Set the header background color to match Telegram's app
-    document.querySelector('.telegram-header').style.backgroundColor = window.Telegram.WebApp.headerBgColor || '#FFFFFF';
+    // Set the header background color in the Telegram app interface
+    tg.setHeaderColor('transparent');
+    tg.setBackgroundColor('#133A2A');
 
-    const tg = window.Telegram.WebApp;
     const joinButton = document.getElementById('joinChannel');
     const checkButton = document.getElementById('checkMembership');
+    const finishButton = document.getElementById('finishTask');
     const statusElement = document.getElementById('status');
 
     // Join channel button functionality
@@ -69,15 +73,16 @@
       statusElement.textContent = 'Please check your membership status.'; // Update status text
     };
 
-    // Check membership status when the "Check Membership" button is clicked
+    // Check membership status when the "Check" button is clicked
     checkButton.onclick = function() {
       const userId = tg.initDataUnsafe.user.id;
-      fetch(`https://api.telegram.org/bot7278739263:AAHt34uP3TLIUUOt_0lgHPLsIgtk68SGsSo/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
+      fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
         .then(response => response.json())
         .then(data => {
           if (data.result.status === 'member' || data.result.status === 'administrator') {
             statusElement.textContent = 'You are a member!';
             checkButton.style.display = 'none'; // Hide check button if member
+            finishButton.style.display = 'block'; // Show the finish button after checking
           } else {
             statusElement.textContent = 'You are not a member!'; 
           }
@@ -85,6 +90,11 @@
         .catch(error => {
           statusElement.textContent = 'Error checking membership.'; 
         });
+    };
+
+    // Finish task and redirect to tasks.html
+    finishButton.onclick = function() {
+      window.location.href = 'tasks.html'; // Redirect to tasks.html
     };
   </script>
 </body>
