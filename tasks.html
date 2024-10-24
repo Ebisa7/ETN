@@ -35,6 +35,9 @@
     const joinButton = document.getElementById('joinChannel');
     const statusElement = document.getElementById('status');
 
+    // Always show the "Join Channel" button
+    joinButton.style.display = 'block'; // Show the button by default
+
     // Check membership status when the "Check Membership" button is clicked
     document.getElementById('checkMembership').onclick = function() {
       // Call the bot API to check membership status
@@ -46,7 +49,7 @@
             joinButton.style.display = 'none'; // Hide join button if member
           } else {
             statusElement.textContent = 'You are not a member!';
-            joinButton.style.display = 'block'; // Show join button
+            // Keep join button visible
             joinButton.onclick = function() {
               window.open('https://t.me/lt_coin', '_blank'); // Open in new tab
             };
@@ -55,6 +58,11 @@
         .catch(error => {
           statusElement.textContent = 'Error checking membership.';
         });
+    };
+
+    // Make the "Join Channel" button always visible
+    joinButton.onclick = function() {
+      window.open('https://t.me/lt_coin', '_blank'); // Open in new tab
     };
   </script>
 </body>
