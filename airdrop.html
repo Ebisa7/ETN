@@ -1,26 +1,76 @@
-// Ensure that the code runs after the Telegram WebApp initializes
-window.onload = function () {
-    const tg = window.Telegram.WebApp;
-
-    // Check if the Telegram WebApp API is available
-    if (tg) {
-        const user = tg.initDataUnsafe?.user;
-
-        if (user) {
-            // Display user data
-            document.getElementById('profile-pic').src = user.photo_url || 'https://via.placeholder.com/100';
-            document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
-            document.getElementById('user-id').textContent = `User ID: ${user.id}`;
-            document.getElementById('first-name').textContent = `First Name: ${user.first_name || 'N/A'}`;
-            document.getElementById('last-name').textContent = `Last Name: ${user.last_name || 'N/A'}`;
-        } else {
-            alert('Unable to fetch user data.');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram User Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
+        .container {
+            text-align: center;
+            background-color: var(--tg-theme-secondary-bg-color, #fff);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+        }
+        p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
 
-        // Match the Telegram theme
-        document.body.style.backgroundColor = tg.themeParams?.bg_color || '#f0f0f0';
-        document.body.style.color = tg.themeParams?.text_color || '#000';
-    } else {
-        console.error('Telegram WebApp API is not available.');
-    }
-};
+<div class="container">
+    <h1>User Information</h1>
+    <img id="profile-pic" src="" alt="Profile Picture">
+    <p id="username"></p>
+    <p id="user-id"></p>
+    <p id="first-name"></p>
+    <p id="last-name"></p>
+</div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+    window.onload = function () {
+        const tg = window.Telegram.WebApp;
+
+        // Check if the Telegram WebApp API is available
+        if (tg) {
+            const user = tg.initDataUnsafe?.user;
+
+            if (user) {
+                // Display user data
+                document.getElementById('profile-pic').src = user.photo_url || 'https://via.placeholder.com/100';
+                document.getElementById('username').textContent = `Username: @${user.username || 'N/A'}`;
+                document.getElementById('user-id').textContent = `User ID: ${user.id}`;
+                document.getElementById('first-name').textContent = `First Name: ${user.first_name || 'N/A'}`;
+                document.getElementById('last-name').textContent = `Last Name: ${user.last_name || 'N/A'}`;
+            } else {
+                alert('Unable to fetch user data.');
+            }
+
+            // Match the Telegram theme
+            document.body.style.backgroundColor = tg.themeParams?.bg_color || '#f0f0f0';
+            document.body.style.color = tg.themeParams?.text_color || '#000';
+        } else {
+            console.error('Telegram WebApp API is not available.');
+        }
+    };
+</script>
+
+</body>
+</html>
