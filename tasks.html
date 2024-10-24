@@ -54,9 +54,12 @@
         });
     };
 
-    // Make the "Join Channel" button always open the link in a new tab without closing the app
-    joinButton.onclick = function() {
+    // Handle the "Join Channel" button to open link in a new tab
+    joinButton.onclick = function(event) {
+      event.preventDefault(); // Prevent default action
       window.open('https://t.me/lt_coin', '_blank'); // Open in new tab
+      // Optionally, you can show a message here to let the user know they can join the channel.
+      statusElement.textContent = 'You can now join the channel in a new tab.';
     };
   </script>
 </body>
