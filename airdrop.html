@@ -58,50 +58,53 @@
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-        window.onload = function () {
-            const tg = window.Telegram.WebApp;
-            const user = tg.initDataUnsafe?.user;
+        <script>
+window.onload = function () {
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user;
 
-            if (user) {
-                // Display user info
-                const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-                document.getElementById('fullName').textContent = `Full Name: ${fullName || 'N/A'}`;
-                document.getElementById('user-id').textContent = `User ID: ${user.id}`;
+    if (user) {
+        // Display user info
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        document.getElementById('fullName').textContent = `Full Name: ${fullName || 'N/A'}`;
+        document.getElementById('user-id').textContent = `User ID: ${user.id}`;
 
-                // Calculate account age using ID ranges
-                const userId = user.id;
-                let creationYear = 2024; // Default to this year in case of unrecognized ID
+        // Corrected ID ranges and logic
+        const userId = user.id;
+        let creationYear = 2024;  // Default year
 
-                if (userId < 1000000) {
-                    creationYear = 2013;
-                } else if (userId < 100000000) {
-                    creationYear = 2016;
-                } else if (userId < 500000000) {
-                    creationYear = 2020;
-                } else if (userId < 700000000) {
-                    creationYear = 2023;
-                }
+        if (userId < 1000000) {
+            creationYear = 2013;
+        } else if (userId < 100000000) {
+            creationYear = 2016;
+        } else if (userId < 500000000) {
+            creationYear = 2020;
+        } else if (userId < 700000000) {
+            creationYear = 2023;
+        } else if (userId > 6000000000) {
+            creationYear = 2023;  // Over 6 billion is recent, 2023+
+        }
 
-                const currentYear = new Date().getFullYear();
-                const accountAge = currentYear - creationYear;
+        const currentYear = new Date().getFullYear();
+        const accountAge = currentYear - creationYear;
 
-                document.getElementById('account-age').textContent = `Account Age: ${accountAge} years`;
+        document.getElementById('account-age').textContent = `Account Age: ${accountAge} years`;
 
-                // Check premium status
-                document.getElementById('is-premium').textContent = `Premium Account: ${user.is_premium ? 'Yes' : 'No'}`;
+        // Check premium status
+        document.getElementById('is-premium').textContent = `Premium Account: ${user.is_premium ? 'Yes' : 'No'}`;
 
-                // Profile picture
-                document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Placeholder if no picture
-            } else {
-                alert('Unable to fetch user data.');
-            }
+        // Profile picture
+        document.getElementById('profilePic').src = user.photo_url || 'default-profile-pic.png'; // Placeholder if no picture
+    } else {
+        alert('Unable to fetch user data.');
+    }
 
-            // Close button functionality
-            document.getElementById('closeButton').addEventListener('click', () => {
-                tg.close();
-            });
-        };
-    </script>
+    // Close button functionality
+    document.getElementById('closeButton').addEventListener('click', () => {
+        tg.close();
+    });
+};
+</script>
+
 </body>
 </html>
