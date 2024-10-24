@@ -32,7 +32,7 @@
     const userId = tg.initDataUnsafe.user.id;
 
     // Call the bot API to check membership status
-    fetch(`https://api.telegram.org/bot<YOUR_BOT_API_TOKEN>/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
+    fetch(`https://api.telegram.org/bot<7278739263:AAHt34uP3TLIUUOt_0lgHPLsIgtk68SGsSo>/getChatMember?chat_id=@lt_coin&user_id=${userId}`)
       .then(response => response.json())
       .then(data => {
         const statusElement = document.getElementById('status');
