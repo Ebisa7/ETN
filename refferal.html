@@ -105,31 +105,11 @@
 
             inviteButton.addEventListener('click', () => {
                 const inviteLink = `https://t.me/trytrytrtyrefref1bot/gevtu?startapp=${inviterId}`;
-                Telegram.WebApp.showPopup({
-                    title: 'Share your referral link',
-                    description: inviteLink,
-                    buttons: [
-                        {
-                            text: 'Share',
-                            action: () => {
-                                Telegram.WebApp.shareLink(inviteLink, {
-                                    text: 'Join this awesome app!',
-                                }).then(result => {
-                                    statusMessage.textContent = 'Referral link shared successfully!';
-                                }).catch(err => {
-                                    statusMessage.textContent = 'Failed to share referral link.';
-                                    console.error('Failed to share: ', err);
-                                });
-                            }
-                        },
-                        {
-                            text: 'Cancel',
-                            action: () => {
-                                statusMessage.textContent = 'Sharing canceled.';
-                            }
-                        }
-                    ]
-                });
+                const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=Join this awesome app!`;
+
+                Telegram.WebApp.openLink(shareUrl);
+
+                statusMessage.textContent = 'Referral link shared!';
             });
 
             // Fetch and display invited users
