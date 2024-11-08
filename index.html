@@ -387,8 +387,14 @@
       });
 
       airdropTab.addEventListener('click', function() {
-        <a href="airdrop.html?data={{tg.initData}}">Go to Airdrop</a>
-      });
+  const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
+  if (tgInitData) {
+    window.location.href = `airdrop.html?data=${encodeURIComponent(tgInitData)}`;
+  } else {
+    console.error('Telegram initData is not available.');
+    window.location.href = 'airdrop.html'; // Fallback
+  }
+});
 
       // Start with page 1 visible
       showPage(1);
