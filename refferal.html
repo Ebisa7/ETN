@@ -51,6 +51,13 @@
     </div>
 
     <script>
+        // Initialize Telegram Web App
+        if (typeof Telegram !== "undefined" && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+        } else {
+            console.error('Telegram Web App not found');
+        }
+
         // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
@@ -64,8 +71,7 @@
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const analytics = firebase.getAnalytics(app);
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // Function to store invited users
@@ -101,7 +107,15 @@
             const inviteButton = document.getElementById('inviteButton');
             const userList = document.getElementById('userList');
             const statusMessage = document.getElementById('statusMessage');
-            const inviterId = Telegram.WebApp.initDataUnsafe.user.id;
+            const telegramUser = Telegram.WebApp.initDataUnsafe.user;
+
+            if (!telegramUser || !telegramUser.id) {
+                console.error('Telegram user data not available');
+                statusMessage.textContent = 'Telegram user data not available';
+                return;
+            }
+
+            const inviterId = telegramUser.id;
 
             inviteButton.addEventListener('click', () => {
                 const inviteLink = `https://t.me/trytrytrtyrefref1bot/gevtu?startapp=${inviterId}`;
