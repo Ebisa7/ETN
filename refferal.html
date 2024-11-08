@@ -42,11 +42,12 @@
 <body>
     <div class="container">
         <h1>Invite Friends to the WebApp</h1>
-        <button id="inviteButton">Invite a Friend</button>
+        <button id="inviteButton">Copy Referral Link</button>
         <div id="invitedUsers">
             <h2>Invited Users:</h2>
             <ul id="userList"></ul>
         </div>
+        <p id="statusMessage"></p>
     </div>
 
     <script>
@@ -99,12 +100,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             const inviteButton = document.getElementById('inviteButton');
             const userList = document.getElementById('userList');
+            const statusMessage = document.getElementById('statusMessage');
             const inviterId = Telegram.WebApp.initDataUnsafe.user.id;
 
-            inviteButton.addEventListener('click', () => {
-                const inviteLink = 'https://t.me/mybot/start?startapp=' + inviterId;
-                Telegram.WebApp.openLink(inviteLink);
-                storeInvite(inviterId, '@invited_user');  // This is a placeholder. Replace '@invited_user' with actual username logic.
+            inviteButton.addEventListener('click', async () => {
+                const inviteLink = `https://t.me/mybot/start?startapp=${inviterId}`;
+
+                try {
+                    await navigator.clipboard.writeText(inviteLink);
+                    statusMessage.textContent = 'Referral link copied to clipboard!';
+                } catch (err) {
+                    statusMessage.textContent = 'Failed to copy referral link.';
+                    console.error('Failed to copy: ', err);
+                }
             });
 
             // Fetch and display invited users
