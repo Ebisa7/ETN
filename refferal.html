@@ -42,7 +42,7 @@
 <body>
     <div class="container">
         <h1>Invite Friends to the WebApp</h1>
-        <button id="inviteButton">Copy Referral Link</button>
+        <button id="inviteButton">Share Referral Link</button>
         <div id="invitedUsers">
             <h2>Invited Users:</h2>
             <ul id="userList"></ul>
@@ -103,16 +103,33 @@
             const statusMessage = document.getElementById('statusMessage');
             const inviterId = Telegram.WebApp.initDataUnsafe.user.id;
 
-            inviteButton.addEventListener('click', async () => {
-                const inviteLink = `https://t.me/trytrytrtyrefref1bot/start?startapp=${inviterId}`;
-
-                try {
-                    await navigator.clipboard.writeText(inviteLink);
-                    statusMessage.textContent = 'Referral link copied to clipboard!';
-                } catch (err) {
-                    statusMessage.textContent = 'Failed to copy referral link.';
-                    console.error('Failed to copy: ', err);
-                }
+            inviteButton.addEventListener('click', () => {
+                const inviteLink = `https://t.me/trytrytrtyrefref1bot/gevtu?startapp=${inviterId}`;
+                Telegram.WebApp.showPopup({
+                    title: 'Share your referral link',
+                    description: inviteLink,
+                    buttons: [
+                        {
+                            text: 'Share',
+                            action: () => {
+                                Telegram.WebApp.shareLink(inviteLink, {
+                                    text: 'Join this awesome app!',
+                                }).then(result => {
+                                    statusMessage.textContent = 'Referral link shared successfully!';
+                                }).catch(err => {
+                                    statusMessage.textContent = 'Failed to share referral link.';
+                                    console.error('Failed to share: ', err);
+                                });
+                            }
+                        },
+                        {
+                            text: 'Cancel',
+                            action: () => {
+                                statusMessage.textContent = 'Sharing canceled.';
+                            }
+                        }
+                    ]
+                });
             });
 
             // Fetch and display invited users
