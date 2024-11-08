@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verification</title>
+<script src="https://www.google.com/recaptcha/api.js?sitekey=6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" async defer></script>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start; /* Align items to the left */
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #17273b; /* Default for light mode */
+        color: #000000; /* Default text color for light mode */
+        padding: 20px;
+    }
+    @media (prefers-color-scheme: dark) {
+        body {
+            background: #1e1e1e; /* Background for dark mode */
+            color: #ffffff; /* Text color for dark mode */
+        }
+    }
+    #header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: left; /* Left-align header text */
+    }
+    #message {
+        font-size: 16px;
+        margin-bottom: 20px;
+        text-align: left; /* Left-align message text */
+    }
+    #loading {
+        font-size: 18px; /* Slightly larger than the text */
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        text-align: left; /* Left-align loading text */
+    }
+    .spinner {
+        border: 2px solid #17273b; /* Black border */
+        border-top: 2px solid #ffffff; /* Black top border */
+        border-radius: 50%;
+        width: 20px; /* Slightly larger than text */
+        height: 20px; /* Slightly larger than text */
+        animation: spin 1s linear infinite;
+        margin-left: 10px;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    #captchaContainer {
+        margin-top: 20px;
+    }
+    #verifyButton {
+        display: none; /* Hide the verify button since it's handled automatically */
+    }
+</style>
+</head>
+<body>
+<div id="header">etneco.ethio-tech.com</div>
+<div id="message">Verifying you're a human. This should take a sec.</div>
+<div id="loading">
+    <div class="spinner"></div> <!-- Visible loading animation -->
+</div>
+<div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
+
+<script>
+function onCaptchaSuccess(response) {
+    if (response) {
+        localStorage.setItem("circleGameVerified", true);
+        setTimeout(() => {
+            window.location.href = 'index.html'; // Redirect back to the game page
+        }, 1000); // Redirect after 1 second
+    } else {
+        alert('Please complete the reCAPTCHA');
+    }
+}
+
+function initializeRecaptcha() {
+    grecaptcha.render('captchaContainer', {
+        sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
+        callback: onCaptchaSuccess
+    });
+}
+
+// Initialize CAPTCHA
+initializeRecaptcha();
+</script>
+</body>
+</html>
