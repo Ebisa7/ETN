@@ -301,6 +301,20 @@
 <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"></script>
 
    <script>
+     function showPage(pageNumber) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.style.display = 'none'; // Hide all pages
+    });
+    const currentPage = document.getElementById('page' + pageNumber);
+    currentPage.style.display = 'flex'; // Show the current page
+
+    // Set header color for Telegram WebApp
+    if (window.Telegram) {
+        Telegram.WebApp.setHeaderColor("#133A2A"); // Set desired color
+        Telegram.WebApp.setBackgroundColor("#133A2A"); // Set background color
+    }
+}
+
     document.addEventListener('DOMContentLoaded', function() {
       const loadingScreen = document.getElementById('loading-screen');
       const tutorialContainer = document.getElementById('tutorial-container');
