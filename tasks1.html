@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Follow X</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #133A2A;
+      color: #f2c94c;
+    }
+    .button-container {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .button {
+      background-color: #f2c94c;
+      color: #133A2A;
+      border: none;
+      padding: 15px 125px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Follow ETnetsa on X</h1>
+  </div>
+  <p id="status">Please follow X to continue.</p>
+
+  <div class="button-container">
+    <button class="button" id="followXPage">Follow</button>
+    <button class="button" id="checkFollow" style="display:none;">Check</button>
+    <button class="button" id="finishTask" style="display:none;">Finish</button>
+  </div>
+
+  <script>
+    const followButton = document.getElementById('followXPage');
+    const checkButton = document.getElementById('checkFollow');
+    const finishButton = document.getElementById('finishTask');
+    const statusElement = document.getElementById('status');
+
+    let followClicked = false;
+    let followStartTime = null;
+
+    // Follow button logic to navigate to X page and enable checking
+    followButton.onclick = function() {
+      followClicked = true;
+      followStartTime = Date.now();
+      checkButton.style.display = 'block';
+      window.open('https://x.com/ETNetsa/', '_blank');
+      statusElement.textContent = 'Please check your follow status after a few seconds.';
+    };
+
+    // Check button logic to verify timing
+    checkButton.onclick = function() {
+      if (!followClicked) {
+        statusElement.textContent = 'Please follow on X first!';
+        return;
+      }
+
+      const timeElapsed = (Date.now() - followStartTime) / 1000;
+
+      if (timeElapsed >= 10) {
+        statusElement.textContent = 'Task completed';
+        checkButton.style.display = 'none';
+        finishButton.style.display = 'block';
+      } else {
+        statusElement.textContent = 'Verification failed. Pease wait a moment';
+      }
+    };
+
+    // Finish task button to proceed to the next task or page
+    finishButton.onclick = function() {
+      window.location.href = 'tasks.html';
+    };
+  </script>
+</body>
+</html>
