@@ -32,6 +32,12 @@
         }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
+    <!-- Firebase Analytics -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
 </head>
 <body>
     <div class="container">
@@ -44,29 +50,71 @@
     </div>
 
     <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
+            authDomain: "mytestapp-f6913.firebaseapp.com",
+            databaseURL: "https://mytestapp-f6913-default-rtdb.firebaseio.com",
+            projectId: "mytestapp-f6913",
+            storageBucket: "mytestapp-f6913.firebasestorage.app",
+            messagingSenderId: "300150696072",
+            appId: "1:300150696072:web:1e29cb5a813d004018573d",
+            measurementId: "G-PPDR4TBQF5"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.getAnalytics(app);
+        const db = firebase.firestore();
+
+        // Function to store invited users
+        function storeInvite(inviterId, invitedUsername) {
+            db.collection("invites").add({
+                inviterId: inviterId,
+                invitedUsername: invitedUsername,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then((docRef) => {
+                console.log("Document written with ID: ", docRef.id);
+            }).catch((error) => {
+                console.error("Error adding document: ", error);
+            });
+        }
+
+        // Function to get invited users
+        function getInvitedUsers(inviterId, callback) {
+            db.collection("invites").where("inviterId", "==", inviterId)
+                .get()
+                .then((querySnapshot) => {
+                    let users = [];
+                    querySnapshot.forEach((doc) => {
+                        users.push(doc.data().invitedUsername);
+                    });
+                    callback(users);
+                })
+                .catch((error) => {
+                    console.error("Error getting documents: ", error);
+                });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const inviteButton = document.getElementById('inviteButton');
             const userList = document.getElementById('userList');
-            const invitedUsers = [];
+            const inviterId = Telegram.WebApp.initDataUnsafe.user.id;
 
             inviteButton.addEventListener('click', () => {
-                const inviteLink = 'https://t.me/trytrytrtyrefref1bot/start?startapp=' + Telegram.WebApp.initDataUnsafe.user.id;
+                const inviteLink = 'https://t.me/mybot/start?startapp=' + inviterId;
                 Telegram.WebApp.openLink(inviteLink);
+                storeInvite(inviterId, '@invited_user');  // This is a placeholder. Replace '@invited_user' with actual username logic.
             });
 
-            // Simulate inviting a user and adding them to the list
-            function addUserToList(username) {
-                if (!invitedUsers.includes(username)) {
-                    invitedUsers.push(username);
+            // Fetch and display invited users
+            getInvitedUsers(inviterId, (users) => {
+                users.forEach((username) => {
                     const listItem = document.createElement('li');
                     listItem.textContent = username;
                     userList.appendChild(listItem);
-                }
-            }
-
-            // For demonstration purposes, simulate users being invited
-            setTimeout(() => addUserToList('@invited_user1'), 1000);
-            setTimeout(() => addUserToList('@invited_user2'), 2000);
+                });
+            });
         });
     </script>
 </body>
