@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram WebApp Invite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #userList {
+            list-style-type: none;
+            padding: 0;
+        }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Invite Friends to the WebApp</h1>
+        <button id="inviteButton">Invite a Friend</button>
+        <div id="invitedUsers">
+            <h2>Invited Users:</h2>
+            <ul id="userList"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const inviteButton = document.getElementById('inviteButton');
+            const userList = document.getElementById('userList');
+            const invitedUsers = [];
+
+            inviteButton.addEventListener('click', () => {
+                const inviteLink = 'https://t.me/trytrytrtyrefref1bot/start?startapp=' + Telegram.WebApp.initDataUnsafe.user.id;
+                Telegram.WebApp.openLink(inviteLink);
+            });
+
+            // Simulate inviting a user and adding them to the list
+            function addUserToList(username) {
+                if (!invitedUsers.includes(username)) {
+                    invitedUsers.push(username);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = username;
+                    userList.appendChild(listItem);
+                }
+            }
+
+            // For demonstration purposes, simulate users being invited
+            setTimeout(() => addUserToList('@invited_user1'), 1000);
+            setTimeout(() => addUserToList('@invited_user2'), 2000);
+        });
+    </script>
+</body>
+</html>
