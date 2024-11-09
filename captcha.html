@@ -13,9 +13,8 @@
         justify-content: center;
         height: 100vh;
         margin: 0;
-        background-color: #133A2A;
         font-family: Arial, sans-serif;
-        color: black; 
+        color: #133A2A; 
         padding: 20px;
     }
     #header {
@@ -53,7 +52,11 @@
     display: flex; 
     justify-content: center; 
     align-items: center; 
+    width: 100%;
     padding: 20px; /* Add padding */
+    border: none; /* Add border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: rgba(255, 255, 255, 0.8); /* Light background */
 }
         
     }
@@ -71,17 +74,15 @@
 <div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
 
 <script>
-function onCaptchaSuccess(response) {
+ function onCaptchaSuccess(response) {
     if (response) {
+        // Set verification flag and current timestamp
         localStorage.setItem("circleGameVerified", true);
+        localStorage.setItem("verificationTimestamp", Date.now()); // Store current timestamp
         setTimeout(() => {
             window.location.href = 'index.html'; // Redirect back to the game page
         }, 1000); // Redirect after 1 second
-    } else {
-        alert('Please complete the reCAPTCHA');
-    }
 }
-
     function onCaptchaSuccess(response) {
     if (response) {
         localStorage.setItem("circleGameVerified", true); // Set verification flag
