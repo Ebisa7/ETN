@@ -14,7 +14,7 @@
         height: 100vh;
         margin: 0;
         font-family: Arial, sans-serif;
-        color: #000000; /* Default text color for light mode */
+        color: #133A2A; 
         padding: 20px;
     }
     #header {
@@ -49,7 +49,16 @@
         100% { transform: rotate(360deg); }
     }
     #captchaContainer {
-        margin-top: 20px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    width: 100%;
+    padding: 20px; /* Add padding */
+    border: none; /* Add border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: rgba(255, 255, 255, 0.8); /* Light background */
+}
+        
     }
     #verifyButton {
         display: none; /* Hide the verify button since it's handled automatically */
@@ -76,6 +85,17 @@ function onCaptchaSuccess(response) {
     }
 }
 
+    function onCaptchaSuccess(response) {
+    if (response) {
+        localStorage.setItem("circleGameVerified", true); // Set verification flag
+        setTimeout(() => {
+            window.location.href = 'index.html'; // Redirect back to the game page
+        }, 1000); // Redirect after 1 second
+    } else {
+        alert('Please complete the reCAPTCHA');
+    }
+}
+    
 function initializeRecaptcha() {
     grecaptcha.render('captchaContainer', {
         sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
