@@ -97,18 +97,10 @@
       window.location.href = 'index.html'; // Redirect to index.html
     };
 
-    // Add back button functionality
-    tg.onEvent('backButtonClicked', function() {
-      window.location.href = 'index.html'; // navigate to index.html when the back button is clicked
-    });
-
-    // Ensure the app is visible
-    tg.onEvent('visibilityChanged', function(event) {
-      if (event.visible) {
-        tg.MainButton.show(); // Show the main button if the app is visible
-      } else {
-        tg.MainButton.hide(); // Hide the main button if the app is not visible
-      }
+    tg.BackButton.show();
+tg.BackButton.onClick(() => {
+    window.location.href = 'index.html';
+});
     });
   </script>
 </body>
