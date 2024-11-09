@@ -177,13 +177,6 @@
      
      const tgInitData = window.Telegram.WebApp.initData;
 
-     function showPage(pageNumber) {
-    document.querySelectorAll('.page').forEach(page => {
-        page.style.display = 'none'; // Hide all pages
-    });
-    const currentPage = document.getElementById('page' + pageNumber);
-    currentPage.style.display = 'flex'; // Show the current page
-
     // Set header color for Telegram WebApp
     if (window.Telegram) {
         Telegram.WebApp.setHeaderColor("#133A2A"); // Set desired color
@@ -192,14 +185,10 @@
 }
 
     document.addEventListener('DOMContentLoaded', function() {
-      const loadingScreen = document.getElementById('loading-screen');
-      const tutorialContainer = document.getElementById('tutorial-container');
       const gameContainer = document.getElementById('game-container');
-      const continueButtons = document.querySelectorAll('.continue-button');
       const coinBalanceDisplay = document.getElementById('coinBalance');
       const playGameImage = document.getElementById('playGame');
 
-      let currentPage = 1;
 
       // Simulate loading
       setTimeout(function() {
@@ -207,27 +196,10 @@
         tutorialContainer.style.display = 'block';
       }, 2000); // Reduced to 2 seconds for quicker loading
 
-      // Tutorial buttons functionality
-      continueButtons.forEach(button => {
-        button.addEventListener('click', () => {
-          if (currentPage === 6) {
-            tutorialContainer.style.display = 'none';
-            gameContainer.style.display = 'block';
             updateCoinBalance(); // Show initial balance when game container is displayed
             initializeTONConnect(); // Initialize TON Connect when game page is shown
           } else {
-            currentPage++;
-            showPage(currentPage);
-          }
-        });
-      });
-
-      function showPage(pageNumber) {
-        document.querySelectorAll('.page').forEach(page => {
-          page.style.display = 'none';
-        });
-        document.getElementById('page' + pageNumber).style.display = 'flex';
-      }
+  
 
       // Balance update functions
       function updateBalanceDisplay(newBalance) {
@@ -286,9 +258,6 @@
     window.location.href = 'airdrop.html'; // Fallback
   }
 });
-
-      // Start with page 1 visible
-      showPage(1);
 
       // TON Connect initialization function
       function initializeTONConnect() {
