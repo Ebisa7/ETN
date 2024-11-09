@@ -209,10 +209,15 @@
             alert('Unable to fetch user data.');
         }
 
-        // Close button functionality
-        document.getElementById('closeButton').addEventListener('click', () => {
-            tg.close();
-        });
+        close-button.addEventListener('click', function() {
+  const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
+  if (tgInitData) {
+    window.location.href = `index.html?data=${encodeURIComponent(tgInitData)}`;
+  } else {
+    console.error('Telegram initData is not available.');
+    window.location.href = 'index.html'; // Fallback
+  }
+});
     </script>
 </body>
 </html>
