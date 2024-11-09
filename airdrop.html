@@ -209,15 +209,18 @@
             alert('Unable to fetch user data.');
         }
 
-        close-button.addEventListener('click', function() {
-  const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
-  if (tgInitData) {
-    window.location.href = `index.html?data=${encodeURIComponent(tgInitData)}`;
-  } else {
-    console.error('Telegram initData is not available.');
-    window.location.href = 'index.html'; // Fallback
-  }
+
+// Assuming you have a close button with id "closeButton"
+const closeButton = document.getElementById('closeButton'); 
+
+closeButton.addEventListener('click', function() {
+  // Replace with your Telegram username or link
+  const telegramLink = 'https://t.me/lt_coin'; 
+
+  window.location.href = telegramLink; 
 });
+
+// ... your existing code ... 
     </script>
 </body>
 </html>
