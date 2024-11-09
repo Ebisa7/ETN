@@ -191,6 +191,18 @@
             tg.expand();
             tg.enableClosingConfirmation();
         }
+
+      function toggleSettingsButton(el) {
+    if (DemoApp.SettingsButton.isVisible) {
+        DemoApp.SettingsButton.hide();
+        el.innerHTML = 'Show Settings Button';
+    } else {
+        DemoApp.SettingsButton.show();
+        el.innerHTML = 'Hide Settings Button';
+        // Navigate to settings.html when the settings button is shown
+        window.location.href = 'settings.html';
+    }
+}
       
         // Simulate loading
         setTimeout(function() {
