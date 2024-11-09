@@ -172,17 +172,30 @@
 
    <script>
      document.addEventListener('DOMContentLoaded', function() {
-    // Check if the user has been verified
     const isVerified = localStorage.getItem("circleGameVerified");
+    const verificationTimestamp = localStorage.getItem("verificationTimestamp");
 
-    // Redirect to captcha.html only if not verified
-    if (!isVerified) {
+    // Check if the verification is still valid (within 24 hours)
+    const currentTime = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+    if (!isVerified || (verificationTimestamp && (currentTime - verificationTimestamp) > twentyFourHours)) {
+        // Redirect to captcha.html if not verified or verification expired
         window.location.href = 'captcha.html';
     } else {
         // Proceed with the rest of your initialization logic
-        // For example, show the game container, etc.
         const loadingScreen = document.getElementById('loading-screen');
         const gameContainer = document.getElementById('game-container');
+        
+        // Simulate loading
+        setTimeout(function() {
+            loadingScreen.style.display = 'none';
+            gameContainer.style.display = 'block'; // Show the game container
+            updateCoinBalance(); // Show initial balance when game container is displayed
+            initializeTONConnect(); // Initialize TON Connect when game page is shown
+        }, 2000); // Reduced to 2 seconds for quicker loading
+    }
+});
         
         // Simulate loading
         setTimeout(function() {
