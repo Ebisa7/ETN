@@ -74,6 +74,13 @@
 <div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
 
 <script>
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
+
+    // Hide the back button on index.html
+    tg.BackButton.hide();
+    
  function onCaptchaSuccess(response) {
     if (response) {
         // Set verification flag and current timestamp
