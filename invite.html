@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Send TON, Receive Assets</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         html, body {
             background-color: #133A2A;
@@ -85,6 +86,22 @@
     </div>
 
     <script>
+        const tg = window.Telegram.WebApp;
+
+    tg.ready();
+
+    // Set header color for Telegram WebApp
+    tg.setHeaderColor("#133A2A"); // Set desired color
+    tg.setBackgroundColor("#133A2A"); // Set background color
+
+    // Show the back button
+    tg.BackButton.show();
+
+    // Define the behavior for the back button click
+    tg.BackButton.onClick(() => {
+      window.location.href = 'index.html'; // Redirect to index.html
+    });
+        
         // Initialize Telegram WebApp
         const tg = window.Telegram?.WebApp;
         if (tg) {
