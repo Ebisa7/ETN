@@ -3,37 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ETN Coin Airdrop Welcome</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Welcome to ETN Coin Airdrop!</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #133A2A;
+      color: white;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .page {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2em;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin: 20px 0;
+    }
+
+    .continue-button {
+      padding: 15px 30px;
+      background-color: #F2C94C;
+      color: black;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+    .continue-button:hover {
+      background-color: #F2C94D;
+    }
+  </style>
 </head>
 <body>
-
-  <!-- Welcome Tutorial -->
-  <div id="tutorial-container">
-    <!-- Page 1 -->
-    <div class="page" id="page1">
-      <img src="well1.png" alt="Well 1" class="tutorial-img">
-      <h1>Welcome to ETN Coin Airdrop!</h1>
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 2 -->
-    <div class="page" id="page2">
-      <img src="well2.png" alt="Well 2" class="tutorial-img">
-      <h1>What is ETN?</h1>
-      <p>ETN is the first Habesha coin developed with the ET Netsa Community.</p>
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 3 -->
-    <div class="page" id="page3">
-      <img src="well3.png" alt="Well 3" class="tutorial-img">
-      <h1>What Now?</h1>
-      <p>Now, let's start earning $ETN tokens!</p>
-      <button class="continue-button">Let’s Go!</button>
-    </div>
+  <!-- Page 1 -->
+  <div class="page" id="page1">
+    <h1>Welcome to ETN Coin Airdrop!</h1>
+    <button class="continue-button">Continue</button>
   </div>
 
-  <script src="welcome.js"></script>
+  <!-- Page 2 -->
+  <div class="page" id="page2">
+    <h1>What is ETN?</h1>
+    <p>$ETN - ET NETSA COIN is the lifeblood of the ETN Ecosystem</p>
+    <button class="continue-button">Continue</button>
+  </div>
+
+  <!-- Page 3 -->
+  <div class="page" id="page3">
+    <h1>What Now?</h1>
+    <p>Now, let's start earning $ETN tokens!</p>
+    <button class="continue-button">Let's Go!</button>
+  </div>
+
+  <!-- Page 4 -->
+  <div class="page" id="page4">
+    <h1>Account Info</h1>
+    <p>Account Age: <span id="account-age">Fail</span></p>
+    <p>Premium Check: <span id="premium-check">Fail</span></p>
+    <button class="continue-button">Continue</button>
+  </div>
+
+  <!-- Page 5 -->
+  <div class="page" id="page5">
+    <h1>Reward</h1>
+    <p id="reward-amount">1000 ETN</p>
+    <button class="continue-button">Continue</button>
+  </div>
+
+  <!-- Page 6 -->
+  <div class="page" id="page6">
+    <h1>Task</h1>
+    <p id="task-status">Task Not Completed</p>
+    <button class="continue-button">Continue</button>
+  </div>
+
+  <script>
+    let currentPage = 0;
+    const pages = document.querySelectorAll('.page');
+    pages[currentPage].style.display = 'flex'; // Show first page
+
+    const continueButtons = document.querySelectorAll('.continue-button');
+    continueButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        currentPage++;
+        if (currentPage < pages.length) {
+          pages[currentPage - 1].style.display = 'none'; // Hide current page
+          pages[currentPage].style.display = 'flex'; // Show next page
+        } else {
+          // Last page, navigate to index.html
+          const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
+          if (tgInitData) {
+            window.location.href = `index.html?data=${encodeURIComponent(tgInitData)}`;
+          } else {
+            console.error('Telegram initData is not available.');
+            window.location.href = 'index.html'; // Fallback
+ }
+        }
+      });
+    });
+  </script>
 </body>
 </html>
