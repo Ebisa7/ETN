@@ -62,77 +62,6 @@
       text-align: center;
     }
 
-    #tutorial-container {
-      display: none;
-    }
-
-    .page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      height: 100vh;
-      padding: 20px;
-      text-align: center;
-      background-color: #133A2A;
-    }
-
-    .tutorial-img {
-      max-width: 80%;
-      height: auto;
-      margin-top: 50px;
-      animation: fadeInScale 1.2s ease forwards, bounce 1.5s ease infinite;
-    }
-
-    @keyframes fadeInScale {
-      0% {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-20px);
-      }
-      60% {
-        transform: translateY(-10px);
-      }
-    }
-
-    h1 {
-      margin-top: 20px;
-      font-size: 2em;
-    }
-
-    p {
-      font-size: 1.2em;
-      margin: 20px 0;
-    }
-
-    .continue-button {
-      padding: 15px 125px;
-      background-color: #F2C94C;
-      color: black;
-      border: none;
-      font-size: 1.2em;
-      cursor: pointer;
-      margin-bottom: 20px;
-      border-radius: 10.000001px;
-      font-family: 'Nebulica', Arial, sans-serif;
-    }
-
-    .continue-button:hover {
-      background-color: #F2C94D;
-    }
-
     #game-container {
       display: none;
       background-color: #133A2A;
@@ -208,66 +137,7 @@
       <p>Loading...</p>
     </div>
   </div>
-
-  <!-- Introduction Tutorial -->
-  <div id="tutorial-container">
-    <!-- Page 1 -->
-    <div class="page" id="page1">
-      <img src="well1.gif" alt="Well 1" class="tutorial-img">
-      <h1>Welcome to ETN Coin Airdrop!</h1>
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 2 -->
-    <div class="page" id="page2">
-      <img src="well2.png" alt="Well 2" class="tutorial-img">
-      <h1>What is ETN?</h1>
-      <p>$ETN - ET NETSA COIN is the lifeblood of the ETN Ecosystem</p>
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 3 -->
-    <div class="page" id="page3">
-      <img src="well3.gif" alt="Well 3" class="tutorial-img">
-      <h1>What Now?</h1>
-      <p>Now, let's start earning $ETN tokens!</p>
-      <button class="continue-button">Let's Go!</button>
-    </div>
-
-    <!-- Page 4 -->
-    <div class="page" id="page4">
-      <img src="well4.gif" alt="Well 4" class="tutorial-img">
-      <h1>Account Info</h1>
-      <p>Account Age: <span id="account-age">Fail</span></p>
-      <p>Premium Check: <span id="premium-check">Fail</span></p>
-      <img src="done.png" alt="Done" id="done-icon">
-      <img src="fail.png" alt="Fail" id="fail-icon">
-      <p>Telegram Info:</p>
-      <p>First Name: <span id="telegram-first-name"></span></p>
-      <p>Username: <span id="telegram-username"></span></p>
-      <p id="premium-status">Not Premium</p>
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 5 -->
-    <div class="page" id="page5">
-      <img src="well5.gif" alt="Well 5" class="tutorial-img">
-      <h1>Reward</h1>
-      <p id="reward-amount">1000 ETN</p>
-      <img src="well2.png" alt="Well 2" class="well-image">
-      <button class="continue-button">Continue</button>
-    </div>
-
-    <!-- Page 6 -->
-    <div class="page" id="page6">
-      <img src="well6.gif" alt="Well 6" class="tutorial-img">
-      <h1>Task</h1>
-      <p id="task-status">Task Not Completed</p>
-      <button class="continue-button">Continue</button>
-    </div>
-
-  </div>
-
+  
   <!-- Main Game Page -->
   <div id="game-container">
     <div class="container">
@@ -301,6 +171,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"></script>
 
    <script>
+     document.addEventListener('DOMContentLoaded', function() {
+      // Redirect to captcha.html every time the app is opened
+      window.location.href = 'captcha.html';
      
      const tgInitData = window.Telegram.WebApp.initData;
 
