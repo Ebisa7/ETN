@@ -62,6 +62,10 @@
       Telegram.WebApp.setBackgroundColor("#133A2A"); // Set background color
     }
 
+    // Set the visibility of the app to true
+    tg.MainButton.show(); // Show the main button if needed
+    tg.MainButton.enable(); // Enable the main button if needed
+
     const joinButton = document.getElementById('joinChannel');
     const checkButton = document.getElementById('checkMembership');
     const finishButton = document.getElementById('finishTask');
@@ -94,6 +98,7 @@
         });
     };
 
+ ```javascript
     // Finish task and redirect to index.html
     finishButton.onclick = function() {
       window.location.href = 'index.html'; // Redirect to index.html
@@ -102,6 +107,15 @@
     // Add back button functionality
     tg.onEvent('backButtonClicked', function() {
       window.location.href = 'index.html'; // navigate to index.html when the back button is clicked
+    });
+
+    // Ensure the app is visible
+    tg.onEvent('visibilityChanged', function(event) {
+      if (event.visible) {
+        tg.MainButton.show(); // Show the main button if the app is visible
+      } else {
+        tg.MainButton.hide(); // Hide the main button if the app is not visible
+      }
     });
   </script>
 </body>
