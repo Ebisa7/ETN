@@ -193,9 +193,10 @@
         }
 
         Telegram.WebApp.Settingsbutton
-            .setText("Settings")
-            .show()
-            .onClick(() => {
+            tg.setText("Settings")
+            tg.show()
+            tg.isvisible true;
+            tg.onClick(() => {
                 // Navigate to settings.html when clicked
                 window.location.href = 'settings.html';
             });
