@@ -1,140 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram WebApp Invite</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #userList {
-            list-style-type: none;
-            padding: 0;
-        }
-    </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase App (the core Firebase SDK) -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js"></script>
-    <!-- Firebase Analytics -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics.js"></script>
-    <!-- Firebase Firestore -->
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore.js"></script>
+  <title>Telegram Referral App</title>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.2.1/firebase-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.2.1/firebase-database.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/telegram-api@1.0.0/telegram-api.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Invite Friends to the WebApp</h1>
-        <button id="inviteButton">Share Referral Link</button>
-        <div id="invitedUsers">
-            <h2>Invited Users:</h2>
-            <ul id="userList"></ul>
-        </div>
-        <p id="statusMessage"></p>
-    </div>
+  <h1>Telegram Referral App</h1>
+  <button id="get-referral-link">Get Referral Link</button>
+  <button id="invite-user">Invite User</button>
+  <div id="invited-users"></div>
 
-    <script>
-        // Initialize Telegram Web App
-        if (typeof Telegram !== "undefined" && Telegram.WebApp) {
-            Telegram.WebApp.ready();
-        } else {
-            console.error('Telegram Web App not found');
-        }
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
+      authDomain: "mytestapp-f6913.firebaseapp.com",
+      databaseURL: "https://mytestapp-f6913-default-rtdb.firebaseio.com",
+      projectId: "mytestapp-f6913",
+      storageBucket: "mytestapp-f6913.firebasestorage.app",
+      messagingSenderId: "300150696072",
+      appId: "1:300150696072:web:1e29cb5a813d004018573d",
+      measurementId: "G-PPDR4TBQF5"
+    };
+    firebase.initializeApp(config);
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
-            authDomain: "mytestapp-f6913.firebaseapp.com",
-            databaseURL: "https://mytestapp-f6913-default-rtdb.firebaseio.com",
-            projectId: "mytestapp-f6913",
-            storageBucket: "mytestapp-f6913.firebasestorage.app",
-            messagingSenderId: "300150696072",
-            appId: "1:300150696072:web:1e29cb5a813d004018573d",
-            measurementId: "G-PPDR4TBQF5"
-        };
+    // Get Telegram bot token
+    var telegramBotToken = "7477407238:AAFoZzzTVQyw8F3cZHt1dZnlRYixpgrTRLo";
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    // Get user's Telegram ID
+    Telegram.getMe(telegramBotToken).then(function(me) {
+      var telegramId = me.id;
+      console.log("Telegram ID: " + telegramId);
 
-        // Function to store invited users
-        function storeInvite(inviterId, invitedUsername) {
-            db.collection("invites").add({
-                inviterId: inviterId,
-                invitedUsername: invitedUsername,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then((docRef) => {
-                console.log("Document written with ID: ", docRef.id);
-            }).catch((error) => {
-                console.error("Error adding document: ", error);
-            });
-        }
+      // Generate unique referral link
+      var referralLink = "https://example.com/invite/" + telegramId;
+      console.log("Referral Link: " + referralLink);
 
-        // Function to get invited users
-        function getInvitedUsers(inviterId, callback) {
-            db.collection("invites").where("inviterId", "==", inviterId)
-                .get()
-                .then((querySnapshot) => {
-                    let users = [];
-                    querySnapshot.forEach((doc) => {
-                        users.push(doc.data().invitedUsername);
-                    });
-                    callback(users);
-                })
-                .catch((error) => {
-                    console.error("Error getting documents: ", error);
-                });
-        }
+      // Store referral link in Firebase database
+      firebase.database().ref("users/" + telegramId).set({
+        referralLink: referralLink,
+        invitedUsers: []
+      });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const inviteButton = document.getElementById('inviteButton');
-            const userList = document.getElementById('userList');
-            const statusMessage = document.getElementById('statusMessage');
-            const telegramUser = Telegram.WebApp.initDataUnsafe.user;
+      // Handle invitations
+      document.getElementById("invite-user").addEventListener("click", function() {
+        var invitedUserId = prompt("Enter invited user's Telegram ID");
+        Telegram.getChat(telegramBotToken, invitedUserId).then(function(chat) {
+          var invitedUserTelegramId = chat.id;
+          console.log("Invited User's Telegram ID: " + invitedUserTelegramId);
 
-            if (!telegramUser || !telegramUser.id) {
-                console.error('Telegram user data not available');
-                statusMessage.textContent = 'Telegram user data not available';
-                return;
-            }
-
-            const inviterId = telegramUser.id;
-
-            inviteButton.addEventListener('click', () => {
-                const inviteLink = `https://t.me/trytrytrtyrefref1bot/gevtu?startapp=${inviterId}`;
-                const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=Join this awesome app!`;
-
-                Telegram.WebApp.openLink(shareUrl);
-
-                statusMessage.textContent = 'Referral link shared!';
-            });
-
-            // Fetch and display invited users
-            getInvitedUsers(inviterId, (users) => {
-                users.forEach((username) => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = username;
-                    userList.appendChild(listItem);
-                });
-            });
+          // Add invited user to referrer's list in Firebase database
+          firebase.database().ref("users/" + telegramId + "/invitedUsers").push(invitedUserTelegramId);
         });
-    </script>
+      });
+
+      // Display invited users
+      firebase.database().ref("users/" + telegramId + "/invitedUsers").on("value", function(snapshot) {
+        var invitedUsers = snapshot.val();
+        console.log("Invited Users: " + invitedUsers);
+
+        var invitedUsersHtml = "";
+        invitedUsers.forEach(function(invitedUser) {
+          invitedUsersHtml += "<p>" + invitedUser + "</p>";
+        });
+        document.getElementById("invited-users").innerHTML = invitedUsersHtml;
+      });
+    });
+  </script>
 </body>
 </html>
