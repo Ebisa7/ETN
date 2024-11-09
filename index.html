@@ -180,6 +180,13 @@
         // Check if the user has been verified
         const isVerified = localStorage.getItem("circleGameVerified");
 
+      const tg = window.Telegram.WebApp;
+
+    tg.ready();
+
+    // Hide the back button on index.html
+    tg.BackButton.hide();
+      
         // Simulate loading
         setTimeout(function() {
             loadingScreen.style.display = 'none';
