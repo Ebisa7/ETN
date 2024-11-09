@@ -171,118 +171,106 @@
 <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"></script>
 
    <script>
-     document.addEventListener('DOMContentLoaded', function() {
-      // Redirect to captcha.html every time the app is opened
-      window.location.href = 'captcha.html';
-     
-     const tgInitData = window.Telegram.WebApp.initData;
+  document.addEventListener('DOMContentLoaded', function() {
+    const loadingScreen = document.getElementById('loading-screen');
+    const gameContainer = document.getElementById('game-container');
+    const coinBalanceDisplay = document.getElementById('coinBalance');
+    const playGameImage = document.getElementById('playGame');
+
+    // Redirect to captcha.html every time the app is opened
+    window.location.href = 'captcha.html';
 
     // Set header color for Telegram WebApp
     if (window.Telegram) {
-        Telegram.WebApp.setHeaderColor("#133A2A"); // Set desired color
-        Telegram.WebApp.setBackgroundColor("#133A2A"); // Set background color
+      Telegram.WebApp.setHeaderColor("#133A2A"); // Set desired color
+      Telegram.WebApp.setBackgroundColor("#133A2A"); // Set background color
     }
-}
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const gameContainer = document.getElementById('game-container');
-      const coinBalanceDisplay = document.getElementById('coinBalance');
-      const playGameImage = document.getElementById('playGame');
+    // Simulate loading
+    setTimeout(function() {
+      loadingScreen.style.display = 'none';
+      gameContainer.style.display = 'block'; // Show the game container
+      updateCoinBalance(); // Show initial balance when game container is displayed
+      initializeTONConnect(); // Initialize TON Connect when game page is shown
+    }, 2000); // Reduced to 2 seconds for quicker loading
 
+    // Balance update functions
+    function updateBalanceDisplay(newBalance) {
+      coinBalanceDisplay.textContent = `${newBalance.toFixed(1)} ETN`;
+      coinBalanceDisplay.classList.add('balance-increased');
+      setTimeout(() => {
+        coinBalanceDisplay.classList.remove('balance-increased');
+      }, 1000);
+    }
 
-      // Simulate loading
-      setTimeout(function() {
-        loadingScreen.style.display = 'none';
-        tutorialContainer.style.display = 'block';
-      }, 2000); // Reduced to 2 seconds for quicker loading
+    function updateCoinBalance() {
+      // Get existing balance from localStorage
+      let currentBalance = parseFloat(localStorage.getItem('finalBalance')) || 0;
+      updateBalanceDisplay(currentBalance);
+    }
 
-            updateCoinBalance(); // Show initial balance when game container is displayed
-            initializeTONConnect(); // Initialize TON Connect when game page is shown
-          } else {
-  
-
-      // Balance update functions
-      function updateBalanceDisplay(newBalance) {
-        coinBalanceDisplay.textContent = `${newBalance.toFixed(1)} ETN`;
-        coinBalanceDisplay.classList.add('balance-increased');
-        setTimeout(() => {
-            coinBalanceDisplay.classList.remove('balance-increased');
-        }, 1000);
- }
-
-      function updateCoinBalance() {
-        // Get existing balance from localStorage
-        let currentBalance = parseFloat(localStorage.getItem('finalBalance')) || 0;
-        updateBalanceDisplay(currentBalance);
-      }
-
-      // Update balance when the page becomes visible
-      document.addEventListener('visibilitychange', function() {
-        if (!document.hidden) {
-            updateCoinBalance();
-        }
-      });
-
-      // Initial balance update when page loads
-      updateCoinBalance();
-
-      // Play game image click
-      playGameImage.addEventListener('click', function() {
-        window.location.href = 'game.html';
-      });
-
-      // Tab navigation
-      const homeTab = document.getElementById('home-tab');
-      const tasksTab = document.getElementById('tasks-tab');
-      const inviteTab = document.getElementById('invite-tab');
-      const airdropTab = document.getElementById('airdrop-tab');
-
-      homeTab.addEventListener('click', function() {
-        window.location.href = 'index.html';
-      });
-
-      tasksTab.addEventListener('click', function() {
-        window.location.href = 'tasks.html';
-      });
-
-      inviteTab.addEventListener('click', function() {
-        window.location.href = 'invite.html';
-      });
-
-      airdropTab.addEventListener('click', function() {
-  const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
-  if (tgInitData) {
-    window.location.href = `airdrop.html?data=${encodeURIComponent(tgInitData)}`;
-  } else {
-    console.error('Telegram initData is not available.');
-    window.location.href = 'airdrop.html'; // Fallback
-  }
-});
-
-      // TON Connect initialization function
-      function initializeTONConnect() {
-        if (window.Telegram) {
-          Telegram.WebApp.setHeaderColor("#133A2A");
-          Telegram.WebApp.setBackgroundColor("#133A2A");
-        }
-
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-          manifestUrl: 'https://etndrop.netlify.app/tonconnect-manifest.json',
-          buttonRootId: 'ton-connect'
-        });
-
-        async function connectToWallet() {
-          try {
-            const connectedWallet = await tonConnectUI.connectWallet();
-            console.log('Connected Wallet:', connectedWallet);
-            alert('Wallet connected: ' + connectedWallet.address);
-          } catch (error) {
-            console.error("Error connecting to wallet:", error);
-            alert('Failed to connect wallet');
-          }
-        }
+    // Update balance when the page becomes visible
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        updateCoinBalance();
       }
     });
+
+    // Play game image click
+    playGameImage.addEventListener('click', function() {
+      window.location.href = 'game.html';
+    });
+
+    // Tab navigation
+    const homeTab = document.getElementById('home-tab');
+    const tasksTab = document.getElementById('tasks-tab');
+    const inviteTab = document.getElementById('invite-tab');
+    const airdropTab = document.getElementById('airdrop-tab');
+
+    homeTab.addEventListener('click', function() {
+      window.location.href = 'index.html';
+    });
+
+    tasksTab.addEventListener('click', function() {
+      window.location.href = 'tasks.html';
+    });
+
+    inviteTab.addEventListener('click', function() {
+      window.location.href = 'invite.html';
+    });
+
+    airdropTab.addEventListener('click', function() {
+      const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
+      if (tgInitData) {
+        window.location.href = `airdrop.html?data=${encodeURIComponent(tgInitData)}`;
+      } else {
+        console.error('Telegram initData is not available.');
+        window.location.href = 'airdrop.html'; // Fallback
+      }
+    });
+
+    // TON Connect initialization function
+    function initializeTONConnect() {
+      const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: 'https://etndrop.netlify.app/tonconnect-manifest.json',
+        buttonRootId: 'ton-connect'
+      });
+
+      async function connectToWallet() {
+        try {
+          const connectedWallet = await tonConnectUI.connectWallet();
+          console.log('Connected Wallet:', connectedWallet);
+          alert('Wallet connected : ' + connectedWallet.address);
+        } catch (error) {
+          console.error("Error connecting to wallet:", error);
+          alert('Failed to connect wallet. Please try again.');
+        }
+      }
+
+      // Call the connect function when the button is clicked
+      document.getElementById('custom-connect-button').addEventListener('click', connectToWallet);
+    }
+  });
 </script>
 </body>
 </html>
