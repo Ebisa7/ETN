@@ -60,6 +60,14 @@
     tg.setHeaderColor("#133A2A"); // Set desired color
     tg.setBackgroundColor("#133A2A"); // Set background color
 
+    // Show the back button
+    tg.BackButton.show();
+
+    // Define the behavior for the back button click
+    tg.BackButton.onClick(() => {
+      window.location.href = 'index.html'; // Redirect to index.html
+    });
+
     const joinButton = document.getElementById('joinChannel');
     const checkButton = document.getElementById('checkMembership');
     const finishButton = document.getElementById('finishTask');
@@ -96,12 +104,5 @@
     finishButton.onclick = function() {
       window.location.href = 'index.html'; // Redirect to index.html
     };
-
-    tg.BackButton.show();
-tg.BackButton.onClick(() => {
-    window.location.href = 'index.html';
-});
-    });
   </script>
-</body>
-</html>
+</
