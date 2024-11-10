@@ -190,16 +190,14 @@
       if (tg) {
             tg.expand();
             tg.enableClosingConfirmation();
-        }
-
-        Telegram.WebApp.Settingsbutton
-            tg.setText("Settings")
-            tg.show()
-            tg.isvisible true;
+            tg.settingsbutton();
             tg.onClick(() => {
                 // Navigate to settings.html when clicked
                 window.location.href = 'settings.html';
             });
+        }
+
+
       
         // Simulate loading
         setTimeout(function() {
