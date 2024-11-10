@@ -77,39 +77,32 @@
     const tg = window.Telegram.WebApp;
 
     tg.ready();
-
-    // Hide the back button on index.html
     tg.BackButton.hide();
-    
- function onCaptchaSuccess(response) {
-    if (response) {
-        // Set verification flag and current timestamp
-        localStorage.setItem("circleGameVerified", true);
-        localStorage.setItem("verificationTimestamp", Date.now()); // Store current timestamp
-        setTimeout(() => {
-            window.location.href = 'index.html'; // Redirect back to the game page
-        }, 1000); // Redirect after 1 second
-}
-    function onCaptchaSuccess(response) {
-    if (response) {
-        localStorage.setItem("circleGameVerified", true); // Set verification flag
-        setTimeout(() => {
-            window.location.href = 'index.html'; // Redirect back to the game page
-        }, 1000); // Redirect after 1 second
-    } else {
-        alert('Please complete the reCAPTCHA');
-    }
-}
-    
-function initializeRecaptcha() {
-    grecaptcha.render('captchaContainer', {
-        sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
-        callback: onCaptchaSuccess
-    });
-}
 
-// Initialize CAPTCHA
-initializeRecaptcha();
+    function onCaptchaSuccess(response) {
+        if (response) {
+            console.log('CAPTCHA verified successfully'); // Debugging message
+            localStorage.setItem("circleGameVerified", true);
+            localStorage.setItem("verificationTimestamp", Date.now()); // Store current timestamp
+            setTimeout(() => {
+                console.log('Redirecting to index.html'); // Debugging message
+                window.location.href = 'index.html';
+            }, 1000); // Redirect after 1 second
+        } else {
+            alert('Please complete the reCAPTCHA'); // Fallback in case of error
+        }
+    }
+
+    function initializeRecaptcha() {
+        grecaptcha.render('captchaContainer', {
+            sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
+            callback: onCaptchaSuccess
+        });
+    }
+
+    // Initialize CAPTCHA
+    initializeRecaptcha();
 </script>
+
 </body>
 </html>
