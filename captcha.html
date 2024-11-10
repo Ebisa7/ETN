@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verification</title>
-<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?sitekey=6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" async defer></script>
 <style>
     body {
         display: flex;
@@ -49,14 +49,19 @@
         100% { transform: rotate(360deg); }
     }
     #captchaContainer {
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        width: 100%;
-        padding: 20px; /* Add padding */
-        border: none; /* Add border */
-        border-radius: 10px; /* Rounded corners */
-        background-color: none; /* Light background */
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    width: 100%;
+    padding: 20px; /* Add padding */
+    border: none; /* Add border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: rgba(255, 255, 255, 0.8); /* Light background */
+}
+        
+    }
+    #verifyButton {
+        display: none; /* Hide the verify button since it's handled automatically */
     }
 </style>
 </head>
@@ -69,19 +74,42 @@
 <div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
 
 <script>
-    // Callback function when captcha is completed successfully
-    function onCaptchaSuccess(token) {
-        const messageElement = document.getElementById('message');
-        messageElement.textContent = 'Verification successful! Redirecting...';
+    const tg = window.Telegram.WebApp;
 
-        // Simulating server verification and local storage update
-        localStorage.setItem('captchaVerified', 'true'); // Store the verification status
+    tg.ready();
 
-        // Redirect to index.html after a short delay
+    // Hide the back button on index.html
+    tg.BackButton.hide();
+    
+ function onCaptchaSuccess(response) {
+    if (response) {
+        // Set verification flag and current timestamp
+        localStorage.setItem("circleGameVerified", true);
+        localStorage.setItem("verificationTimestamp", Date.now()); // Store current timestamp
         setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 2000); // Redirect after 2 seconds
+            window.location.href = 'index.html'; // Redirect back to the game page
+        }, 1000); // Redirect after 1 second
+}
+    function onCaptchaSuccess(response) {
+    if (response) {
+        localStorage.setItem("circleGameVerified", true); // Set verification flag
+        setTimeout(() => {
+            window.location.href = 'index.html'; // Redirect back to the game page
+        }, 1000); // Redirect after 1 second
+    } else {
+        alert('Please complete the reCAPTCHA');
     }
+}
+    
+function initializeRecaptcha() {
+    grecaptcha.render('captchaContainer', {
+        sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
+        callback: onCaptchaSuccess
+    });
+}
+
+// Initialize CAPTCHA
+initializeRecaptcha();
 </script>
 </body>
 </html>
