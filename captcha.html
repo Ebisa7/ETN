@@ -4,13 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verification</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 <style>
     body {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: flex-start; /* Align items to the left */
         justify-content: center;
         height: 100vh;
         margin: 0;
@@ -22,26 +21,26 @@
         font-size: 24px;
         font-weight: bold;
         margin-bottom: 20px;
-        text-align: left;
+        text-align: left; /* Left-align header text */
     }
     #message {
         font-size: 16px;
         margin-bottom: 20px;
-        text-align: left;
+        text-align: left; /* Left-align message text */
     }
     #loading {
-        font-size: 18px;
+        font-size: 18px; /* Slightly larger than the text */
         margin-bottom: 20px;
         display: flex;
         align-items: center;
-        text-align: left;
+        text-align: left; /* Left-align loading text */
     }
     .spinner {
-        border: 2px solid #17273b;
-        border-top: 2px solid #ffffff;
+        border: 2px solid #17273b; /* Black border */
+        border-top: 2px solid #ffffff; /* Black top border */
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
+        width: 20px; /* Slightly larger than text */
+        height: 20px; /* Slightly larger than text */
         animation: spin 1s linear infinite;
         margin-left: 10px;
     }
@@ -54,9 +53,10 @@
         justify-content: center; 
         align-items: center; 
         width: 100%;
-        padding: 20px;
-        border: none;
-        border-radius: 10px;
+        padding: 20px; /* Add padding */
+        border: none; /* Add border */
+        border-radius: 10px; /* Rounded corners */
+        background-color: none; /* Light background */
     }
 </style>
 </head>
@@ -64,36 +64,24 @@
 <div id="header">etneco.ethio-tech.com</div>
 <div id="message">Verifying you're a human. This should take a sec.</div>
 <div id="loading">
-    <div class="spinner"></div>
+    <div class="spinner"></div> <!-- Visible loading animation -->
 </div>
 <div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
 
 <script>
-    document.getElementById('verifyButton').addEventListener('click', function() {
-            const captchaResponse = grecaptcha.getResponse();
-            const messageElement = document.getElementById('message');
+    // Callback function when captcha is completed successfully
+    function onCaptchaSuccess(token) {
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = 'Verification successful! Redirecting...';
 
-            if (captchaResponse.length === 0) {
-                messageElement.textContent = 'Please complete the captcha.';
-                return;
-            }
+        // Simulating server verification and local storage update
+        localStorage.setItem('captchaVerified', 'true'); // Store the verification status
 
-            // Here you would typically send the captchaResponse to your server for verification
-            // Simulating verification success
-            const verificationSuccess = true; // Replace this with your actual verification logic
-
-            if (verificationSuccess) {
-                localStorage.setItem('captchaVerified', 'true'); // Store the verification status
-                messageElement.textContent = 'Verification successful! Redirecting...';
-
-                // Redirect to index.html after a short delay
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000); // Redirect after 2 seconds
-            } else {
-                messageElement.textContent = 'Verification failed. Please try again.';
-            }
-        });
+        // Redirect to index.html after a short delay
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000); // Redirect after 2 seconds
+    }
 </script>
 </body>
 </html>
