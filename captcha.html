@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verification</title>
-<script src="https://www.google.com/recaptcha/api.js?sitekey=6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" async defer></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 <style>
     body {
         display: flex;
         flex-direction: column;
-        align-items: flex-start; /* Align items to the left */
+        align-items: flex-start;
         justify-content: center;
         height: 100vh;
         margin: 0;
@@ -21,26 +22,26 @@
         font-size: 24px;
         font-weight: bold;
         margin-bottom: 20px;
-        text-align: left; /* Left-align header text */
+        text-align: left;
     }
     #message {
         font-size: 16px;
         margin-bottom: 20px;
-        text-align: left; /* Left-align message text */
+        text-align: left;
     }
     #loading {
-        font-size: 18px; /* Slightly larger than the text */
+        font-size: 18px;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
-        text-align: left; /* Left-align loading text */
+        text-align: left;
     }
     .spinner {
-        border: 2px solid #17273b; /* Black border */
-        border-top: 2px solid #ffffff; /* Black top border */
+        border: 2px solid #17273b;
+        border-top: 2px solid #ffffff;
         border-radius: 50%;
-        width: 20px; /* Slightly larger than text */
-        height: 20px; /* Slightly larger than text */
+        width: 20px;
+        height: 20px;
         animation: spin 1s linear infinite;
         margin-left: 10px;
     }
@@ -49,19 +50,13 @@
         100% { transform: rotate(360deg); }
     }
     #captchaContainer {
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    width: 100%;
-    padding: 20px; /* Add padding */
-    border: none; /* Add border */
-    border-radius: 10px; /* Rounded corners */
-    background-color: none; /* Light background */
-}
-        
-    }
-    #verifyButton {
-        display: none; /* Hide the verify button since it's handled automatically */
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        width: 100%;
+        padding: 20px;
+        border: none;
+        border-radius: 10px;
     }
 </style>
 </head>
@@ -69,36 +64,32 @@
 <div id="header">etneco.ethio-tech.com</div>
 <div id="message">Verifying you're a human. This should take a sec.</div>
 <div id="loading">
-    <div class="spinner"></div> <!-- Visible loading animation -->
+    <div class="spinner"></div>
 </div>
 <div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
 
 <script>
-    document.getElementById('verifyButton').addEventListener('click', function() {
-            const captchaResponse = grecaptcha.getResponse();
-            const messageElement = document.getElementById('message');
+    // Function called when captcha is successfully completed
+    function onCaptchaSuccess(token) {
+        const messageElement = document.getElementById('message');
+        localStorage.setItem('captchaVerified', 'true'); // Store the verification status
+        messageElement.textContent = 'Verification successful! Redirecting...';
 
-            if (captchaResponse.length === 0) {
-                messageElement.textContent = 'Please complete the captcha.';
-                return;
-            }
+        // Simulate storing verification and redirecting
+        localStorage.setItem('captchaVerified', 'true'); // Store verification status
 
-            // Here you would typically send the captchaResponse to your server for verification
-            // Simulating verification success
-            const verificationSuccess = true; // Replace this with your actual verification logic
+        setTimeout(() => {
+            window.location.href = 'index.html'; // Redirect to index.html
+        }, 2000); // Delay for user feedback
+    }
 
-            if (verificationSuccess) {
-                localStorage.setItem('captchaVerified', 'true'); // Store the verification status
-                messageElement.textContent = 'Verification successful! Redirecting...';
+    tg.ready();
 
-                // Redirect to index.html after a short delay
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000); // Redirect after 2 seconds
-            } else {
-                messageElement.textContent = 'Verification failed. Please try again.';
-            }
-        });
+    // Set header color for Telegram WebApp
+    if (window.Telegram) {
+      Telegram.WebApp.setHeaderColor("#133A2A"); // Set desired color
+      Telegram.WebApp.setBackgroundColor("#133A2A"); // Set background color
+    }
 </script>
 </body>
 </html>
