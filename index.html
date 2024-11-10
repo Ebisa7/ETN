@@ -49,13 +49,16 @@
     }
 
     #loading-screen {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #133A2A;
-      color: white;
-    }
+    display: flex; /* Make sure it's flex to center content */
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    background-color: #133A2A; /* Background color */
+    color: white; /* Text color */
+    position: fixed; /* Fixed position to cover the entire screen */
+    width: 100%; /* Full width */
+    z-index: 1000; /* Ensure it's on top of other elements */
+}
 
     .loading-content p {
       color: white;
