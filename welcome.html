@@ -33,6 +33,41 @@
       font-size: 2em;
     }
 
+    .animated-img {
+  max-width: 80%;
+  height: auto;
+  margin-top: 50px;
+  animation: fadeInScale 1.2s ease forwards, bounce 1.5s ease infinite;
+}
+    @keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+    .tutorial-img {
+  max-width: 80%;
+  height: auto;
+  margin-top: 50px;
+}
+
     p {
       font-size: 1.2em;
       margin: 20px 0;
@@ -58,6 +93,7 @@
   <!-- Page 1 -->
   <div class="page" id="page1">
     <h1>Welcome to ETN Coin Airdrop!</h1>
+    <img src="well1.gif" alt="Well 3" class="tutorial-img">
     <button class="continue-button">Continue</button>
   </div>
 
@@ -65,13 +101,16 @@
   <div class="page" id="page2">
     <h1>What is ETN?</h1>
     <p>$ETN - ET NETSA COIN is the lifeblood of the ETN Ecosystem</p>
+    <img src="well2.png" alt="Well 3" class="tutorial-img animated-img">
     <button class="continue-button">Continue</button>
   </div>
 
   <!-- Page 3 -->
   <div class="page" id="page3">
     <h1>What Now?</h1>
+    <img src="well2.png" alt="Well 3" class="tutorial-img">
     <p>Now, let's start earning $ETN tokens!</p>
+    <img src="well3.gif" alt="Well 3" class="tutorial-img">
     <button class="continue-button">Let's Go!</button>
   </div>
 
