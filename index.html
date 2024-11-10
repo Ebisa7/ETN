@@ -206,7 +206,7 @@
                 updateCoinBalance(); // Show initial balance when game container is displayed
                 initializeTONConnect(); // Initialize TON Connect when game page is shown
             }
-        }, 2000); // Keep the loading for 2 seconds
+        }, 3000); // Keep the loading for 3 seconds
 
         // Balance update functions
         function updateBalanceDisplay(newBalance) {
@@ -231,9 +231,12 @@
         });
 
         // Play game image click
-        playGameImage.addEventListener('click', function() {
-            window.location.href = 'game.html';
-        });
+playGameImage.addEventListener('click', function() {
+    loadingScreen.style.display = 'flex'; // Show loading screen
+    setTimeout(function() {
+        window.location.href = 'game.html'; // Redirect to game.html after 3 seconds
+    }, 2000); // Adjust the timeout as needed
+});
 
         // Tab navigation
         const homeTab = document.getElementById('home-tab');
