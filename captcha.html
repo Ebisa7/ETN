@@ -81,14 +81,7 @@
     // Hide the back button on index.html
     tg.BackButton.hide();
     
- function onCaptchaSuccess(response) {
-    if (response) {
-        // Set verification flag and current timestamp
-        localStorage.setItem("circleGameVerified", true);
-        localStorage.setItem("verificationTimestamp", Date.now()); // Store current timestamp
-        setTimeout(() => {
-            window.location.href = 'index.html'; // Redirect back to the game page
-        }, 1000); // Redirect after 1 second
+
 }
     function onCaptchaSuccess(response) {
     if (response) {
