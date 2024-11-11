@@ -219,7 +219,7 @@
 
         // Balance update functions
         function updateBalanceDisplay(newBalance) {
-            coinBalanceDisplay.textContent = ${newBalance.toFixed(1)} ETN;
+            coinBalanceDisplay.textContent = `${newBalance.toFixed(1)} ETN`;
             coinBalanceDisplay.classList.add('balance-increased');
             setTimeout(() => {
                 coinBalanceDisplay.classList.remove('balance-increased');
@@ -268,7 +268,7 @@ playGameImage.addEventListener('click', function() {
         airdropTab.addEventListener('click', function() {
             const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
             if (tgInitData) {
-                window.location.href = airdrop.html?data=${encodeURIComponent(tgInitData)};
+                window.location.href = `airdrop.html?data=${encodeURIComponent(tgInitData)}`;
             } else {
                 console.error('Telegram initData is not available.');
                 window.location.href = 'airdrop.html'; // Fallback
