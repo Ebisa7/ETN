@@ -207,30 +207,15 @@
         setTimeout(function() {
             loadingScreen.style.display = 'none';
 
-            document.addEventListener('DOMContentLoaded', function() {
-    const isVerified = localStorage.getItem("circleGameVerified");
-    const verificationTimestamp = localStorage.getItem("verificationTimestamp");
-    const expirationPeriod = 30 * 60 * 1000; // 30 minutes in milliseconds
-
-    if (isVerified && verificationTimestamp) {
-        const currentTime = new Date().getTime(); // Current time in milliseconds
-        const savedTime = parseInt(verificationTimestamp, 10); // Parse saved timestamp
-
-        // Check if the verification has expired
-        if (currentTime - savedTime > expirationPeriod) {
-            // Expired, clear verification data and redirect
-            localStorage.removeItem("circleGameVerified");
-            localStorage.removeItem("verificationTimestamp");
-            window.location.href = 'captcha.html';
-        } else {
-            console.log("User is still verified");
-        }
-    } else {
-        // User is not verified
-        window.location.href = 'captcha.html';
-    }
-});
-
+            // Redirect to captcha.html if not verified
+            if (!isVerified) {
+                window.location.href = 'captcha.html';
+            } else {
+                gameContainer.style.display = 'block'; // Show the game container
+                updateCoinBalance(); // Show initial balance when game container is displayed
+                initializeTONConnect(); // Initialize TON Connect when game page is shown
+            }
+        }, 3000); // Keep the loading for 3 seconds
 
         // Balance update functions
         function updateBalanceDisplay(newBalance) {
