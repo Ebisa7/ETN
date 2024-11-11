@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verification</title>
-<script src="https://www.google.com/recaptcha/api.js?onload=initializeRecaptcha&render=explicit" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?sitekey=6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" async defer></script>
 <style>
     body {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: flex-start; /* Align items to the left */
         justify-content: center;
         height: 100vh;
         margin: 0;
@@ -21,26 +21,26 @@
         font-size: 24px;
         font-weight: bold;
         margin-bottom: 20px;
-        text-align: left;
+        text-align: left; /* Left-align header text */
     }
     #message {
         font-size: 16px;
         margin-bottom: 20px;
-        text-align: left;
+        text-align: left; /* Left-align message text */
     }
     #loading {
-        font-size: 18px;
+        font-size: 18px; /* Slightly larger than the text */
         margin-bottom: 20px;
         display: flex;
         align-items: center;
-        text-align: left;
+        text-align: left; /* Left-align loading text */
     }
     .spinner {
-        border: 2px solid #17273b;
-        border-top: 2px solid #ffffff;
+        border: 2px solid #17273b; /* Black border */
+        border-top: 2px solid #ffffff; /* Black top border */
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
+        width: 20px; /* Slightly larger than text */
+        height: 20px; /* Slightly larger than text */
         animation: spin 1s linear infinite;
         margin-left: 10px;
     }
@@ -49,13 +49,19 @@
         100% { transform: rotate(360deg); }
     }
     #captchaContainer {
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        width: 100%;
-        padding: 20px;
-        background-color: rgba(255, 255, 255, 0.8);
-        border-radius: 10px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    width: 100%;
+    padding: 20px; /* Add padding */
+    border: none; /* Add border */
+    border-radius: 10px; /* Rounded corners */
+    background-color: rgba(255, 255, 255, 0.8); /* Light background */
+}
+        
+    }
+    #verifyButton {
+        display: none; /* Hide the verify button since it's handled automatically */
     }
 </style>
 </head>
@@ -63,55 +69,40 @@
 <div id="header">etneco.ethio-tech.com</div>
 <div id="message">Verifying you're a human. This should take a sec.</div>
 <div id="loading">
-    <div class="spinner"></div>
+    <div class="spinner"></div> <!-- Visible loading animation -->
 </div>
-<div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv"></div>
+<div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
 
 <script>
-    const expirationPeriod = 30 * 60 * 1000; // 30 minutes in milliseconds
+    const tg = window.Telegram.WebApp;
 
-    // Function to handle CAPTCHA success
+    tg.ready();
+    tg.BackButton.hide();
+
     function onCaptchaSuccess(response) {
         if (response) {
-            console.log('CAPTCHA verified successfully');
+            console.log('CAPTCHA verified successfully'); // Debugging message
             localStorage.setItem("circleGameVerified", true);
             localStorage.setItem("verificationTimestamp", Date.now()); // Store current timestamp
             setTimeout(() => {
-                console.log('Redirecting to index.html');
+                console.log('Redirecting to index.html'); // Debugging message
                 window.location.href = 'index.html';
             }, 1000); // Redirect after 1 second
         } else {
-            alert('Please complete the reCAPTCHA');
+            alert('Please complete the reCAPTCHA'); // Fallback in case of error
         }
     }
 
-    // Initialize CAPTCHA and check for verification state
     function initializeRecaptcha() {
-        // Check for previous verification
-        const isVerified = localStorage.getItem("circleGameVerified");
-        const verificationTimestamp = localStorage.getItem("verificationTimestamp");
-
-        if (isVerified && verificationTimestamp) {
-            const currentTime = Date.now();
-            const savedTime = parseInt(verificationTimestamp, 10);
-
-            if (currentTime - savedTime < expirationPeriod) {
-                // If verification is still valid, redirect
-                window.location.href = 'index.html';
-                return;
-            } else {
-                // If expired, clear old verification
-                localStorage.removeItem("circleGameVerified");
-                localStorage.removeItem("verificationTimestamp");
-            }
-        }
-
-        // Render CAPTCHA
         grecaptcha.render('captchaContainer', {
             sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
             callback: onCaptchaSuccess
         });
     }
+
+    // Initialize CAPTCHA
+    initializeRecaptcha();
 </script>
+
 </body>
 </html>
