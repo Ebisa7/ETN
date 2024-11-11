@@ -98,14 +98,15 @@
 
 
 /* Styling for the tabs */
-.tabs { 
-    display: flex; 
-    justify-content: center; /* Center horizontally */ 
-    position: fixed; 
-    bottom: 0; 
-    width: 100%; 
-    background-color: #1f4e3b; 
+.tabs {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    position: fixed;
+    bottom: 20px; /* Adjust this value to change the bottom placement */
+    width: 100%;
+    background-color: #1f4e3b;
     padding: 10px 0;
+    z-index: 1000; /* Ensure it's on top of other elements */
 }
 
 /* Individual tab style */
