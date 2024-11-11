@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ETN Coin Game</title>
   <style>
@@ -124,13 +125,6 @@
   </div>
 
   <script>
-        // Show the back button
-    tg.BackButton.show();
-
-    // Define the behavior for the back button click
-    tg.BackButton.onClick(() => {
-      window.location.href = 'index.html'; // Redirect to index.html
-    });
     
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -312,6 +306,14 @@
     window.addEventListener('resize', () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+    });
+
+            // Show the back button
+    tg.BackButton.show();
+
+    // Define the behavior for the back button click
+    tg.BackButton.onClick(() => {
+      window.location.href = 'index.html'; // Redirect to index.html
     });
     
   </script>
