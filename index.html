@@ -207,30 +207,19 @@
         setTimeout(function() {
             loadingScreen.style.display = 'none';
 
-           // Check if the user has been verified and verification is still valid
-const isVerified = localStorage.getItem("circleGameVerified");
-const verificationTimestamp = localStorage.getItem("verificationTimestamp");
-
-if (isVerified && verificationTimestamp) {
-    const now = Date.now();
-    const thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
-    const isStillValid = now - parseInt(verificationTimestamp, 10) < thirtyMinutes;
-
-    if (!isStillValid) {
-        // Expired, clear verification data and redirect to captcha
-        localStorage.removeItem("circleGameVerified");
-        localStorage.removeItem("verificationTimestamp");
-        window.location.href = 'captcha.html';
-    }
-} else {
-    // Redirect to captcha.html if not verified
-    window.location.href = 'captcha.html';
-}
-
+            // Redirect to captcha.html if not verified
+            if (!isVerified) {
+                window.location.href = 'captcha.html';
+            } else {
+                gameContainer.style.display = 'block'; // Show the game container
+                updateCoinBalance(); // Show initial balance when game container is displayed
+                initializeTONConnect(); // Initialize TON Connect when game page is shown
+            }
+        }, 3000); // Keep the loading for 3 seconds
 
         // Balance update functions
         function updateBalanceDisplay(newBalance) {
-            coinBalanceDisplay.textContent = `${newBalance.toFixed(1)} ETN`;
+            coinBalanceDisplay.textContent = ${newBalance.toFixed(1)} ETN;
             coinBalanceDisplay.classList.add('balance-increased');
             setTimeout(() => {
                 coinBalanceDisplay.classList.remove('balance-increased');
@@ -279,7 +268,7 @@ playGameImage.addEventListener('click', function() {
         airdropTab.addEventListener('click', function() {
             const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
             if (tgInitData) {
-                window.location.href = `airdrop.html?data=${encodeURIComponent(tgInitData)}`;
+                window.location.href = airdrop.html?data=${encodeURIComponent(tgInitData)};
             } else {
                 console.error('Telegram initData is not available.');
                 window.location.href = 'airdrop.html'; // Fallback
