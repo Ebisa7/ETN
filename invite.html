@@ -73,13 +73,13 @@
   <script>
     // Firebase Configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
-  authDomain: "etndrop-bc9c3.firebaseapp.com",
-  projectId: "etndrop-bc9c3",
-  storageBucket: "etndrop-bc9c3.firebasestorage.app",
-  messagingSenderId: "1017600425514",
-  appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
-};
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_FIREBASE_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_FIREBASE_PROJECT_ID",
+      storageBucket: "YOUR_FIREBASE_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_FIREBASE_SENDER_ID",
+      appId: "YOUR_FIREBASE_APP_ID"
+    };
 
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
@@ -94,7 +94,7 @@
       const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
       coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
 
-      // Integrate Telegram WebApp API
+      // Get user info from Telegram WebApp API
       const tg = window.Telegram.WebApp;
 
       if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -109,7 +109,7 @@
       // Send data to Firestore automatically when the page opens
       sendDataToFirestore(balance);
 
-      // Manually send data when button is clicked
+      // Manually send data when the button is clicked
       sendToFirebaseBtn.addEventListener('click', function() {
         sendDataToFirestore(balance);
       });
