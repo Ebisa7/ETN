@@ -40,6 +40,21 @@
       margin-top: 15px;
       width: 50px;
     }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #FFD700;
+      color: black;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ffcc00;
+    }
   </style>
 </head>
 <body>
@@ -48,13 +63,32 @@
     <h2 id="coinBalance">0.0 ETN</h2>
     <h3 id="userInfo">Loading user info...</h3>
     <img src="well2.png" alt="Coin Icon">
+    <button id="sendToFirebaseBtn">Send to Firebase</button>
   </div>
 
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
+
   <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
+  authDomain: "etndrop-bc9c3.firebaseapp.com",
+  projectId: "etndrop-bc9c3",
+  storageBucket: "etndrop-bc9c3.firebasestorage.app",
+  messagingSenderId: "1017600425514",
+  appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
+};
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
+
     document.addEventListener('DOMContentLoaded', function() {
       const coinBalanceDisplay = document.getElementById('coinBalance');
       const userInfoDisplay = document.getElementById('userInfo');
+      const sendToFirebaseBtn = document.getElementById('sendToFirebaseBtn');
 
       // Retrieve coin balance from localStorage
       const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
@@ -70,6 +104,32 @@
         userInfoDisplay.textContent = `${fullName} (${username})`;
       } else {
         userInfoDisplay.textContent = 'User info not available';
+      }
+
+      // Send data to Firestore automatically when the page opens
+      sendDataToFirestore(balance);
+
+      // Manually send data when button is clicked
+      sendToFirebaseBtn.addEventListener('click', function() {
+        sendDataToFirestore(balance);
+      });
+
+      // Function to send coin balance to Firebase Firestore
+      function sendDataToFirestore(balance) {
+        const userId = tg.initDataUnsafe?.user?.id || "unknown"; // Use Telegram user ID or "unknown" if not available
+
+        // Add coin balance to Firestore
+        db.collection("coins").add({
+          userId: userId,
+          balance: balance,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then(() => {
+          console.log("Data successfully sent to Firestore!");
+        })
+        .catch((error) => {
+          console.error("Error sending data to Firestore: ", error);
+        });
       }
     });
   </script>
