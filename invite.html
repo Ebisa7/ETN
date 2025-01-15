@@ -31,8 +31,8 @@
       color: #ffd700;
     }
 
-    h2 {
-      margin: 0;
+    h2, h3 {
+      margin: 5px 0;
       font-size: 1.5em;
     }
 
@@ -46,15 +46,31 @@
   <div class="balance-container">
     <h1>Your Coin Balance</h1>
     <h2 id="coinBalance">0.0 ETN</h2>
+    <h3 id="userInfo">Loading user info...</h3>
     <img src="well2.png" alt="Coin Icon">
   </div>
 
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
-    // Retrieve coin balance from localStorage
     document.addEventListener('DOMContentLoaded', function() {
       const coinBalanceDisplay = document.getElementById('coinBalance');
+      const userInfoDisplay = document.getElementById('userInfo');
+
+      // Retrieve coin balance from localStorage
       const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
       coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
+
+      // Integrate Telegram WebApp API
+      const tg = window.Telegram.WebApp;
+
+      if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const user = tg.initDataUnsafe.user;
+        const fullName = `${user.first_name} ${user.last_name || ''}`.trim();
+        const username = user.username ? `@${user.username}` : 'No username';
+        userInfoDisplay.textContent = `${fullName} (${username})`;
+      } else {
+        userInfoDisplay.textContent = 'User info not available';
+      }
     });
   </script>
 </body>
