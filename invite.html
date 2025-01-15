@@ -1,231 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send TON, Receive Assets</title>
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        html, body {
-            background-color: #133A2A;
-            color: #FFFFFF;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            height: 100%;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .tutorial-img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 20px;
-        }
-
-        #amount-input {
-            margin: 20px 0;
-            padding: 15px;
-            font-size: 1em;
-            border-radius: 10px;
-            border: none;
-            width: 200px;
-            text-align: center;
-        }
-
-        .button {
-            padding: 15px 30px;
-            background-color: #F2C94C;
-            color: #133A2A;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2em;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 200px;
-        }
-
-        #transaction-status {
-            margin-top: 20px;
-            color: #F2C94C;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: rgba(242, 201, 76, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        #transaction-status.verified {
-            background-color: rgba(75, 181, 67, 0.1);
-            color: #4BB543;
-        }
-
-        .tabs {
-      display: flex;
-      justify-content: center; /* Center horizontally */
-      align-items: center; /* Center vertically */
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background-color: #1f4e3b;
-      padding: 10px 0;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sync to Firebase</title>
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #133A2A;
+      color: white;
+      text-align: center;
+      padding: 20px;
     }
 
-            
+    .balance-display {
+      font-size: 2em;
+      margin: 20px 0;
+    }
 
-        #transaction-hash {
-            word-break: break-all;
-            margin-top: 10px;
-            font-size: 0.8em;
-            color: #F2C94C;
-        }
-    </style>
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <img src="wallet.gif" alt="Your GIF" class="tutorial-img">
-        <h1>Send TON, Receive Assets</h1>
-        <div id="ton-connect"></div> <!-- Connect Wallet Button -->
-        <input type="number" id="amount-input" placeholder="Amount of TON to send" min="0.001" step="0.001">
-        <button id="send-transaction-button" class="button">Send TON</button>
-        <button id="verify-button" class="button">Verify Transaction</button>
-        <div id="transaction-hash"></div>
-        <div id="transaction-status"></div>
-    </div>
+  <h1>Sync Balance to Firebase</h1>
+  <div class="balance-display">
+    Balance: <span id="balance">0</span> ETN
+  </div>
+  <button id="send-button">Send to Firebase</button>
 
-    <script>
-        const tg = window.Telegram.WebApp;
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-    tg.ready();
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(app);
 
-    // Set header color for Telegram WebApp
-    tg.setHeaderColor("#133A2A"); // Set desired color
-    tg.setBackgroundColor("#133A2A"); // Set background color
+    // Retrieve balance from localStorage
+    const balance = parseFloat(localStorage.getItem('finalBalance')) || 0;
 
-    // Show the back button
-    tg.BackButton.show();
+    // Display balance
+    const balanceDisplay = document.getElementById('balance');
+    balanceDisplay.textContent = balance.toFixed(1);
 
-    // Define the behavior for the back button click
-    tg.BackButton.onClick(() => {
-      window.location.href = 'index.html'; // Redirect to index.html
+    // Send balance to Firebase
+    document.getElementById('send-button').addEventListener('click', async () => {
+      try {
+        const userId = "user_" + Math.random().toString(36).substr(2, 9); // Generate a simple user ID
+        await db.collection('coins').doc(userId).set({
+          userId: userId,
+          balance: balance,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('Balance successfully synced to Firebase!');
+      } catch (error) {
+        console.error('Error syncing balance:', error);
+        alert('Failed to sync balance. Please try again.');
+      }
     });
-        
-        if (tg) {
-            tg.expand();
-            tg.enableClosingConfirmation();
-        }
-
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://etndrop.netlify.app/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect',
-            uiPreferences: {
-                theme: 'DARK'
-            }
-        });
-
-        const amountInput = document.getElementById('amount-input');
-        const sendButton = document.getElementById('send-transaction-button');
-        const verifyButton = document.getElementById('verify-button');
-        const transactionStatus = document.getElementById('transaction-status');
-        const transactionHash = document.getElementById('transaction-hash');
-
-        let lastTransactionHash = '';
-
-        async function sendTransaction() {
-            try {
-                const amountToSend = parseFloat(amountInput.value);
-                if (isNaN(amountToSend) || amountToSend < 0.001) {
-                    throw new Error("Please enter a valid amount (minimum 0.0001 TON)");
-                }
-
-                const transaction = {
-                    validUntil: Math.floor(Date.now() / 1000) + 600,
-                    messages: [
-                        {
-                            address: 'UQBImMCDcWNfBmHFm1EenLLO5KHxvE9_IlJZtczzKmC5cC9x',
-                            amount: (amountToSend * 1e9).toString(),
-                        },
-                    ],
-                };
-
-                transactionStatus.textContent = 'Sending transaction...';
-                
-                const result = await tonConnectUI.sendTransaction(transaction);
-                console.log('Transaction sent:', result);
-                
-                lastTransactionHash = result.boc;
-                transactionHash.textContent = `Transaction Hash: ${lastTransactionHash.substring(0, 20)}...`;
-                
-                transactionStatus.textContent = 'Transaction sent! Click Verify to check status.';
-
-            } catch (error) {
-                console.error("Transaction error:", error);
-                transactionStatus.textContent = 'Transaction failed: ' + error.message;
-            }
-        }
-
-        async function verifyTransaction() {
-            try {
-                transactionStatus.textContent = 'Checking transaction...';
-                const expectedAmount = parseFloat(amountInput.value) * 1e9;
-
-                const response = await fetch(`https://toncenter.com/api/v2/transactions/search/?account=UQBImMCDcWNfBmHFm1EenLLO5KHxvE9_IlJZtczzKmC5cC9x&limit=5`, {
-                    headers: {
-                        'accept': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-
-                if (data.result && data.result.length > 0) {
-                    for (const tx of data.result) {
-                        if (tx.in_msg && tx.in_msg.value) {
-                            const receivedAmount = parseInt(tx.in_msg.value);
-                            if (Math.abs(receivedAmount - expectedAmount) < 0.01 * 1e9) {
-                                transactionStatus.innerHTML = `✅ Transaction Verified!<br>Received: ${(receivedAmount / 1e9).toFixed(3)} TON`;
-                                transactionStatus.classList.add('verified');
-                                
-                                // Store verification data
-                                localStorage.setItem('lastVerifiedTx', JSON.stringify({
-                                    amount: receivedAmount / 1e9,
-                                    timestamp: Date.now(),
-                                    hash: tx.transaction_id.hash
-                                }));
-
-                                return;
-                            }
-                        }
-                    }
-                    transactionStatus.textContent = 'Transaction not found yet. Please try verifying again in a few moments.';
-                }
-
-            } catch (error) {
-                console.error("Error in verification:", error);
-                transactionStatus.textContent = 'Error verifying transaction. Please try again.';
-            }
-        }
-
-        // Event listeners
-        sendButton.addEventListener('click', sendTransaction);
-        verifyButton.addEventListener('click', verifyTransaction);
-
-        // Listen for wallet connection changes
-        tonConnectUI.onStatusChange(wallet => {
-            if (wallet) {
-                sendButton.style.display = 'block';
-            } else {
-                sendButton.style.display = 'none';
-            }
-        });
-    </script>
+  </script>
 </body>
 </html>
