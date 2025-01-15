@@ -3,81 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sync to Firebase</title>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"></script>
+  <title>Coin Balance</title>
   <style>
     body {
+      margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
       background-color: #133A2A;
       color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       text-align: center;
+    }
+
+    .balance-container {
+      border: 2px solid white;
+      border-radius: 15px;
       padding: 20px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
-    .balance-display {
+    h1 {
+      margin: 0 0 10px;
       font-size: 2em;
-      margin: 20px 0;
+      color: #ffd700;
     }
 
-    button {
-      background-color: #28a745;
-      color: white;
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    h2 {
+      margin: 0;
+      font-size: 1.5em;
     }
 
-    button:hover {
-      background-color: #218838;
+    img {
+      margin-top: 15px;
+      width: 50px;
     }
   </style>
 </head>
 <body>
-  <h1>Sync Balance to Firebase</h1>
-  <div class="balance-display">
-    Balance: <span id="balance">0</span> ETN
+  <div class="balance-container">
+    <h1>Your Coin Balance</h1>
+    <h2 id="coinBalance">0.0 ETN</h2>
+    <img src="well2.png" alt="Coin Icon">
   </div>
-  <button id="send-button">Send to Firebase</button>
 
   <script>
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    // Retrieve balance from localStorage
-    const balance = parseFloat(localStorage.getItem('finalBalance')) || 0;
-
-    // Display balance
-    const balanceDisplay = document.getElementById('balance');
-    balanceDisplay.textContent = balance.toFixed(1);
-
-    // Send balance to Firebase
-    document.getElementById('send-button').addEventListener('click', async () => {
-      try {
-        const userId = "user_" + Math.random().toString(36).substr(2, 9); // Generate a simple user ID
-        await db.collection('coins').doc(userId).set({
-          userId: userId,
-          balance: balance,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        alert('Balance successfully synced to Firebase!');
-      } catch (error) {
-        console.error('Error syncing balance:', error);
-        alert('Failed to sync balance. Please try again.');
-      }
+    // Retrieve coin balance from localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const coinBalanceDisplay = document.getElementById('coinBalance');
+      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
+      coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
     });
   </script>
 </body>
