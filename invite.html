@@ -4,6 +4,67 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coin Balance</title>
+  <script type="module">
+    // Firebase configuration and initialization
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
+  authDomain: "etndrop-bc9c3.firebaseapp.com",
+  projectId: "etndrop-bc9c3",
+  storageBucket: "etndrop-bc9c3.firebasestorage.app",
+  messagingSenderId: "1017600425514",
+  appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const coinBalanceDisplay = document.getElementById('coinBalance');
+      const userInfoDisplay = document.getElementById('userInfo');
+      const sendButton = document.getElementById('sendButton');
+
+      // Retrieve coin balance from localStorage
+      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
+      coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
+
+      let userData = { coinBalance: balance };
+
+      // Integrate Telegram WebApp API
+      const tg = window.Telegram.WebApp;
+
+      if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const user = tg.initDataUnsafe.user;
+        const fullName = `${user.first_name} ${user.last_name || ''}`.trim();
+        const username = user.username ? `@${user.username}` : 'No username';
+
+        userInfoDisplay.textContent = `${fullName} (${username})`;
+        userData = {
+          ...userData,
+          firstName: user.first_name,
+          lastName: user.last_name || '',
+          username: user.username || '',
+          telegramId: user.id,
+        };
+      } else {
+        userInfoDisplay.textContent = 'User info not available';
+      }
+
+      // Send data to Firestore when the button is clicked
+      sendButton.addEventListener('click', async () => {
+        try {
+          await setDoc(doc(db, "coins", userData.telegramId.toString()), userData);
+          alert('Data sent successfully!');
+          window.location.href = "YOUR_REDIRECT_URL"; // Replace with your desired link
+        } catch (error) {
+          console.error('Error sending data to Firestore:', error);
+          alert('Failed to send data. Please try again.');
+        }
+      });
+    });
+  </script>
   <style>
     body {
       margin: 0;
@@ -14,6 +75,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
       height: 100vh;
       text-align: center;
     }
@@ -23,6 +85,7 @@
       border-radius: 15px;
       padding: 20px;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      margin-bottom: 20px;
     }
 
     h1 {
@@ -42,18 +105,18 @@
     }
 
     button {
-      margin-top: 20px;
       padding: 10px 20px;
-      background-color: #FFD700;
-      color: black;
-      font-size: 1em;
+      background-color: #ffd700;
+      color: #133A2A;
       border: none;
-      border-radius: 5px;
+      border-radius: 10px;
+      font-size: 1em;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     button:hover {
-      background-color: #ffcc00;
+      background-color: #e5c300;
     }
   </style>
 </head>
@@ -63,75 +126,7 @@
     <h2 id="coinBalance">0.0 ETN</h2>
     <h3 id="userInfo">Loading user info...</h3>
     <img src="well2.png" alt="Coin Icon">
-    <button id="sendToFirebaseBtn">Send to Firebase</button>
   </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"></script>
-
-  <script>
-    // Firebase Configuration
-    const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
-      authDomain: "YOUR_FIREBASE_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_FIREBASE_PROJECT_ID",
-      storageBucket: "YOUR_FIREBASE_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_FIREBASE_SENDER_ID",
-      appId: "YOUR_FIREBASE_APP_ID"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const coinBalanceDisplay = document.getElementById('coinBalance');
-      const userInfoDisplay = document.getElementById('userInfo');
-      const sendToFirebaseBtn = document.getElementById('sendToFirebaseBtn');
-
-      // Retrieve coin balance from localStorage
-      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
-      coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
-
-      // Get user info from Telegram WebApp API
-      const tg = window.Telegram.WebApp;
-
-      if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        const user = tg.initDataUnsafe.user;
-        const fullName = `${user.first_name} ${user.last_name || ''}`.trim();
-        const username = user.username ? `@${user.username}` : 'No username';
-        userInfoDisplay.textContent = `${fullName} (${username})`;
-      } else {
-        userInfoDisplay.textContent = 'User info not available';
-      }
-
-      // Send data to Firestore automatically when the page opens
-      sendDataToFirestore(balance);
-
-      // Manually send data when the button is clicked
-      sendToFirebaseBtn.addEventListener('click', function() {
-        sendDataToFirestore(balance);
-      });
-
-      // Function to send coin balance to Firebase Firestore
-      function sendDataToFirestore(balance) {
-        const userId = tg.initDataUnsafe?.user?.id || "unknown"; // Use Telegram user ID or "unknown" if not available
-
-        // Add coin balance to Firestore
-        db.collection("coins").add({
-          userId: userId,
-          balance: balance,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(() => {
-          console.log("Data successfully sent to Firestore!");
-        })
-        .catch((error) => {
-          console.error("Error sending data to Firestore: ", error);
-        });
-      }
-    });
-  </script>
+  <button id="sendButton">Send</button>
 </body>
 </html>
