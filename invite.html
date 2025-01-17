@@ -4,67 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coin Balance</title>
-  <script type="module">
-    // Firebase configuration and initialization
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
-  authDomain: "etndrop-bc9c3.firebaseapp.com",
-  projectId: "etndrop-bc9c3",
-  storageBucket: "etndrop-bc9c3.firebasestorage.app",
-  messagingSenderId: "1017600425514",
-  appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
-};
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const coinBalanceDisplay = document.getElementById('coinBalance');
-      const userInfoDisplay = document.getElementById('userInfo');
-      const sendButton = document.getElementById('sendButton');
-
-      // Retrieve coin balance from localStorage
-      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
-      coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
-
-      let userData = { coinBalance: balance };
-
-      // Integrate Telegram WebApp API
-      const tg = window.Telegram.WebApp;
-
-      if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        const user = tg.initDataUnsafe.user;
-        const fullName = `${user.first_name} ${user.last_name || ''}`.trim();
-        const username = user.username ? `@${user.username}` : 'No username';
-
-        userInfoDisplay.textContent = `${fullName} (${username})`;
-        userData = {
-          ...userData,
-          firstName: user.first_name,
-          lastName: user.last_name || '',
-          username: user.username || '',
-          telegramId: user.id,
-        };
-      } else {
-        userInfoDisplay.textContent = 'User info not available';
-      }
-
-      // Send data to Firestore when the button is clicked
-      sendButton.addEventListener('click', async () => {
-        try {
-          await setDoc(doc(db, "coins", userData.telegramId.toString()), userData);
-          alert('Data sent successfully!');
-          window.location.href = "YOUR_REDIRECT_URL"; // Replace with your desired link
-        } catch (error) {
-          console.error('Error sending data to Firestore:', error);
-          alert('Failed to send data. Please try again.');
-        }
-      });
-    });
-  </script>
   <style>
     body {
       margin: 0;
@@ -75,7 +14,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
       height: 100vh;
       text-align: center;
     }
@@ -85,7 +23,6 @@
       border-radius: 15px;
       padding: 20px;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-      margin-bottom: 20px;
     }
 
     h1 {
@@ -103,21 +40,6 @@
       margin-top: 15px;
       width: 50px;
     }
-
-    button {
-      padding: 10px 20px;
-      background-color: #ffd700;
-      color: #133A2A;
-      border: none;
-      border-radius: 10px;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #e5c300;
-    }
   </style>
 </head>
 <body>
@@ -127,6 +49,29 @@
     <h3 id="userInfo">Loading user info...</h3>
     <img src="well2.png" alt="Coin Icon">
   </div>
-  <button id="sendButton">Send</button>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const coinBalanceDisplay = document.getElementById('coinBalance');
+      const userInfoDisplay = document.getElementById('userInfo');
+
+      // Retrieve coin balance from localStorage
+      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
+      coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
+
+      // Integrate Telegram WebApp API
+      const tg = window.Telegram.WebApp;
+
+      if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const user = tg.initDataUnsafe.user;
+        const fullName = `${user.first_name} ${user.last_name || ''}`.trim();
+        const username = user.username ? `@${user.username}` : 'No username';
+        userInfoDisplay.textContent = `${fullName} (${username})`;
+      } else {
+        userInfoDisplay.textContent = 'User info not available';
+      }
+    });
+  </script>
 </body>
 </html>
