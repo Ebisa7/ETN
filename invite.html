@@ -3,70 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coin Balance</title>
+  <title>Welcome to ETN Coin Airdrop!</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
       background-color: #133A2A;
       color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
-      height: 100vh;
-      text-align: center;
-    }
-
-    .balance-container {
-      border: 2px solid white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-      margin-bottom: 20px;
+      box-sizing: border-box;
     }
 
     h1 {
-      margin: 0 0 10px;
-      font-size: 2em;
-      color: #ffd700;
+      font-size: 1.8em;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
 
-    h2, h3 {
-      margin: 5px 0;
-      font-size: 1.5em;
-    }
-
-    img {
-      margin-top: 15px;
-      width: 50px;
-    }
-
-    button {
-      padding: 10px 20px;
+    p {
       font-size: 1em;
-      background-color: #ffd700;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      font-weight: 300;
+      max-width: 800px;
+      line-height: 1.6;
+      margin: 0 20px 30px;
     }
 
-    button:hover {
-      background-color: #e6c200;
+    .tutorial-img {
+      max-width: 150px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .continue-button {
+      padding: 15px 60px;
+      background-color: #F2C94C;
+      color: black;
+      border: none;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    .continue-button:hover {
+      background-color: #FFD65E;
     }
   </style>
 </head>
 <body>
-  <div class="balance-container">
-    <h1>Your Coin Balance</h1>
-    <h2 id="coinBalance">0.0 ETN</h2>
-    <h3 id="userInfo">Loading user info...</h3>
-    <img src="well2.png" alt="Coin Icon">
+  <div>
+    <img src="https://raw.githubusercontent.com/Ebisa7/ETN/refs/heads/main/IMG_20250115_210357_121.gif" alt="Well 1" class="tutorial-img">
+    <h1>We’ve Moved to a New App!</h1>
+    <p>
+      Thank you for being part of our testing journey. This website was created for testing purposes only and will no longer be updated.  
+      <br><br>
+      We’re excited to introduce our new app, now in beta! It’s designed for early testers like you to experience the original features and help us fine-tune the experience.
+    </p>
+    <button class="continue-button" onclick="navigateToLink()">Try the New App</button>
   </div>
-
-  <button id="sendToFirebase">Send to Firebase</button>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script type="module">
@@ -86,42 +87,31 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const coinBalanceDisplay = document.getElementById('coinBalance');
-      const userInfoDisplay = document.getElementById('userInfo');
-      const sendToFirebaseBtn = document.getElementById('sendToFirebase');
-
-      // Retrieve coin balance from localStorage
-      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
-      coinBalanceDisplay.textContent = `${balance.toFixed(1)} ETN`;
-
-      let username = '';
+    document.addEventListener('DOMContentLoaded', async function() {
       const tg = window.Telegram.WebApp;
+      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
 
-      // Integrate Telegram WebApp API
+      let username = 'Anonymous';
       if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const user = tg.initDataUnsafe.user;
         const fullName = `${user.first_name} ${user.last_name || ''}`.trim();
         username = user.username ? `@${user.username}` : fullName;
-        userInfoDisplay.textContent = `${fullName} (${username})`;
-      } else {
-        userInfoDisplay.textContent = 'User info not available';
       }
 
-      // Send to Firebase
-      sendToFirebaseBtn.addEventListener('click', async () => {
-        try {
-          const docRef = await addDoc(collection(db, 'coins'), {
-            username: username || 'Anonymous',
-            coinBalance: balance.toFixed(1)
-          });
-          alert('Data sent to Firebase successfully!');
-        } catch (error) {
-          console.error('Error adding document: ', error);
-          alert('Failed to send data to Firebase.');
-        }
-      });
+      try {
+        await addDoc(collection(db, 'coins'), {
+          username: username,
+          coinBalance: balance.toFixed(1),
+        });
+        console.log('Data sent to Firebase successfully!');
+      } catch (error) {
+        console.error('Error sending data to Firebase:', error);
+      }
     });
+
+    function navigateToLink() {
+      window.location.href = "https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454"; // Replace with your target link
+    }
   </script>
 </body>
 </html>
