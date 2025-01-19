@@ -3,305 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ETN Coin Airdrop Game</title>
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>Welcome to ETN Coin Airdrop!</title>
   <style>
-
-    body, html {
-    overflow-x: hidden;
-}
-
-   /* Centering the TON Connect button */
-  #ton-connect {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 auto; /* Center horizontally */
-      padding: 15px 30px;
-      font-size: 1.2em;
-      background-color: none;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-  }
-
-    #custom-connect-button {
-    display: none;
-}
-
-  /* Additional style for positioning in the container */
-  .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      height: 100%; /* To make sure the container uses the full height */
-  }
-
-    @font-face {
-      font-family: 'Nebulica';
-      src: url('Nebulica-Regular.ttf') format('truetype');
-    }
-
     body {
       margin: 0;
-      padding: 0; 
-      font-family: 'Nebulica', Arial, sans-serif;
+      padding: 0;
       background-color: #133A2A;
       color: white;
-    }
-
-    #loading-screen {
-    display: flex; /* Make sure it's flex to center content */
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Full viewport height */
-    background-color: #133A2A; /* Background color */
-    color: white; /* Text color */
-    position: fixed; /* Fixed position to cover the entire screen */
-    width: 100%; /* Full width */
-    z-index: 1000; /* Ensure it's on top of other elements */
-}
-
-    .loading-content p {
-      color: white;
+      font-family: Arial, sans-serif;
       text-align: center;
-    }
-
-    #game-container {
-      display: none;
-      background-color: #133A2A;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .coin-balance {
+      height: 100vh;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin-top: 30px;
+      box-sizing: border-box;
     }
 
-    .coin-balance h2 {
-      font-size: 2em;
-      margin-right: 10px;
-      display: flex;
-      align-items: center;
+    h1 {
+      font-size: 1.8em;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
 
-    .well-image {
-      width: auto;
-      height: 2em;
+    p {
+      font-size: 1em;
+      font-weight: 300;
+      max-width: 800px;
+      line-height: 1.6;
+      margin: 0 20px 30px;
     }
 
-    .tabs {
-      display: flex;
-      justify-content: space-around;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background-color: #1f4e3b;
-      padding: 10px 0;
+    .tutorial-img {
+      max-width: 150px;
+      height: auto;
+      margin-bottom: 20px;
     }
 
-    .tab {
-      background: none;
+    .continue-button {
+      padding: 15px 60px;
+      background-color: #F2C94C;
+      color: black;
       border: none;
+      font-size: 1.1em;
+      font-weight: bold;
       cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
     }
 
-    .tab img {
-      width: 30px;
-    }
-
-    .tab.active img {
-      filter: brightness(1.2);
-    }
-
-    .play-image {
-      width: 60px;
-      margin-top: 30px;
-      cursor: pointer;
-    }
-
-    @keyframes balanceIncreaseAnimation {
-      0% { transform: scale(1); color: #f2c94c; }
-      50% { transform: scale(1.1); color: #ffd700; }
-      100% { transform: scale(1); color: #f2c94c; }
-    }
-
-    .balance-increased {
-      animation: balanceIncreaseAnimation 1s ease-in-out;
+    .continue-button:hover {
+      background-color: #FFD65E;
     }
   </style>
 </head>
 <body>
-  <!-- Loading Screen -->
-  <div id="loading-screen">
-    <div class="loading-content">
-      <p>Loading...</p>
-    </div>
+  <div>
+    <img src="https://raw.githubusercontent.com/Ebisa7/ETN/refs/heads/main/IMG_20250115_210357_121.gif" alt="Well 1" class="tutorial-img">
+    <h1>We’ve Moved to a New App!</h1>
+    <p>
+      Thank you for being part of our testing journey. This website was created for testing purposes only and will no longer be updated.  
+      <br><br>
+      We’re excited to introduce our new app, now in beta! It’s designed for early testers like you to experience the original features and help us fine-tune the experience.
+    </p>
+    <button class="continue-button" onclick="navigateToLink()">Try the New App</button>
   </div>
-  
-  <!-- Main Game Page -->
-  <div id="game-container">
-    <div class="container">
-      <div id="ton-connect"></div>
-      <button id="custom-connect-button">Connect Wallet</button>
-    </div>
-    <div class="coin-balance">
-      <h2 id="coinBalance"></h2>
-      <img src="well2.png" alt="Well 2" class="well-image">
-    </div>
-    <img src="game.png" alt="Play Game" class="play-image" id="playGame" 
-       style="width: 400px; height: auto; position: absolute; top: 295px; left: 50%; transform: translateX(-50%); margin-bottom: 50px;">
-    
-    <div class="tabs">
-      <button class="tab" id="home-tab">
-        <img src="home.png" alt="Home">
-      </button>
-      <button class="tab" id="tasks-tab">
-        <img src="tasks.png" alt="Tasks">
-      </button>
-      <button class="tab" id="invite-tab">
-        <img src="invite.png" alt="Invite">
-      </button>
-      <button class="tab" id="airdrop-tab">
-        <img src="airdrop.png" alt="Airdrop">
-      </button>
-    </div>
-  </div>
-  
-<script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const loadingScreen = document.getElementById('loading-screen');
-        const gameContainer = document.getElementById('game-container');
-        const coinBalanceDisplay = document.getElementById('coinBalance');
-        const playGameImage = document.getElementById('playGame');
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script type="module">
+    // Firebase configuration
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js";
 
-        // Check if the user has been verified
-        const isVerified = localStorage.getItem("circleGameVerified");
+    const firebaseConfig = {
+      apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
+      authDomain: "etndrop-bc9c3.firebaseapp.com",
+      projectId: "etndrop-bc9c3",
+      storageBucket: "etndrop-bc9c3.firebasestorage.app",
+      messagingSenderId: "1017600425514",
+      appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
+    };
 
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.addEventListener('DOMContentLoaded', async function() {
       const tg = window.Telegram.WebApp;
+      const balance = parseFloat(localStorage.getItem('finalBalance')) || 0.0;
 
-    tg.ready();
+      let username = 'Anonymous';
+      if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const user = tg.initDataUnsafe.user;
+        const fullName = `${user.first_name} ${user.last_name || ''}`.trim();
+        username = user.username ? `@${user.username}` : fullName;
+      }
 
-    // Hide the back button on index.html
-    tg.BackButton.hide();
-
-      if (tg) {
-            tg.expand();
-            tg.enableClosingConfirmation();
-        }
-
-
-      
-        // Simulate loading
-        setTimeout(function() {
-            loadingScreen.style.display = 'none';
-
-            // Redirect to captcha.html if not verified
-            if (!isVerified) {
-                window.location.href = 'captcha.html';
-            } else {
-                gameContainer.style.display = 'block'; // Show the game container
-                updateCoinBalance(); // Show initial balance when game container is displayed
-                initializeTONConnect(); // Initialize TON Connect when game page is shown
-            }
-        }, 3000); // Keep the loading for 3 seconds
-
-        // Balance update functions
-        function updateBalanceDisplay(newBalance) {
-            coinBalanceDisplay.textContent = `${newBalance.toFixed(1)} ETN`;
-            coinBalanceDisplay.classList.add('balance-increased');
-            setTimeout(() => {
-                coinBalanceDisplay.classList.remove('balance-increased');
-            }, 1000);
-        }
-
-        function updateCoinBalance() {
-            // Get existing balance from localStorage
-            let currentBalance = parseFloat(localStorage.getItem('finalBalance')) || 0;
-            updateBalanceDisplay(currentBalance);
-        }
-
-        // Update balance when the page becomes visible
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                updateCoinBalance();
-            }
+      try {
+        await addDoc(collection(db, 'coins'), {
+          username: username,
+          coinBalance: balance.toFixed(1),
         });
-
-        // Play game image click
-playGameImage.addEventListener('click', function() {
-    loadingScreen.style.display = 'flex'; // Show loading screen
-    setTimeout(function() {
-        window.location.href = 'game.html'; // Redirect to game.html after 3 seconds
-    }, 2000); // Adjust the timeout as needed
-});
-
-        // Tab navigation
-        const homeTab = document.getElementById('home-tab');
-        const tasksTab = document.getElementById('tasks-tab');
-        const inviteTab = document.getElementById('invite-tab');
-        const airdropTab = document.getElementById('airdrop-tab');
-
-        homeTab.addEventListener('click', function() {
-            window.location.href = 'index.html';
-        });
-
-        tasksTab.addEventListener('click', function() {
-            window.location.href = 'tasks.html';
-        });
-
-        inviteTab.addEventListener('click', function() {
-            window.location.href = 'invite.html';
-        });
-
-        airdropTab.addEventListener('click', function() {
-            const tgInitData = window.Telegram.WebApp.initData; // Get Telegram initData
-            if (tgInitData) {
-                window.location.href = `airdrop.html?data=${encodeURIComponent(tgInitData)}`;
-            } else {
-                console.error('Telegram initData is not available.');
-                window.location.href = 'airdrop.html'; // Fallback
-            }
-        });
-
-        // TON Connect initialization function
-        function initializeTONConnect() {
-            const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-                manifestUrl: 'https://etndrop.netlify.app/tonconnect-manifest.json',
-                buttonRootId: 'ton-connect'
-            });
-
-          // Set header color for Telegram WebApp
-    if (window.Telegram) {
-      Telegram.WebApp.setHeaderColor("#133A2A"); // Set desired color
-      Telegram.WebApp.setBackgroundColor("#133A2A"); // Set background color
-    }
-
-            async function connectToWallet() {
-                try {
-                    const connectedWallet = await tonConnectUI.connectWallet();
-                    console.log('Connected Wallet:', connectedWallet);
-                    alert('Wallet connected : ' + connectedWallet.address);
-                } catch (error) {
-                    console.error("Error connecting to wallet:", error);
-                    alert('Failed to connect wallet. Please try again.');
-                }
-            }
-
-            // Call the connect function when the button is clicked
-            document.getElementById('custom-connect-button').addEventListener('click', connectToWallet);
-        }
+        console.log('Data sent to Firebase successfully!');
+      } catch (error) {
+        console.error('Error sending data to Firebase:', error);
+      }
     });
-</script>
+
+    function navigateToLink() {
+      window.location.href = "https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454"; // Replace with your target link
+    }
+  </script>
 </body>
 </html>
