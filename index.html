@@ -110,7 +110,17 @@
     });
 
     function navigateToLink() {
-      window.location.href = "https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454"; // Replace with your target link
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.openLink("https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454");
+  } else {
+    console.error("Telegram WebApp is not available.");
+  }
+}
+
+// Set header color for Telegram WebApp
+    if (window.Telegram) {
+      Telegram.WebApp.setHeaderColor("#133A2A"); // Set desired color
+      Telegram.WebApp.setBackgroundColor("#133A2A"); // Set background color
     }
   </script>
 </body>
