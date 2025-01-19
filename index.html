@@ -67,7 +67,6 @@
       We’re excited to introduce our new app, now in beta! It’s designed for early testers like you to experience the original features and help us fine-tune the experience.
     </p>
     <button class="continue-button" onclick="navigateToLink()">Try the New App</button>
-  </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script type="module">
@@ -110,7 +109,11 @@
     });
 
     function navigateToLink() {
-  window.open("https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454", "_blank");
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.openTelegramLink("https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454");
+  } else {
+    console.error("Telegram WebApp is not available.");
+  }
 }
 
 // Set header color for Telegram WebApp
