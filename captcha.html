@@ -1,123 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="well2.png" type="image/png">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verification</title>
-<script src="https://www.google.com/recaptcha/api.js?render=explicit&sitekey=6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" async defer></script>
-<style>
-    body {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
-        font-family: Arial, sans-serif;
-        color: #133A2A;
-        padding: 20px;
-    }
-
-    html, body {
-        overflow-x: hidden;
-        overflow-y: hidden;
-    }
-
-    #header {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        text-align: left;
-    }
-
-    #message {
-        font-size: 16px;
-        margin-bottom: 20px;
-        text-align: left;
-    }
-
-    #loading {
-        font-size: 18px;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        text-align: left;
-    }
-
-    .spinner {
-        border: 2px solid #17273b;
-        border-top: 2px solid #ffffff;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 1s linear infinite;
-        margin-left: 10px;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    #captchaContainer {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        padding: 20px;
-        border: none;
-        border-radius: 10px;
-        background-color: none;
-    }
-
-    #verifyButton {
-        display: none;
-    }
-    
-</style>
+        <link rel="icon" href="well2.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captcha Verification</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        #captchaContainer {
+            margin-bottom: 20px;
+        }
+        #verificationStatus {
+            font-size: 18px;
+            color: green;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    
-<div id="header">etneco.ethio-tech.com</div>
-<div id="message">Verifying you're a human. This should take a sec.</div>
-<div id="loading">
-    <div class="spinner"></div> <!-- Visible loading animation -->
-</div>
-<div id="captchaContainer"></div>
+    <div>
+        <div id="captchaContainer"></div>
+        <div id="verificationStatus">Verified!</div>
+    </div>
 
-<script>
-    const tg = window.Telegram.WebApp;
-
-    tg.ready();
-    tg.BackButton.hide();
-
-    function onCaptchaSuccess(response) {
-        if (response) {
-            console.log('CAPTCHA verified successfully'); // Debugging message
-            localStorage.setItem("circleGameVerified", true);
-            localStorage.setItem("verificationTimestamp", Date.now()); // Store current timestamp
-            setTimeout(() => {
-                console.log('Redirecting to index.html'); // Debugging message
-                window.location.href = 'index.html';
-            }, 1000); // Redirect after 1 second
-        } else {
-            alert('Please complete the reCAPTCHA'); // Fallback in case of error
+    <script>
+        function initializeRecaptcha() {
+            grecaptcha.render('captchaContainer', {
+                sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
+                callback: onCaptchaSuccess
+            });
         }
-    }
 
-    function initializeRecaptcha() {
-        grecaptcha.render('captchaContainer', {
-            sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
-            callback: onCaptchaSuccess,
-            size: 'normal', // Normal size for the checkbox
-            type: 'checkbox', // Explicitly use checkbox type
-        });
-    }
+        function onCaptchaSuccess(response) {
+            document.getElementById('verificationStatus').style.display = 'block';
+        }
 
-    // Initialize CAPTCHA
-    initializeRecaptcha();
-</script>
-
+        // Initialize reCAPTCHA when the page loads
+        window.onload = function() {
+            initializeRecaptcha();
+        };
+    </script>
 </body>
 </html>
