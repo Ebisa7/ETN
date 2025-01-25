@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captcha Verification</title>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,27 +24,19 @@
 </head>
 <body>
     <div>
-        <div id="captchaContainer"></div>
+        <div class="cf-turnstile" 
+             data-sitekey="0x4AAAAAAA6RvYk0R1opOotQ" 
+             data-callback="onCaptchaSuccess">
+        </div>
         <div id="verificationStatus">Verified!</div>
     </div>
 
     <script>
-        function initializeRecaptcha() {
-            grecaptcha.render('captchaContainer', {
-                sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv', // Your reCAPTCHA site key
-                callback: onCaptchaSuccess,
-                size: 'normal', // Normal size for the checkbox
-            });
-        }
-
-        function onCaptchaSuccess(response) {
+        function onCaptchaSuccess(token) {
             document.getElementById('verificationStatus').style.display = 'block';
+            console.log('Captcha success:', token);
+            // You can send the token to your server for verification if needed
         }
-
-        // Initialize reCAPTCHA when the page loads
-        window.onload = function() {
-            initializeRecaptcha();
-        };
     </script>
 </body>
 </html>
