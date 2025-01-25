@@ -4,68 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verification</title>
-<script src="https://www.google.com/recaptcha/api.js?sitekey=6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?render=explicit&sitekey=6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" async defer></script>
 <style>
     body {
         display: flex;
         flex-direction: column;
-        align-items: flex-start; /* Align items to the left */
+        align-items: flex-start;
         justify-content: center;
         height: 100vh;
         margin: 0;
         font-family: Arial, sans-serif;
-        color: #133A2A; 
+        color: #133A2A;
         padding: 20px;
     }
-     html, body {
-    overflow-x: hidden;
-    overflow-y: hidden;
-}
+
+    html, body {
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+
     #header {
         font-size: 24px;
         font-weight: bold;
         margin-bottom: 20px;
-        text-align: left; /* Left-align header text */
+        text-align: left;
     }
+
     #message {
         font-size: 16px;
         margin-bottom: 20px;
-        text-align: left; /* Left-align message text */
+        text-align: left;
     }
+
     #loading {
-        font-size: 18px; /* Slightly larger than the text */
+        font-size: 18px;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
-        text-align: left; /* Left-align loading text */
+        text-align: left;
     }
+
     .spinner {
-        border: 2px solid #17273b; /* Black border */
-        border-top: 2px solid #ffffff; /* Black top border */
+        border: 2px solid #17273b;
+        border-top: 2px solid #ffffff;
         border-radius: 50%;
-        width: 20px; /* Slightly larger than text */
-        height: 20px; /* Slightly larger than text */
+        width: 20px;
+        height: 20px;
         animation: spin 1s linear infinite;
         margin-left: 10px;
     }
+
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
     #captchaContainer {
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    width: 100%;
-    padding: 20px; /* Add padding */
-    border: none; /* Add border */
-    border-radius: 10px; /* Rounded corners */
-    background-color: none; /* Light background */
-}
-        
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 20px;
+        border: none;
+        border-radius: 10px;
+        background-color: none;
     }
+
     #verifyButton {
-        display: none; /* Hide the verify button since it's handled automatically */
+        display: none;
     }
 </style>
 </head>
@@ -75,7 +81,7 @@
 <div id="loading">
     <div class="spinner"></div> <!-- Visible loading animation -->
 </div>
-<div id="captchaContainer" class="g-recaptcha" data-sitekey="6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv" data-callback="onCaptchaSuccess"></div>
+<div id="captchaContainer"></div>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -100,7 +106,9 @@
     function initializeRecaptcha() {
         grecaptcha.render('captchaContainer', {
             sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
-            callback: onCaptchaSuccess
+            callback: onCaptchaSuccess,
+            size: 'normal', // Normal size for the checkbox
+            type: 'checkbox', // Explicitly use checkbox type
         });
     }
 
