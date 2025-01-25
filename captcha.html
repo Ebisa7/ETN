@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <link rel="icon" href="well2.png" type="image/png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Captcha Verification</title>
@@ -15,9 +14,6 @@
             height: 100vh;
             margin: 0;
             background-color: #f4f4f4;
-        }
-        #captchaContainer {
-            margin-bottom: 20px;
         }
         #verificationStatus {
             font-size: 18px;
@@ -35,8 +31,9 @@
     <script>
         function initializeRecaptcha() {
             grecaptcha.render('captchaContainer', {
-                sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv',
-                callback: onCaptchaSuccess
+                sitekey: '6LdT-3gqAAAAADV1ht5p8PeQd--S3Hh6JJAoETJv', // Your reCAPTCHA site key
+                callback: onCaptchaSuccess,
+                size: 'normal', // Normal size for the checkbox
             });
         }
 
