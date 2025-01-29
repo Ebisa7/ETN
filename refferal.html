@@ -137,16 +137,10 @@
             // After the ad is shown, update the status text
             AdController.show().then(() => {
                 status.textContent = "Ad watched successfully!";
-
-                // Change button text and background color to yellow after watching the ad
-                const button = document.getElementById("showAd");
-                button.textContent = "Claim";
-                button.style.backgroundColor = "yellow"; // Change background color to yellow
-
                 setTimeout(() => {
                     // Trigger slide up animation after 3 seconds
                     status.style.animation = "slideUp 0.5s forwards";
-                }, 3000); // Stay for 3 seconds before sliding up
+                }, 900); // Stay for 3 seconds before sliding up
             }).catch(() => {
                 status.textContent = "Ad failed to load or was skipped.";
                 setTimeout(() => {
