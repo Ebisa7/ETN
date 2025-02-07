@@ -3,152 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mint ETN OG Pass</title>
-    <style>
-        body {
-            background-color: #06110C;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            display: flex;
-            align-items: center;
-            background-color: none; /* Semi-transparent background */
-            padding: 10px 15px;
-            border-radius: 10px;
-            width: 350px;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        .h1 {
-            width: 45px;
-            height: 45px;
-            background-color: #313235;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        .info {
-            flex-grow: 1;
-            margin-left: 10px;
-        }
-
-        .info h3 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: normal;
-        }
-
-        .info p {
-            margin: 2px 0;
-            font-size: 15px;
-            color: gray;
-        }
-
-        .start-btn {
-            background-color: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 200px;
-            font-size: 15px;
-            cursor: pointer;
-        }
-
-        .start-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Popup style for #status with animation */
-        #status {
-            display: none; /* Initially hidden */
-            position: fixed;
-            top: -50px; /* Start above the screen */
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-            z-index: 1000;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            animation: slideDown 0.5s forwards, slideUp 0.5s 3s forwards;
-        }
-
-        /* Slide down animation */
-        @keyframes slideDown {
-            0% {
-                top: -50px;
-            }
-            100% {
-                top: 20px;
-            }
-        }
-
-        /* Slide up animation */
-        @keyframes slideUp {
-            0% {
-                top: 20px;
-            }
-            100% {
-                top: -600px;
-            }
-        }
-    </style>
+    <title>Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="h1">
-            AD
-        </div>
-        <div class="info">
-            <h3>Watch AD</h3>
-            <p>+500 Coins</p>
-        </div>
-        <button id="showAd" class="start-btn">Start</button>
-        <p id="status"></p> <!-- Popup element -->
-    </div>
 
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <h2>Telegram Mini App</h2>
+    <input type="text" id="textbox" placeholder="Value from URL">
+
     <script>
-        const AdController = window.Adsgram.init({ blockId: "int-7504" });
+        // Initialize Telegram Mini App
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Expand WebApp to full height
 
-        document.getElementById("showAd").addEventListener("click", function () {
-            const status = document.getElementById("status");
-            status.textContent = "Loading ad...";  // Set text to "Loading ad..."
-            status.style.display = "block";  // Show the popup
+        // Extract the start_param from Telegram WebApp
+        let startParam = tg.initDataUnsafe.start_param;
 
-            // Trigger the slide down animation
-            status.style.animation = "slideDown 0.2s forwards";
-
-            // After the ad is shown, update the status text
-            AdController.show().then(() => {
-                status.textContent = "Ad watched successfully!";
-                setTimeout(() => {
-                    // Trigger slide up animation after 3 seconds
-                    status.style.animation = "slideUp 0.5s forwards";
-                }, 900); // Stay for 3 seconds before sliding up
-            }).catch(() => {
-                status.textContent = "Ad failed to load or was skipped.";
-                setTimeout(() => {
-                    // Trigger slide up animation after 3 seconds
-                    status.style.animation = "slideUp 0.5s forwards";
-                }, 3000); // Stay for 3 seconds before sliding up
-            });
-        });
+        // If the startParam exists, set it in the textbox
+        if (startParam) {
+            document.getElementById("textbox").value = startParam.replace("num_", ""); // Remove prefix if needed
+        }
     </script>
+
 </body>
 </html>
