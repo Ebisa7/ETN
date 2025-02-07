@@ -3,25 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
+    <title>Telegram Referral Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
-    <h2>Telegram Mini App</h2>
-    <input type="text" id="textbox" placeholder="Value from URL">
+    <h2>Telegram Mini App - Referral System</h2>
+    <p id="message">Loading...</p>
 
     <script>
-        // Initialize Telegram Mini App
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Expand WebApp to full height
+        tg.expand(); // Expand to full height
 
-        // Extract the start_param from Telegram WebApp
-        let startParam = tg.initDataUnsafe.start_param;
+        // Get the referring user ID (start_param)
+        let referrerId = tg.initDataUnsafe.start_param;
 
-        // If the startParam exists, set it in the textbox
-        if (startParam) {
-            document.getElementById("textbox").value = startParam.replace("num_", ""); // Remove prefix if needed
+        if (referrerId) {
+            document.getElementById("message").innerText = `Referred by User ID: ${referrerId}`;
+
+            // Send referrer data to your bot API
+            fetch("https://api.telegram.org/7613088806:AAGlek9OqouZ1zfYqa-8-0hZvWKnrr_PoHw/sendMessage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: referrerId,
+                    text: `🎉 Someone joined using your referral link!`
+                })
+            })
+            .then(response => response.json())
+            .then(data => console.log("Bot Response:", data))
+            .catch(error => console.error("Error:", error));
+        } else {
+            document.getElementById("message").innerText = "No referrer found.";
         }
     </script>
 
