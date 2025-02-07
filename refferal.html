@@ -6,100 +6,130 @@
     <title>Telegram Referral System</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module">
+        // 🔥 Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDocs, collection, query, where, addDoc } 
+        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ✅ Firebase Config
+        // 🔥 Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
             authDomain: "etndrop-bc9c3.firebaseapp.com",
             projectId: "etndrop-bc9c3",
-            storageBucket: "etndrop-bc9c3.firebasestorage.app",
+            storageBucket: "etndrop-bc9c3.appspot.com",
             messagingSenderId: "1017600425514",
             appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
         };
 
-        // ✅ Initialize Firebase
+        // 🔥 Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ✅ Telegram WebApp
+        // 🔹 Telegram Mini App
         let tg = window.Telegram.WebApp;
         tg.expand(); // Expand to full height
 
-        // ✅ Get User Info
-        let userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
-        let referrerId = tg.initDataUnsafe.start_param || null;
-
-        async function registerUser() {
-            if (!userId) {
-                document.getElementById("message").innerText = "❌ Failed to get Telegram ID.";
+        // 🔹 Get User Info
+        tg.ready(() => {
+            const user = tg.initDataUnsafe.user;
+            if (!user) {
+                document.getElementById("message").innerText = "⚠️ Error: Unable to get user info.";
                 return;
             }
 
-            // 🔍 Check if user already exists
-            const userRef = doc(db, "users", userId);
-            const userSnapshot = await getDocs(query(collection(db, "users"), where("__name__", "==", userId)));
+            const userId = user.id.toString();
+            const username = user.username || `User_${userId}`;
+            const referrerId = tg.initDataUnsafe.start_param || null;
 
-            if (!userSnapshot.empty) {
-                document.getElementById("message").innerText = "✅ You're already using the bot!";
-                return;
+            document.getElementById("referral-link").value = `https://t.me/${tg.initDataUnsafe.bot_username}/webapp?start=${userId}`;
+
+            handleReferral(userId, username, referrerId);
+            loadReferralList(userId);
+        });
+
+        // 🔥 Handle Referrals
+        async function handleReferral(userId, username, referrerId) {
+            const userDoc = doc(db, "bot_users", userId);
+            const userSnap = await getDoc(userDoc);
+
+            if (userSnap.exists()) {
+                console.log("User already exists. No new referral added.");
+                return; // 👌 User already in the system, do nothing
             }
 
-            // 🔥 Add user to Firestore
-            await setDoc(userRef, { joined_at: new Date() });
+            // 🆕 Add user to bot_users
+            await setDoc(userDoc, { username, joinedAt: new Date() });
 
-            // 🔍 Check if user was already referred before
-            const referralQuery = await getDocs(query(collection(db, "referrals"), where("referred_user", "==", userId)));
-
-            if (!referralQuery.empty) {
-                document.getElementById("message").innerText = "🎉 You were already referred!";
-                return;
-            }
-
-            // 🔥 Add Referral (if valid referrer)
             if (referrerId && referrerId !== userId) {
-                await addDoc(collection(db, "referrals"), {
-                    referrer: referrerId,
-                    referred_user: userId,
-                    joined_at: new Date()
+                const referrerDoc = doc(db, "bot_refferals", referrerId);
+                const referrerSnap = await getDoc(referrerDoc);
+
+                if (referrerSnap.exists()) {
+                    await updateDoc(referrerDoc, {
+                        refferalCount: (referrerSnap.data().refferalCount || 0) + 1,
+                        referrals: arrayUnion({ id: userId, name: username })
+                    });
+                } else {
+                    await setDoc(referrerDoc, {
+                        refferalCount: 1,
+                        referrals: [{ id: userId, name: username }]
+                    });
+                }
+
+                // 🔹 Notify Referrer via Bot
+                fetch(`https://api.telegram.org/bot6902372310:AAEchI7a6x0Ir-MC64hhyyupEvohUSbOnxE/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: referrerId,
+                        text: `🎉 ${username} joined using your referral link!`
+                    })
+                }).then(res => res.json()).then(console.log).catch(console.error);
+            }
+        }
+
+        // 🔥 Load Referral List
+        async function loadReferralList(userId) {
+            const refDoc = doc(db, "bot_refferals", userId);
+            const refSnap = await getDoc(refDoc);
+
+            if (refSnap.exists()) {
+                const data = refSnap.data();
+                document.getElementById("referral-count").innerText = `👥 Referrals: ${data.refferalCount || 0}`;
+                
+                let referralListHTML = "";
+                data.referrals.forEach(ref => {
+                    referralListHTML += `<li>${ref.name} (ID: ${ref.id})</li>`;
                 });
 
-                document.getElementById("message").innerText = `🎊 You were referred by User ID: ${referrerId}`;
+                document.getElementById("referral-list").innerHTML = referralListHTML || "<li>No referrals yet.</li>";
             } else {
-                document.getElementById("message").innerText = "✅ You have joined!";
+                document.getElementById("referral-count").innerText = "👥 Referrals: 0";
+                document.getElementById("referral-list").innerHTML = "<li>No referrals yet.</li>";
             }
         }
-
-        async function showReferrals() {
-            if (!userId) return;
-
-            // 🔍 Get referrals from Firestore
-            const querySnapshot = await getDocs(query(collection(db, "referrals"), where("referrer", "==", userId)));
-            let referredUsers = [];
-            querySnapshot.forEach((doc) => {
-                referredUsers.push(doc.data().referred_user);
-            });
-
-            // 📝 Display referred users
-            document.getElementById("referrals").innerHTML = referredUsers.length ?
-                "👥 Your referrals: <br>" + referredUsers.join("<br>") :
-                "😕 You haven't referred anyone yet.";
-        }
-
-        // ✅ Run Functions
-        registerUser();
-        setTimeout(showReferrals, 2000);
-
     </script>
+
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        h2 { color: #333; }
+        #container { max-width: 400px; margin: auto; background: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        input { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin-top: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        ul { list-style: none; padding: 0; }
+        li { background: #e9ecef; padding: 8px; margin: 5px 0; border-radius: 5px; }
+    </style>
 </head>
 <body>
 
-    <h2>Telegram Referral Mini App</h2>
-    <p id="message">Loading...</p>
-    <h3>Your Referrals:</h3>
-    <p id="referrals">Loading...</p>
+    <div id="container">
+        <h2>Referral System</h2>
+        <p id="message">🔄 Loading...</p>
+        <p><strong>Your Referral Link:</strong></p>
+        <input type="text" id="referral-link" readonly>
+        <p id="referral-count">👥 Referrals: 0</p>
+        <ul id="referral-list"><li>No referrals yet.</li></ul>
+    </div>
 
 </body>
 </html>
