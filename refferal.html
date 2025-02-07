@@ -10,24 +10,27 @@
 
     <h2>Telegram Mini App - Referral System</h2>
     <p id="message">Loading...</p>
+    <h3>Your Referral Link:</h3>
+    <p id="referralLink">Generating...</p>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Expand to full height
+        tg.expand(); // Expand Web App
 
-        // Get the referring user ID (start_param)
-        let referrerId = tg.initDataUnsafe.start_param;
+        let userId = tg.initDataUnsafe.user?.id; // Current user ID
+        let referrerId = tg.initDataUnsafe.start_param; // Who referred them
 
+        // Display referral information
         if (referrerId) {
             document.getElementById("message").innerText = `Referred by User ID: ${referrerId}`;
 
-            // Send referrer data to your bot API
-            fetch("https://api.telegram.org/7613088806:AAGlek9OqouZ1zfYqa-8-0hZvWKnrr_PoHw/sendMessage", {
+            // Notify the referrer that they got a new referral
+            fetch(`https://api.telegram.org/bot7613088806:AAGlek9OqouZ1zfYqa-8-0hZvWKnrr_PoHw/sendMessage`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     chat_id: referrerId,
-                    text: `🎉 Someone joined using your referral link!`
+                    text: `🎉 Someone joined using your referral link! (User ID: ${userId})`
                 })
             })
             .then(response => response.json())
@@ -36,6 +39,15 @@
         } else {
             document.getElementById("message").innerText = "No referrer found.";
         }
+
+        // Generate the user's own referral link
+        if (userId) {
+            let referralLink = `https://t.me/trytrytrtyrefref1bot/gevtu?start=${userId}`;
+            document.getElementById("referralLink").innerHTML = `<a href="${referralLink}" target="_blank">${referralLink}</a>`;
+        } else {
+            document.getElementById("referralLink").innerText = "Unable to generate referral link.";
+        }
+
     </script>
 
 </body>
