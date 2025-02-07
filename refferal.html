@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Referral Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 </head>
 <body>
 
@@ -13,41 +15,77 @@
     <h3>Your Referral Link:</h3>
     <p id="referralLink">Generating...</p>
 
+    <h3>👥 Users You Referred:</h3>
+    <ul id="referredList">Loading...</ul>
+
     <script>
+        // Initialize Telegram Mini App
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Expand Web App
+        tg.expand();
 
         let userId = tg.initDataUnsafe.user?.id; // Current user ID
-        let referrerId = tg.initDataUnsafe.start_param; // Who referred them
+        let referrerId = null;
 
-        // Display referral information
-        if (referrerId) {
-            document.getElementById("message").innerText = `Referred by User ID: ${referrerId}`;
-
-            // Notify the referrer that they got a new referral
-            fetch(`https://api.telegram.org/bot7613088806:AAGlek9OqouZ1zfYqa-8-0hZvWKnrr_PoHw/sendMessage`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: referrerId,
-                    text: `🎉 Someone joined using your referral link! (User ID: ${userId})`
-                })
-            })
-            .then(response => response.json())
-            .then(data => console.log("Bot Response:", data))
-            .catch(error => console.error("Error:", error));
-        } else {
-            document.getElementById("message").innerText = "No referrer found.";
+        // Get referrer ID from URL (for mobile fix)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("start")) {
+            referrerId = urlParams.get("start");
         }
 
-        // Generate the user's own referral link
+        // 🔥 Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
+            authDomain: "etndrop-bc9c3.firebaseapp.com",
+            projectId: "etndrop-bc9c3",
+            storageBucket: "etndrop-bc9c3.appspot.com",
+            messagingSenderId: "1017600425514",
+            appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // If the user was referred, save the referral in Firestore
+        if (referrerId && userId) {
+            db.collection("referrals").doc(userId.toString()).set({
+                referrer: referrerId,
+                referred_by: referrerId,
+                joined_at: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById("message").innerText = `Referred by User ID: ${referrerId}`;
+
+                // Notify referrer via Telegram Bot
+                fetch(`https://api.telegram.org/bot7613088806:AAGlek9OqouZ1zfYqa-8-0hZvWKnrr_PoHw/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: referrerId,
+                        text: `🎉 Someone joined using your referral link! (User ID: ${userId})`
+                    })
+                });
+            }).catch(error => console.error("Error saving referral:", error));
+        }
+
+        // Generate and show the user's own referral link
         if (userId) {
             let referralLink = `https://t.me/trytrytrtyrefref1bot/gevtu?start=${userId}`;
             document.getElementById("referralLink").innerHTML = `<a href="${referralLink}" target="_blank">${referralLink}</a>`;
+
+            // Fetch users referred by this user
+            db.collection("referrals")
+                .where("referrer", "==", userId.toString())
+                .get()
+                .then(snapshot => {
+                    let listHTML = "";
+                    snapshot.forEach(doc => {
+                        listHTML += `<li>User ID: ${doc.id}</li>`;
+                    });
+                    document.getElementById("referredList").innerHTML = listHTML || "No referrals yet.";
+                });
         } else {
             document.getElementById("referralLink").innerText = "Unable to generate referral link.";
         }
-
     </script>
 
 </body>
