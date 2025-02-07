@@ -8,7 +8,7 @@
     <script type="module">
         // 🔥 Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc, arrayUnion } 
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // 🔥 Firebase Config
@@ -30,7 +30,7 @@
         tg.expand(); // Expand to full height
 
         // 🔹 Get User Info
-        tg.ready(() => {
+        tg.ready(async () => {
             const user = tg.initDataUnsafe.user;
             if (!user) {
                 document.getElementById("message").innerText = "⚠️ Error: Unable to get user info.";
@@ -41,9 +41,10 @@
             const username = user.username || `User_${userId}`;
             const referrerId = tg.initDataUnsafe.start_param || null;
 
-            document.getElementById("referral-link").value = `https://t.me/${tg.initDataUnsafe.bot_username}/webapp?start=${userId}`;
+            const referralLink = `https://t.me/${tg.initDataUnsafe.bot_username}/webapp?start=${userId}`;
+            document.getElementById("referral-link").value = referralLink;
 
-            handleReferral(userId, username, referrerId);
+            await handleReferral(userId, username, referrerId);
             loadReferralList(userId);
         });
 
@@ -64,15 +65,17 @@
                 const referrerDoc = doc(db, "bot_refferals", referrerId);
                 const referrerSnap = await getDoc(referrerDoc);
 
+                const referralData = { id: userId, name: username, joinedAt: new Date().toISOString().split("T")[0] };
+
                 if (referrerSnap.exists()) {
                     await updateDoc(referrerDoc, {
                         refferalCount: (referrerSnap.data().refferalCount || 0) + 1,
-                        referrals: arrayUnion({ id: userId, name: username })
+                        referrals: arrayUnion(referralData)
                     });
                 } else {
                     await setDoc(referrerDoc, {
                         refferalCount: 1,
-                        referrals: [{ id: userId, name: username }]
+                        referrals: [referralData]
                     });
                 }
 
@@ -99,7 +102,7 @@
                 
                 let referralListHTML = "";
                 data.referrals.forEach(ref => {
-                    referralListHTML += `<li>${ref.name} (ID: ${ref.id})</li>`;
+                    referralListHTML += `<li>${ref.name} (ID: ${ref.id}) <br> <small>Joined: ${ref.joinedAt}</small></li>`;
                 });
 
                 document.getElementById("referral-list").innerHTML = referralListHTML || "<li>No referrals yet.</li>";
@@ -108,16 +111,27 @@
                 document.getElementById("referral-list").innerHTML = "<li>No referrals yet.</li>";
             }
         }
+
+        // 📋 Copy Referral Link to Clipboard
+        function copyReferralLink() {
+            const copyText = document.getElementById("referral-link");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            document.getElementById("copy-btn").innerText = "✅ Copied!";
+            setTimeout(() => document.getElementById("copy-btn").innerText = "📋 Copy Link", 2000);
+        }
     </script>
 
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
         h2 { color: #333; }
-        #container { max-width: 400px; margin: auto; background: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        input { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        #container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        input { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
         button { padding: 10px 15px; margin-top: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        ul { list-style: none; padding: 0; }
-        li { background: #e9ecef; padding: 8px; margin: 5px 0; border-radius: 5px; }
+        button:hover { background: #0056b3; }
+        ul { list-style: none; padding: 0; text-align: left; }
+        li { background: #e9ecef; padding: 10px; margin: 5px 0; border-radius: 5px; }
+        small { color: gray; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -127,6 +141,7 @@
         <p id="message">🔄 Loading...</p>
         <p><strong>Your Referral Link:</strong></p>
         <input type="text" id="referral-link" readonly>
+        <button id="copy-btn" onclick="copyReferralLink()">📋 Copy Link</button>
         <p id="referral-count">👥 Referrals: 0</p>
         <ul id="referral-list"><li>No referrals yet.</li></ul>
     </div>
