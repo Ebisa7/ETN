@@ -1,150 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Referral System</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script type="module">
-        // 🔥 Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } 
-        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Referral System</title>
+  <style>
+  body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-        // 🔥 Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
-            authDomain: "etndrop-bc9c3.firebaseapp.com",
-            projectId: "etndrop-bc9c3",
-            storageBucket: "etndrop-bc9c3.appspot.com",
-            messagingSenderId: "1017600425514",
-            appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
-        };
+.container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
 
-        // 🔥 Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
 
-        // 🔹 Telegram Mini App
-        let tg = window.Telegram.WebApp;
-        tg.expand(); // Expand to full height
+.referral-info {
+  margin-bottom: 20px;
+}
 
-        // 🔹 Get User Info
-        tg.ready(async () => {
-            const user = tg.initDataUnsafe.user;
-            if (!user) {
-                document.getElementById("message").innerText = "⚠️ Error: Unable to get user info.";
-                return;
-            }
+#copyLinkBtn {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
 
-            const userId = user.id.toString();
-            const username = user.username || `User_${userId}`;
-            const referrerId = tg.initDataUnsafe.start_param || null;
+#copyLinkBtn:hover {
+  background-color: #0056b3;
+}
 
-            const referralLink = `https://t.me/${tg.initDataUnsafe.bot_username}/webapp?start=${userId}`;
-            document.getElementById("referral-link").value = referralLink;
+.referral-list {
+  text-align: left;
+}
 
-            await handleReferral(userId, username, referrerId);
-            loadReferralList(userId);
-        });
+.referral-list h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
 
-        // 🔥 Handle Referrals
-        async function handleReferral(userId, username, referrerId) {
-            const userDoc = doc(db, "bot_users", userId);
-            const userSnap = await getDoc(userDoc);
+#referralList {
+  list-style-type: none;
+  padding: 0;
+}
 
-            if (userSnap.exists()) {
-                console.log("User already exists. No new referral added.");
-                return; // 👌 User already in the system, do nothing
-            }
-
-            // 🆕 Add user to bot_users
-            await setDoc(userDoc, { username, joinedAt: new Date() });
-
-            if (referrerId && referrerId !== userId) {
-                const referrerDoc = doc(db, "bot_refferals", referrerId);
-                const referrerSnap = await getDoc(referrerDoc);
-
-                const referralData = { id: userId, name: username, joinedAt: new Date().toISOString().split("T")[0] };
-
-                if (referrerSnap.exists()) {
-                    await updateDoc(referrerDoc, {
-                        refferalCount: (referrerSnap.data().refferalCount || 0) + 1,
-                        referrals: arrayUnion(referralData)
-                    });
-                } else {
-                    await setDoc(referrerDoc, {
-                        refferalCount: 1,
-                        referrals: [referralData]
-                    });
-                }
-
-                // 🔹 Notify Referrer via Bot
-                fetch(`https://api.telegram.org/bot6902372310:AAEchI7a6x0Ir-MC64hhyyupEvohUSbOnxE/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        chat_id: referrerId,
-                        text: `🎉 ${username} joined using your referral link!`
-                    })
-                }).then(res => res.json()).then(console.log).catch(console.error);
-            }
-        }
-
-        // 🔥 Load Referral List
-        async function loadReferralList(userId) {
-            const refDoc = doc(db, "bot_refferals", userId);
-            const refSnap = await getDoc(refDoc);
-
-            if (refSnap.exists()) {
-                const data = refSnap.data();
-                document.getElementById("referral-count").innerText = `👥 Referrals: ${data.refferalCount || 0}`;
-                
-                let referralListHTML = "";
-                data.referrals.forEach(ref => {
-                    referralListHTML += `<li>${ref.name} (ID: ${ref.id}) <br> <small>Joined: ${ref.joinedAt}</small></li>`;
-                });
-
-                document.getElementById("referral-list").innerHTML = referralListHTML || "<li>No referrals yet.</li>";
-            } else {
-                document.getElementById("referral-count").innerText = "👥 Referrals: 0";
-                document.getElementById("referral-list").innerHTML = "<li>No referrals yet.</li>";
-            }
-        }
-
-        // 📋 Copy Referral Link to Clipboard
-        function copyReferralLink() {
-            const copyText = document.getElementById("referral-link");
-            copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            document.getElementById("copy-btn").innerText = "✅ Copied!";
-            setTimeout(() => document.getElementById("copy-btn").innerText = "📋 Copy Link", 2000);
-        }
-    </script>
-
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
-        h2 { color: #333; }
-        #container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        input { width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
-        button { padding: 10px 15px; margin-top: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        ul { list-style: none; padding: 0; text-align: left; }
-        li { background: #e9ecef; padding: 10px; margin: 5px 0; border-radius: 5px; }
-        small { color: gray; font-size: 12px; }
-    </style>
+#referralList li {
+  background: #f9f9f9;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+  </style>
 </head>
 <body>
-
-    <div id="container">
-        <h2>Referral System</h2>
-        <p id="message">🔄 Loading...</p>
-        <p><strong>Your Referral Link:</strong></p>
-        <input type="text" id="referral-link" readonly>
-        <button id="copy-btn" onclick="copyReferralLink()">📋 Copy Link</button>
-        <p id="referral-count">👥 Referrals: 0</p>
-        <ul id="referral-list"><li>No referrals yet.</li></ul>
+  <div class="container">
+    <h1>Referral System</h1>
+    <div class="referral-info">
+      <p>Your Referral Count: <span id="referralCount">0</span></p>
+      <button id="copyLinkBtn">Copy Referral Link</button>
     </div>
+    <div class="referral-list">
+      <h2>Referred Users</h2>
+      <ul id="referralList"></ul>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <script>
+  // Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
+  authDomain: "etndrop-bc9c3.firebaseapp.com",
+  projectId: "etndrop-bc9c3",
+  storageBucket: "etndrop-bc9c3.appspot.com",
+  messagingSenderId: "1017600425514",
+  appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
+};
 
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Telegram Mini App initialization
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+// Get user ID and username from Telegram
+const userId = tg.initDataUnsafe.user?.id;
+const username = tg.initDataUnsafe.user?.username;
+
+// DOM elements
+const referralCountElement = document.getElementById('referralCount');
+const referralListElement = document.getElementById('referralList');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
+
+// Check if the user is coming from a referral link
+const urlParams = new URLSearchParams(window.location.search);
+const referrerId = urlParams.get('ref');
+
+// Function to notify the referrer via Telegram bot
+async function notifyReferrer(referrerId, referredUsername) {
+  const botToken = '6970014376:AAGEySk5WgjWrUaZp01q3x_qB-VeWohnMPM';
+  const message = `🎉 ${referredUsername} joined using your referral link!`;
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${referrerId}&text=${encodeURIComponent(message)}`;
+  await fetch(url);
+}
+
+// Function to add a new user to Firestore
+async function addUserToFirestore(userId, username, referrerId) {
+  const userRef = db.collection('bot_users').doc(userId);
+  const userSnapshot = await userRef.get();
+
+  if (!userSnapshot.exists) {
+    // Add user to bot_users collection
+    await userRef.set({
+      username: username,
+      joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Add referral to bot_refferals collection
+    if (referrerId && referrerId !== userId) {
+      const referrerRef = db.collection('bot_refferals').doc(referrerId);
+      const referrerSnapshot = await referrerRef.get();
+
+      if (referrerSnapshot.exists) {
+        await referrerRef.update({
+          refferalCount: firebase.firestore.FieldValue.increment(1),
+          referrals: firebase.firestore.FieldValue.arrayUnion({
+            id: userId,
+            name: username,
+            joinedAt: new Date().toISOString().split('T')[0]
+          })
+        });
+      } else {
+        await referrerRef.set({
+          refferalCount: 1,
+          referrals: [{
+            id: userId,
+            name: username,
+            joinedAt: new Date().toISOString().split('T')[0]
+          }]
+        });
+      }
+
+      // Notify the referrer
+      await notifyReferrer(referrerId, username);
+    }
+  }
+}
+
+// Function to load referral data
+async function loadReferralData(userId) {
+  const referrerRef = db.collection('bot_refferals').doc(userId);
+  const referrerSnapshot = await referrerRef.get();
+
+  if (referrerSnapshot.exists) {
+    const data = referrerSnapshot.data();
+    referralCountElement.textContent = data.refferalCount;
+
+    // Clear the list
+    referralListElement.innerHTML = '';
+
+    // Populate the list
+    data.referrals.forEach(referral => {
+      const li = document.createElement('li');
+      li.textContent = `${referral.name} - ${referral.joinedAt}`;
+      referralListElement.appendChild(li);
+    });
+  } else {
+    referralCountElement.textContent = '0';
+    referralListElement.innerHTML = '<li>No referrals yet.</li>';
+  }
+}
+
+// Copy referral link
+copyLinkBtn.addEventListener('click', () => {
+  const referralLink = `${window.location.origin}?ref=${userId}`;
+  navigator.clipboard.writeText(referralLink).then(() => {
+    alert('Referral link copied to clipboard!');
+  });
+});
+
+// Main function
+async function main() {
+  if (userId && username) {
+    await addUserToFirestore(userId, username, referrerId);
+    await loadReferralData(userId);
+  }
+}
+
+// Run the app
+main();
+  </script>
 </body>
 </html>
