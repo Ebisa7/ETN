@@ -4,55 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Referral Mini App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- 🔹 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
-</head>
+
+    <!-- 🔹 Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         body {
-            background-color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        h2 {
+            color: #0088cc;
+        }
+        #message {
+            font-size: 18px;
+            margin-top: 10px;
+            color: #333;
+        }
+        .referral-link {
+            display: block;
+            background: #0088cc;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 10px;
         }
     </style>
+</head>
 <body>
 
-    <h2>Telegram Mini App - Referral System</h2>
-    <p id="message">Loading...</p>
-    <h3>Your Referral Link:</h3>
-    <p id="referralLink">Generating...</p>
-
-    <h3>👥 Users You Referred:</h3>
-    <ul id="referredList">Loading...</ul>
+    <div class="container">
+        <h2>Telegram Mini App - Referral System</h2>
+        <p id="message">🔄 Loading...</p>
+        <a id="referral-link" class="referral-link" href="#" target="_blank">Get Your Referral Link</a>
+    </div>
 
     <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
-        authDomain: "etndrop-bc9c3.firebaseapp.com",
-        projectId: "etndrop-bc9c3",
-        storageBucket: "etndrop-bc9c3.appspot.com",
-        messagingSenderId: "1017600425514",
-        appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
-    };
+        // 🔥 Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
+            authDomain: "etndrop-bc9c3.firebaseapp.com",
+            projectId: "etndrop-bc9c3",
+            storageBucket: "etndrop-bc9c3.appspot.com",
+            messagingSenderId: "1017600425514",
+            appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
+        };
 
-    // Load Firebase SDK and Initialize
-    async function initFirebase() {
-        try {
-            console.log("Initializing Firebase...");
-            const firebaseApp = firebase.initializeApp(firebaseConfig);
-            console.log("Firebase Initialized:", firebaseApp);
-            return firebase.firestore();
-        } catch (error) {
-            console.error("🔥 Firebase Error:", error);
-            document.getElementById("message").innerText = "🔥 Firebase Connection Failed.";
+        // ✅ Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ✅ Telegram WebApp
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let userId = tg.initDataUnsafe.user?.id;
+        let referrerId = tg.initDataUnsafe.start_param || new URLSearchParams(window.location.search).get("start");
+
+        if (userId) {
+            document.getElementById("message").innerText = `Your Telegram ID: ${userId}`;
+
+            // ✅ Show Referral Link
+            let referralLink = `https://t.me/trytrytrtyrefref1bot/webapp?start=${userId}`;
+            document.getElementById("referral-link").href = referralLink;
+            document.getElementById("referral-link").innerText = "📢 Share Your Referral Link";
+            
+            if (referrerId) {
+                // ✅ Save Referral Data to Firebase
+                db.collection("referrals").doc(String(userId)).set({
+                    referrer: referrerId,
+                    joined_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById("message").innerText += `\n👥 Referred by User ID: ${referrerId}`;
+            }
+        } else {
+            document.getElementById("message").innerText = "❌ Error: Cannot detect Telegram ID.";
         }
-    }
-
-    let db;
-    initFirebase().then((firestore) => {
-        db = firestore;
-        console.log("🔥 Firestore Loaded:", db);
-    });
-</script>
-
+    </script>
 
 </body>
 </html>
