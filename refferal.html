@@ -17,7 +17,7 @@
         Telegram.WebApp.onEvent('themeChanged', setThemeClass);
         setThemeClass();
     </script>
-    <title>Mint ETN OG Pass</title>
+    <title>Set emoji status</title>
     <style>
         body {
             background-color: #06110C;
@@ -182,10 +182,10 @@
                 Telegram.WebApp.requestEmojiStatusAccess(function(allowed) {
                     const span = el.nextElementSibling;
                     if (allowed) {
-                        span.textContent = '(Access granted)';
+                        span.textContent = 'Emoji set! task done';
                         span.className = 'ok';
                     } else {
-                        span.textContent = '(User declined this request)';
+                        span.textContent = 'USER_DECLINED_REQUEST!';
                         span.className = 'err';
                     }
                 });
