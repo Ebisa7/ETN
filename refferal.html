@@ -12,7 +12,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background-color: black;
         }
 
         .container {
@@ -44,13 +44,11 @@
         document.getElementById('setStatusBtn').addEventListener('click', async () => {
             try {
                 if (window.Telegram) {
-                    const emojiId = '5845951029639648949';  // The emoji ID to set as status
-                    
-                    // Request permission to set emoji status
-                    const permissionGranted = await Telegram.requestEmojiStatusAccess();
-                    
-                    if (permissionGranted || Telegram.isEmojiStatusAvailable()) {
-                        // Set the emoji status if permission is granted or already allowed
+                    // Request emoji status access first
+                    const hasPermission = await Telegram.requestEmojiStatusAccess();
+                    if (hasPermission) {
+                        // Set the emoji status if permission is granted
+                        const emojiId = '5845951029639648949';  // The emoji ID to set as status
                         await Telegram.setEmojiStatus({ emoji: emojiId });
                         alert('Emoji status set successfully!');
                     } else {
