@@ -33,29 +33,38 @@
   <button id="requestButton">Request Emoji Status Access</button>
   <div class="message" id="statusMessage"></div>
 
+  <!-- Telegram Web App Script -->
+  <script async src="https://web.telegram.org/js/telegram-web-app.js"></script>
   <script>
-    // Function to check if the user has granted access to emoji status
-    function checkEmojiStatus() {
-      // This is a simulated check. Replace this with actual Telegram logic if supported
-      const hasAccess = localStorage.getItem('emojiStatusAccess') === 'granted'; // Simulated access check
+    // Check if Telegram WebApp is available
+    if (window.Telegram && window.Telegram.WebApp) {
+      // Initialize the Telegram WebApp
+      const tgWebApp = window.Telegram.WebApp;
 
-      const statusMessage = document.getElementById('statusMessage');
-      if (hasAccess) {
-        statusMessage.textContent = 'You have granted access to set your emoji status!';
-      } else {
-        statusMessage.textContent = 'You have not granted access yet. Please request it!';
+      // Function to check if the user has granted emoji status access
+      function checkEmojiStatus() {
+        const hasAccess = tgWebApp.initData; // Assuming initData includes the necessary access info
+
+        const statusMessage = document.getElementById('statusMessage');
+        if (hasAccess) {
+          statusMessage.textContent = 'You have granted access to set your emoji status!';
+        } else {
+          statusMessage.textContent = 'You have not granted access yet. Please request it!';
+        }
       }
+
+      // Handle button click to request emoji status access
+      document.getElementById('requestButton').addEventListener('click', function() {
+        // Example function: request access to emoji status (this is hypothetical)
+        tgWebApp.sendData('request_emoji_status_access');
+        checkEmojiStatus();
+      });
+
+      // On page load, check access status
+      window.onload = checkEmojiStatus;
+    } else {
+      alert("Telegram WebApp is not available.");
     }
-
-    // Simulate granting access when the button is clicked
-    document.getElementById('requestButton').addEventListener('click', function() {
-      // Simulate granting access by saving in localStorage
-      localStorage.setItem('emojiStatusAccess', 'granted');
-      checkEmojiStatus();
-    });
-
-    // Check the status when the page loads
-    checkEmojiStatus();
   </script>
 </body>
 </html>
