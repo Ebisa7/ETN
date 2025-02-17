@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set Emoji Status</title>
+    <title>Request Emoji Status Access</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: black;
+            background-color: #f0f0f0;
         }
 
         .container {
@@ -32,34 +32,37 @@
         button:hover {
             background-color: #0056b3;
         }
+
+        #statusMessage {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="container">
-        <button id="setStatusBtn">Set Emoji Status</button>
+        <button id="requestAccessBtn">Request Emoji Status Access</button>
+        <div id="statusMessage"></div>
     </div>
 
     <script>
-        document.getElementById('setStatusBtn').addEventListener('click', async () => {
+        document.getElementById('requestAccessBtn').addEventListener('click', async () => {
             try {
                 if (window.Telegram) {
-                    // Request emoji status access first
-                    const hasPermission = await Telegram.requestEmojiStatusAccess();
-                    if (hasPermission) {
-                        // Set the emoji status if permission is granted
-                        const emojiId = '5845951029639648949';  // The emoji ID to set as status
-                        await Telegram.setEmojiStatus({ emoji: emojiId });
-                        alert('Emoji status set successfully!');
+                    const response = await Telegram.WebApp.requestEmojiStatusAccess();
+                    if (response) {
+                        document.getElementById('statusMessage').innerText = 'Allowed';
                     } else {
-                        alert('Permission to change emoji status denied.');
+                        document.getElementById('statusMessage').innerText = 'Permission to change emoji status denied.';
                     }
                 } else {
                     alert('Telegram SDK is not available.');
                 }
             } catch (error) {
                 console.error(error);
-                alert('Failed to set emoji status.');
+                alert('Failed to request emoji status access.');
             }
         });
     </script>
