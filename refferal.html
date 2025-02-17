@@ -16,66 +16,68 @@
 
         Telegram.WebApp.onEvent('themeChanged', setThemeClass);
         setThemeClass();
-
     </script>
-    <title></title>
+    <title>Emoji Status Demo</title>
     <style>
         body {
+            --bg-color: var(--tg-theme-bg-color, #fff);
             font-family: sans-serif;
-            background-color: gray;
-            color: white;
+            background-color: var(--bg-color);
+            color: var(--tg-theme-text-color, #222);
             font-size: 14px;
             margin: 0;
             padding: 0;
             color-scheme: var(--tg-color-scheme);
         }
-
-
     </style>
 </head>
-
-
+<body>
     <ul>
         <li><a href="javascript:DemoApp.setEmojiStatus(this, '5845951029639648949');">Set emoji status</a> <span></span></li>
-        <li><a href="javascript:DemoApp.setEmojiStatus(this, '5845951029639648949', 300);">Set emoji status</a> for 5 min <span></span></li>
-        <li><a href="javascript:DemoApp.setEmojiStatus(this, '5845951029639648949');">Set emoji status</a> (invalid id) <span></span></li>
+
     </ul>
 
+    <script type="application/javascript">
+        const DemoApp = {
+            // Emoji status functionality
+            emojiStatusInit: function() {
+                Telegram.WebApp.onEvent('emojiStatusFailed', function(params) {
+                    DemoApp.showAlert('emojiStatusFailed: ' + params.error);
+                });
+            },
+            setEmojiStatus: function(el, custom_emoji_id, duration) {
+                Telegram.WebApp.setEmojiStatus(custom_emoji_id, duration ? {duration: duration} : {}, function(result) {
+                    const span = el.nextElementSibling;
+                    if (result) {
+                        span.textContent = '(status set!)';
+                        span.className = 'ok';
+                    } else {
+                        span.textContent = '(status NOT set)';
+                        span.className = 'err';
+                    }
+                });
+            },
+            requestEmojiStatusAccess: function(el) {
+                Telegram.WebApp.requestEmojiStatusAccess(function(allowed) {
+                    const span = el.nextElementSibling;
+                    if (allowed) {
+                        span.textContent = '(Access granted)';
+                        span.className = 'ok';
+                    } else {
+                        span.textContent = '(User declined this request)';
+                        span.className = 'err';
+                    }
+                });
+            },
 
-<script type="application/javascript">
+            // Helper function to show alerts
+            showAlert: function(message) {
+                Telegram.WebApp.showAlert(message);
+            }
+        };
 
-     // emoji status
-        emojiStatusInit: function() {
-            Telegram.WebApp.onEvent('emojiStatusFailed', function(params) {
-                DemoApp.showAlert('emojiStatusFailed: ' + params.error);
-            })
-        },
-        setEmojiStatus: function(el, custom_emoji_id, duration) {
-            Telegram.WebApp.setEmojiStatus(custom_emoji_id, duration ? {duration: duration} : {}, function(result) {
-                const span = el.nextElementSibling;
-                if (result) {
-                    span.textContent = '(status set!)';
-                    span.className = 'ok';
-                } else {
-                    span.textContent = '(status NOT set)';
-                    span.className = 'err';
-                }
-            });
-        },
-        requestEmojiStatusAccess: function(el) {
-            Telegram.WebApp.requestEmojiStatusAccess(function(allowed) {
-                const span = el.nextElementSibling;
-                if (allowed) {
-                    span.textContent = '(Access granted)';
-                    span.className = 'ok';
-                } else {
-                    span.textContent = '(User declined this request)';
-                    span.className = 'err';
-                }
-            })
-        },
-
-</script>
-
+        // Initialize emoji status functionality
+        DemoApp.emojiStatusInit();
+    </script>
 </body>
 </html>
