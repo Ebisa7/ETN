@@ -3,215 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram Referral System</title>
+  <title>Emoji Status Access</title>
   <style>
-  body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
-  color: #333;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.container {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.referral-info {
-  margin-bottom: 20px;
-}
-
-#copyLinkBtn {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-#copyLinkBtn:hover {
-  background-color: #0056b3;
-}
-
-.referral-list {
-  text-align: left;
-}
-
-.referral-list h2 {
-  font-size: 20px;
-  margin-bottom: 10px;
-}
-
-#referralList {
-  list-style-type: none;
-  padding: 0;
-}
-
-#referralList li {
-  background: #f9f9f9;
-  margin: 5px 0;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ddd;
-}
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    .message {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    button {
+      background-color: #f39c12;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #e67e22;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Referral System</h1>
-    <div class="referral-info">
-      <p>Your Referral Count: <span id="referralCount">0</span></p>
-      <button id="copyLinkBtn">Copy Referral Link</button>
-    </div>
-    <div class="referral-list">
-      <h2>Referred Users</h2>
-      <ul id="referralList"></ul>
-    </div>
-  </div>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <h1>Request Access to Emoji Status</h1>
+  <button id="requestButton">Request Emoji Status Access</button>
+  <div class="message" id="statusMessage"></div>
+
   <script>
-  // Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyA_S5XfXJ7iyLIrPBOPkvP0110vXjzhqEg",
-  authDomain: "etndrop-bc9c3.firebaseapp.com",
-  projectId: "etndrop-bc9c3",
-  storageBucket: "etndrop-bc9c3.appspot.com",
-  messagingSenderId: "1017600425514",
-  appId: "1:1017600425514:web:f65bb6ee44f86da2014d53"
-};
+    // Function to check if the user has granted access to emoji status
+    function checkEmojiStatus() {
+      // This is a simulated check. Replace this with actual Telegram logic if supported
+      const hasAccess = localStorage.getItem('emojiStatusAccess') === 'granted'; // Simulated access check
 
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// Telegram Mini App initialization
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-// Get user ID and username from Telegram
-const userId = tg.initDataUnsafe.user?.id;
-const username = tg.initDataUnsafe.user?.username;
-
-// DOM elements
-const referralCountElement = document.getElementById('referralCount');
-const referralListElement = document.getElementById('referralList');
-const copyLinkBtn = document.getElementById('copyLinkBtn');
-
-// Check if the user is coming from a referral link
-const urlParams = new URLSearchParams(window.location.search);
-const referrerId = urlParams.get('ref');
-
-// Function to notify the referrer via Telegram bot
-async function notifyReferrer(referrerId, referredUsername) {
-  const botToken = '6970014376:AAGEySk5WgjWrUaZp01q3x_qB-VeWohnMPM';
-  const message = `🎉 ${referredUsername} joined using your referral link!`;
-  const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${referrerId}&text=${encodeURIComponent(message)}`;
-  await fetch(url);
-}
-
-// Function to add a new user to Firestore
-async function addUserToFirestore(userId, username, referrerId) {
-  const userRef = db.collection('bot_users').doc(userId);
-  const userSnapshot = await userRef.get();
-
-  if (!userSnapshot.exists) {
-    // Add user to bot_users collection
-    await userRef.set({
-      username: username,
-      joinedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // Add referral to bot_refferals collection
-    if (referrerId && referrerId !== userId) {
-      const referrerRef = db.collection('bot_refferals').doc(referrerId);
-      const referrerSnapshot = await referrerRef.get();
-
-      if (referrerSnapshot.exists) {
-        await referrerRef.update({
-          refferalCount: firebase.firestore.FieldValue.increment(1),
-          referrals: firebase.firestore.FieldValue.arrayUnion({
-            id: userId,
-            name: username,
-            joinedAt: new Date().toISOString().split('T')[0]
-          })
-        });
+      const statusMessage = document.getElementById('statusMessage');
+      if (hasAccess) {
+        statusMessage.textContent = 'You have granted access to set your emoji status!';
       } else {
-        await referrerRef.set({
-          refferalCount: 1,
-          referrals: [{
-            id: userId,
-            name: username,
-            joinedAt: new Date().toISOString().split('T')[0]
-          }]
-        });
+        statusMessage.textContent = 'You have not granted access yet. Please request it!';
       }
-
-      // Notify the referrer
-      await notifyReferrer(referrerId, username);
     }
-  }
-}
 
-// Function to load referral data
-async function loadReferralData(userId) {
-  const referrerRef = db.collection('bot_refferals').doc(userId);
-  const referrerSnapshot = await referrerRef.get();
-
-  if (referrerSnapshot.exists) {
-    const data = referrerSnapshot.data();
-    referralCountElement.textContent = data.refferalCount;
-
-    // Clear the list
-    referralListElement.innerHTML = '';
-
-    // Populate the list
-    data.referrals.forEach(referral => {
-      const li = document.createElement('li');
-      li.textContent = `${referral.name} - ${referral.joinedAt}`;
-      referralListElement.appendChild(li);
+    // Simulate granting access when the button is clicked
+    document.getElementById('requestButton').addEventListener('click', function() {
+      // Simulate granting access by saving in localStorage
+      localStorage.setItem('emojiStatusAccess', 'granted');
+      checkEmojiStatus();
     });
-  } else {
-    referralCountElement.textContent = '0';
-    referralListElement.innerHTML = '<li>No referrals yet.</li>';
-  }
-}
 
-// Copy referral link
-copyLinkBtn.addEventListener('click', () => {
-  const referralLink = `${window.location.origin}?ref=${userId}`;
-  navigator.clipboard.writeText(referralLink).then(() => {
-    alert('Referral link copied to clipboard!');
-  });
-});
-
-// Main function
-async function main() {
-  if (userId && username) {
-    await addUserToFirestore(userId, username, referrerId);
-    await loadReferralData(userId);
-  }
-}
-
-// Run the app
-main();
+    // Check the status when the page loads
+    checkEmojiStatus();
   </script>
 </body>
 </html>
