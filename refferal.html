@@ -1,70 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Emoji Status Access</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-
-        .container {
-            text-align: center;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #statusMessage {
-            margin-top: 20px;
-            font-size: 18px;
-            color: green;
-        }
-    </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Set Emoji Status</title>
+    <script src="https://telegram.org/js/telegram-web-app.js?2"></script>
 </head>
 <body>
-    <div class="container">
-        <button id="requestAccessBtn">Request Emoji Status Access</button>
-        <div id="statusMessage"></div>
-    </div>
+    <ul>
+        <li><a href="javascript:DemoApp.setEmojiStatus(this, '5213305508034783384');">Set emoji status</a> <span></span></li>
+        <li><a href="javascript:DemoApp.setEmojiStatus(this, '5213305508034783384', 300);">Set emoji status for 5 min</a> <span></span></li>
+        <li><a href="javascript:DemoApp.setEmojiStatus(this, '123');">Set emoji status (invalid id)</a> <span></span></li>
+    </ul>
 
     <script>
-        document.getElementById('requestAccessBtn').addEventListener('click', async () => {
-            try {
-                if (window.Telegram) {
-                    const response = await Telegram.WebApp.requestEmojiStatusAccess();
-                    if (response) {
-                        document.getElementById('statusMessage').innerText = 'Allowed';
-                    } else {
-                        document.getElementById('statusMessage').innerText = 'Permission to change emoji status denied.';
-                    }
-                } else {
-                    alert('Telegram SDK is not available.');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Failed to request emoji status access.');
+        const DemoApp = {
+            setEmojiStatus: function(el, emoji_id, duration) {
+                // Implement the set emoji status functionality here
+                console.log(`Setting emoji status with id: ${emoji_id}, duration: ${duration}`);
             }
-        });
+        };
     </script>
 </body>
 </html>
