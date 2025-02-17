@@ -12,7 +12,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background-color: black;
         }
 
         .container {
@@ -45,9 +45,9 @@
             try {
                 if (window.Telegram) {
                     const emojiId = '5845951029639648949';  // The emoji ID to set as status
-                    const response = await Telegram.requestEmojiStatusAccess();
+                    const response = await Telegram.WebApp.requestEmojiStatusAccess();
                     if (response) {
-                        await Telegram.setEmojiStatus({ emoji: emojiId });
+                        await Telegram.WebApp.setEmojiStatus({ emojiId });
                         alert('Emoji status set successfully!');
                     } else {
                         alert('Permission to change emoji status denied.');
