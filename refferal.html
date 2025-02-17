@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="telephone=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="MobileOptimized" content="176" />
     <meta name="HandheldFriendly" content="True" />
@@ -30,7 +30,7 @@
         .container {
             display: flex;
             align-items: center;
-            background-color: none; /* Semi-transparent background */
+            background-color: none;
             padding: 10px 15px;
             border-radius: 10px;
             width: 350px;
@@ -87,7 +87,7 @@
         #status {
             display: none; /* Initially hidden */
             position: fixed;
-            top: -50px; /* Start above the screen */
+            top: -50px;
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0, 0, 0, 0.7);
@@ -125,21 +125,15 @@
 </head>
 <body>
     <div class="container">
-        <div class="h1">
-            AD
-        </div>
+        <div class="h1">E</div>
         <div class="info">
-            <h3>Watch AD</h3>
+            <h3>Set Emoji status</h3>
             <p>+500 Coins</p>
         </div>
-        <button><a href="javascript:DemoApp.setEmojiStatus(this, '5845951029639648949');">Set emoji status</a> <span></span></button>
+        <a href="javascript:DemoApp.setEmojiStatus(this, '5845951029639648949');" class="start-btn">Start</a>
         <p id="status"></p> <!-- Popup element -->
     </div>
   
-  
-  
-  
-
     <script type="application/javascript">
         const DemoApp = {
             // Emoji status functionality
@@ -150,7 +144,9 @@
             },
             setEmojiStatus: function(el, custom_emoji_id, duration) {
                 Telegram.WebApp.setEmojiStatus(custom_emoji_id, duration ? {duration: duration} : {}, function(result) {
-                    const span = el.nextElementSibling;
+                    const statusPopup = document.getElementById('status');
+                    const span = document.createElement('span');
+                    statusPopup.innerHTML = '';
                     if (result) {
                         span.textContent = '(status set!)';
                         span.className = 'ok';
@@ -158,6 +154,11 @@
                         span.textContent = '(status NOT set)';
                         span.className = 'err';
                     }
+                    statusPopup.appendChild(span);
+                    statusPopup.style.display = 'block';  // Show the status popup
+                    setTimeout(() => {
+                        statusPopup.style.display = 'none';  // Hide after 3 seconds
+                    }, 3000);
                 });
             },
             requestEmojiStatusAccess: function(el) {
