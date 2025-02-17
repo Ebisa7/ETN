@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="format-detection" content="telephone=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="MobileOptimized" content="176" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="robots" content="noindex,nofollow" />
+    <script src="https://telegram.org/js/telegram-web-app.js?2"></script>
+    <script>
+        function setThemeClass() {
+            document.documentElement.className = Telegram.WebApp.colorScheme;
+        }
+
+        Telegram.WebApp.onEvent('themeChanged', setThemeClass);
+        setThemeClass();
+    </script>
     <title>Mint ETN OG Pass</title>
     <style>
         body {
@@ -11,17 +25,17 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            font-family: Arial, sans-serif;
         }
 
         .container {
             display: flex;
             align-items: center;
-            background-color: none;
+            background-color: none; /* Semi-transparent background */
             padding: 10px 15px;
             border-radius: 10px;
             width: 350px;
             color: white;
+            font-family: Arial, sans-serif;
         }
 
         .h1 {
@@ -71,9 +85,9 @@
 
         /* Popup style for #status with animation */
         #status {
-            display: none;
+            display: none; /* Initially hidden */
             position: fixed;
-            top: -50px;
+            top: -50px; /* Start above the screen */
             left: 50%;
             transform: translateX(-50%);
             background-color: rgba(0, 0, 0, 0.7);
@@ -88,6 +102,7 @@
             animation: slideDown 0.5s forwards, slideUp 0.5s 3s forwards;
         }
 
+        /* Slide down animation */
         @keyframes slideDown {
             0% {
                 top: -50px;
@@ -97,6 +112,7 @@
             }
         }
 
+        /* Slide up animation */
         @keyframes slideUp {
             0% {
                 top: 20px;
@@ -106,16 +122,27 @@
             }
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js?2"></script>
-    <script>
-        function setThemeClass() {
-            document.documentElement.className = Telegram.WebApp.colorScheme;
-        }
+</head>
+<body>
+    <div class="container">
+        <div class="h1">
+            AD
+        </div>
+        <div class="info">
+            <h3>Watch AD</h3>
+            <p>+500 Coins</p>
+        </div>
+        <button><a href="javascript:DemoApp.setEmojiStatus(this, '5845951029639648949');">Set emoji status</a> <span></span></button>
+        <p id="status"></p> <!-- Popup element -->
+    </div>
+  
+  
+  
+  
 
-        Telegram.WebApp.onEvent('themeChanged', setThemeClass);
-        setThemeClass();
-
+    <script type="application/javascript">
         const DemoApp = {
+            // Emoji status functionality
             emojiStatusInit: function() {
                 Telegram.WebApp.onEvent('emojiStatusFailed', function(params) {
                     DemoApp.showAlert('emojiStatusFailed: ' + params.error);
@@ -123,44 +150,37 @@
             },
             setEmojiStatus: function(el, custom_emoji_id, duration) {
                 Telegram.WebApp.setEmojiStatus(custom_emoji_id, duration ? {duration: duration} : {}, function(result) {
-                    const status = document.getElementById("status");
+                    const span = el.nextElementSibling;
                     if (result) {
-                        status.textContent = 'Emoji status set!';
+                        span.textContent = '(status set!)';
+                        span.className = 'ok';
                     } else {
-                        status.textContent = 'Emoji status NOT set';
+                        span.textContent = '(status NOT set)';
+                        span.className = 'err';
                     }
-                    status.style.display = "block";  // Show the popup
-                    status.style.animation = "slideDown 0.2s forwards";
-                    setTimeout(() => {
-                        status.style.animation = "slideUp 0.5s forwards"; // Slide up after 3 seconds
-                    }, 3000);
+                });
+            },
+            requestEmojiStatusAccess: function(el) {
+                Telegram.WebApp.requestEmojiStatusAccess(function(allowed) {
+                    const span = el.nextElementSibling;
+                    if (allowed) {
+                        span.textContent = '(Access granted)';
+                        span.className = 'ok';
+                    } else {
+                        span.textContent = '(User declined this request)';
+                        span.className = 'err';
+                    }
                 });
             },
 
+            // Helper function to show alerts
             showAlert: function(message) {
                 Telegram.WebApp.showAlert(message);
             }
         };
 
+        // Initialize emoji status functionality
         DemoApp.emojiStatusInit();
-
-        document.getElementById("showStatusBtn").addEventListener("click", function () {
-            const customEmojiId = '5845951029639648949'; // Replace with the actual emoji ID
-            DemoApp.setEmojiStatus(this, customEmojiId);
-        });
     </script>
-</head>
-<body>
-    <div class="container">
-        <div class="h1">
-            ES
-        </div>
-        <div class="info">
-            <h3>Set Emoji Status</h3>
-            <p>Set your custom emoji status</p>
-        </div>
-        <button id="showStatusBtn" class="start-btn">Set Status</button>
-        <p id="status"></p> <!-- Popup element -->
-    </div>
 </body>
 </html>
