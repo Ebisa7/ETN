@@ -1,70 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emoji Status Access</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    .message {
-      margin-top: 20px;
-      font-size: 18px;
-    }
-    button {
-      background-color: #f39c12;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #e67e22;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Emoji Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <h1>Request Access to Emoji Status</h1>
-  <button id="requestButton">Request Emoji Status Access</button>
-  <div class="message" id="statusMessage"></div>
+    <div class="container">
+        <button id="setStatusBtn">Set Emoji Status</button>
+    </div>
 
-  <!-- Telegram Web App Script -->
-  <script async src="https://web.telegram.org/js/telegram-web-app.js"></script>
-  <script>
-    // Check if Telegram WebApp is available
-    if (window.Telegram && window.Telegram.WebApp) {
-      // Initialize the Telegram WebApp
-      const tgWebApp = window.Telegram.WebApp;
-
-      // Function to check if the user has granted emoji status access
-      function checkEmojiStatus() {
-        const hasAccess = tgWebApp.initData; // Assuming initData includes the necessary access info
-
-        const statusMessage = document.getElementById('statusMessage');
-        if (hasAccess) {
-          statusMessage.textContent = 'You have granted access to set your emoji status!';
-        } else {
-          statusMessage.textContent = 'You have not granted access yet. Please request it!';
-        }
-      }
-
-      // Handle button click to request emoji status access
-      document.getElementById('requestButton').addEventListener('click', function() {
-        // Example function: request access to emoji status (this is hypothetical)
-        tgWebApp.sendData('request_emoji_status_access');
-        checkEmojiStatus();
-      });
-
-      // On page load, check access status
-      window.onload = checkEmojiStatus;
-    } else {
-      alert("Telegram WebApp is not available.");
-    }
-  </script>
+    <script>
+        document.getElementById('setStatusBtn').addEventListener('click', async () => {
+            try {
+                if (window.Telegram) {
+                    const emojiId = '5845951029639648949';  // The emoji ID to set as status
+                    const response = await Telegram.requestEmojiStatusAccess();
+                    if (response) {
+                        await Telegram.setEmojiStatus({ emoji: emojiId });
+                        alert('Emoji status set successfully!');
+                    } else {
+                        alert('Permission to change emoji status denied.');
+                    }
+                } else {
+                    alert('Telegram SDK is not available.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Failed to set emoji status.');
+            }
+        });
+    </script>
 </body>
 </html>
