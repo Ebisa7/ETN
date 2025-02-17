@@ -51,6 +51,8 @@
             align-items: center;
             text-align: center;
         }
+      
+
 
         .info {
             flex-grow: 1;
@@ -121,11 +123,26 @@
                 top: -600px;
             }
         }
+      
+.h1 a {
+    font-size: 12px; /* Set the font size to your preference */
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+
+.h1 a img {
+    width: 20px; /* Set the image size */
+    height: auto; /* Maintain aspect ratio */
+}
+
+
+      
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="h1">E</div>
+        <div class="h1"><a href="https://imgbb.com/"><img src="etnicon.png" alt="done" border="0"></a></div>
         <div class="info">
             <h3>Set Emoji status</h3>
             <p>+500 Coins</p>
@@ -148,10 +165,10 @@
                     const span = document.createElement('span');
                     statusPopup.innerHTML = '';
                     if (result) {
-                        span.textContent = 'Task done!';
+                        span.textContent = '(status set!)';
                         span.className = 'ok';
                     } else {
-                        span.textContent = 'You didn't set as emoji status';
+                        span.textContent = '(status NOT set)';
                         span.className = 'err';
                     }
                     statusPopup.appendChild(span);
