@@ -3,11 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="format-detection" content="telephone=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="MobileOptimized" content="176" />
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="robots" content="noindex,nofollow" />
     <script src="https://telegram.org/js/telegram-web-app.js?2"></script>
     <script>
         function setThemeClass() {
@@ -17,14 +12,16 @@
         Telegram.WebApp.onEvent('themeChanged', setThemeClass);
         setThemeClass();
     </script>
-    <title>Set emoji status</title>
+    <title>Set Emoji Status & Share Picture</title>
     <style>
         body {
             background-color: #06110C;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
+            gap: 15px;
         }
 
         .container {
@@ -42,17 +39,17 @@
             width: 45px;
             height: 45px;
             background-color: #313235;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
         }
-      
 
+        .h1 a img {
+            width: 20px;
+            height: auto;
+        }
 
         .info {
             flex-grow: 1;
@@ -62,7 +59,6 @@
         .info h3 {
             margin: 0;
             font-size: 20px;
-            font-weight: normal;
         }
 
         .info p {
@@ -85,9 +81,8 @@
             background-color: rgba(255, 255, 255, 0.3);
         }
 
-        /* Popup style for #status with animation */
         #status {
-            display: none; /* Initially hidden */
+            display: none;
             position: fixed;
             top: -50px;
             left: 50%;
@@ -97,113 +92,71 @@
             padding: 15px;
             border-radius: 8px;
             font-size: 16px;
-            font-weight: bold;
             text-align: center;
             z-index: 1000;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             animation: slideDown 0.5s forwards, slideUp 0.5s 3s forwards;
         }
 
-        /* Slide down animation */
         @keyframes slideDown {
-            0% {
-                top: -50px;
-            }
-            100% {
-                top: 20px;
-            }
+            0% { top: -50px; }
+            100% { top: 20px; }
         }
 
-        /* Slide up animation */
         @keyframes slideUp {
-            0% {
-                top: 20px;
-            }
-            100% {
-                top: -600px;
-            }
+            0% { top: 20px; }
+            100% { top: -600px; }
         }
-      
-.h1 a {
-    font-size: 12px; /* Set the font size to your preference */
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-}
-
-.h1 a img {
-    width: 20px; /* Set the image size */
-    height: auto; /* Maintain aspect ratio */
-}
-
-
-      
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="h1"><a href="https://imgbb.com/"><img src="etnicon.png" alt="done" border="0"></a></div>
+        <div class="h1"><a href="https://imgbb.com/"><img src="etnicon.png" alt="done"></a></div>
         <div class="info">
             <h3>Set Emoji status</h3>
             <p>+500 Coins</p>
         </div>
         <a href="javascript:DemoApp.setEmojiStatus(this, '5845951029639648949');" class="start-btn">Start</a>
-        <p id="status"></p> <!-- Popup element -->
+        <p id="status"></p>
     </div>
 
-    <ul>
-        <li><a href="javascript:Telegram.WebApp.shareToStory('https://aquamarine-delicate-scorpion-718.mypinata.cloud/ipfs/bafkreidrobxffovbqjff6rsrmrqhn6brqgfl5yzte2l7zsyw7jxlnxcrhm',{text:'#ETNETSA',widget_link:{url:'https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454'}});">Share picture to story (with link widget)</a></li>
+    <div class="container">
+        <div class="h1"><a href="https://imgbb.com/"><img src="etnicon.png" alt="done"></a></div>
+        <div class="info">
+            <h3>Share picture to story</h3>
+            <p>+500 Coins</p>
+        </div>
+        <a href="javascript:DemoApp.sharePictureToStory();" class="start-btn">Start</a>
+        <p id="status-story"></p>
+    </div>
 
-    </ul>
-  
-    <script type="application/javascript">
+    <script>
         const DemoApp = {
-            // Emoji status functionality
-            emojiStatusInit: function() {
-                Telegram.WebApp.onEvent('emojiStatusFailed', function(params) {
-                    DemoApp.showAlert('emojiStatusFailed: ' + params.error);
-                });
-            },
-            setEmojiStatus: function(el, custom_emoji_id, duration) {
-                Telegram.WebApp.setEmojiStatus(custom_emoji_id, duration ? {duration: duration} : {}, function(result) {
-                    const statusPopup = document.getElementById('status');
-                    const span = document.createElement('span');
-                    statusPopup.innerHTML = '';
-                    if (result) {
-                        span.textContent = '(status set!)';
-                        span.className = 'ok';
-                    } else {
-                        span.textContent = '(status NOT set)';
-                        span.className = 'err';
-                    }
-                    statusPopup.appendChild(span);
-                    statusPopup.style.display = 'block';  // Show the status popup
-                    setTimeout(() => {
-                        statusPopup.style.display = 'none';  // Hide after 3 seconds
-                    }, 3000);
-                });
-            },
-            requestEmojiStatusAccess: function(el) {
-                Telegram.WebApp.requestEmojiStatusAccess(function(allowed) {
-                    const span = el.nextElementSibling;
-                    if (allowed) {
-                        span.textContent = 'Emoji set! task done';
-                        span.className = 'ok';
-                    } else {
-                        span.textContent = 'USER_DECLINED_REQUEST!';
-                        span.className = 'err';
-                    }
+            setEmojiStatus: function(el, custom_emoji_id) {
+                Telegram.WebApp.setEmojiStatus(custom_emoji_id, {}, function(result) {
+                    DemoApp.showPopup(result ? 'Emoji status set!' : 'Failed to set emoji status', 'status');
                 });
             },
 
-            // Helper function to show alerts
-            showAlert: function(message) {
-                Telegram.WebApp.showAlert(message);
+            sharePictureToStory: function() {
+                Telegram.WebApp.shareToStory(
+                    'https://aquamarine-delicate-scorpion-718.mypinata.cloud/ipfs/bafkreidrobxffovbqjff6rsrmrqhn6brqgfl5yzte2l7zsyw7jxlnxcrhm',
+                    { text: 'I just posted a story from @ET_Netsa_Airdrop_bot and earned $ETN tokens #ETNETSA', 
+                      widget_link: { url: 'https://t.me/ET_Netsa_Airdrop_bot?start=r6373984454' }
+                    },
+                    function(success) {
+                        DemoApp.showPopup(success ? 'Story shared successfully!' : 'Failed to share story', 'status-story');
+                    }
+                );
+            },
+
+            showPopup: function(message, elementId) {
+                const popup = document.getElementById(elementId);
+                popup.textContent = message;
+                popup.style.display = 'block';
+                setTimeout(() => { popup.style.display = 'none'; }, 3000);
             }
         };
-
-        // Initialize emoji status functionality
-        DemoApp.emojiStatusInit();
     </script>
 </body>
 </html>
