@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
+            background-color: gray;
             color: #333;
             text-align: center;
         }
@@ -109,6 +109,8 @@
         tg.MainButton.text = "Pay with Telegram Stars";
         tg.MainButton.show();
 
+        const botToken = "7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo";  // Replace with your bot token
+
         function purchaseItem(itemId) {
             const item = ITEMS[itemId];
             const payload = itemId;  // Payload for the Telegram bot to identify the item
@@ -122,26 +124,37 @@
 
             // Handle payment when the user clicks the main button
             tg.MainButton.onClick(() => {
-                tg.sendInvoice({
-                    title: item.name,
-                    description: item.description,
-                    payload: payload,
-                    providerToken: "",  // Empty for digital goods
-                    currency: "XTR",  // Telegram Stars currency code
-                    prices: [
-                        {
-                            label: item.name,
-                            amount: item.price * 100  // Telegram Stars uses cents (multiply by 100)
-                        }
-                    ],
-                    startParameter: "start_parameter"
+                // Send invoice using your bot token
+                fetch(`https://api.telegram.org/bot${botToken}/sendInvoice`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: tg.initDataUnsafe.user.id,
+                        title: item.name,
+                        description: item.description,
+                        payload: payload,
+                        currency: 'XTR',  // Telegram Stars currency
+                        prices: [
+                            {
+                                label: item.name,
+                                amount: item.price * 100  // Telegram Stars uses cents (multiply by 100)
+                            }
+                        ],
+                        start_parameter: "start_parameter"
+                    })
                 })
-                .then((response) => {
-                    const transactionId = response.transaction_id;
-                    document.getElementById('message').textContent = `Thank you for purchasing ${item.name}! Your secret code is: ${item.secret}`;
-                    tg.MainButton.hide();
-                    // Optionally, send the transaction ID for processing or save it to a database
-                    console.log('Transaction ID:', transactionId);
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        const transactionId = data.result.transaction_id;
+                        document.getElementById('message').textContent = `Thank you for purchasing ${item.name}! Your secret code is: ${item.secret}`;
+                        tg.MainButton.hide();
+                        console.log('Transaction ID:', transactionId);
+                    } else {
+                        throw new Error('Error in sending invoice');
+                    }
                 })
                 .catch((error) => {
                     console.error('Payment error:', error);
