@@ -50,6 +50,7 @@
 
         // Initialize the Web App
         Telegram.WebApp.ready();
+        console.log('WebApp initialized:', Telegram.WebApp.initDataUnsafe);
 
         // Function to send payment
         async function sendPayment() {
@@ -60,26 +61,34 @@
             }
 
             try {
+                const payload = `payment_${Date.now()}`;
+                const requestBody = {
+                    chat_id: Telegram.WebApp.initDataUnsafe.user.id,
+                    title: `Payment of ${amount} Stars`,
+                    description: 'Thank you for your payment!',
+                    payload: payload,
+                    provider_token: "", // Empty for digital goods
+                    currency: "XTR", // Telegram Stars currency code
+                    prices: [{ label: 'Stars', amount: amount * 100 }], // Amount in cents
+                    start_parameter: "start_parameter"
+                };
+
+                console.log('Sending invoice request:', requestBody);
+
                 const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendInvoice`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        chat_id: Telegram.WebApp.initDataUnsafe.user.id,
-                        title: `Payment of ${amount} Stars`,
-                        description: 'Thank you for your payment!',
-                        payload: `payment_${Date.now()}`, // Unique payload
-                        provider_token: "", // Empty for digital goods
-                        currency: "XTR", // Telegram Stars currency code
-                        prices: [{ label: 'Stars', amount: amount * 100 }], // Amount in cents
-                        start_parameter: "start_parameter"
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
+                console.log('Invoice response:', data);
+
                 if (data.ok) {
                     Telegram.WebApp.openInvoice(data.result.invoice_payload, function(status) {
+                        console.log('Payment status:', status);
                         if (status === 'paid') {
                             const transaction = {
                                 id: data.result.invoice_payload,
@@ -117,6 +126,8 @@
                 });
 
                 const data = await response.json();
+                console.log('Refund response:', data);
+
                 if (data.ok) {
                     const transaction = transactions.find(t => t.id === transactionId);
                     if (transaction) {
