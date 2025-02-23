@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Store</title>
+    <title>Digital Store - Telegram Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -78,6 +79,8 @@
         </div>
     </div>
 
+    <div id="message" style="margin-top: 20px; color: green;"></div>
+
     <script>
         const ITEMS = {
             'ice_cream': {
@@ -100,35 +103,50 @@
             }
         };
 
-        const BOT_API_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo'; // Replace with your bot API token
-        const CHAT_ID = '6373984454'; // Replace with the user's chat ID
+        // Initialize Telegram Web App SDK
+        const tg = window.Telegram.WebApp;
+        tg.initDataUnsafe();
+        tg.MainButton.text = "Pay with Telegram Stars";
+        tg.MainButton.show();
 
         function purchaseItem(itemId) {
             const item = ITEMS[itemId];
-            const message = `I want to buy ${item.name} for ${item.price} ⭐`;
+            const payload = itemId;  // Payload for the Telegram bot to identify the item
 
-            // Call the Telegram Bot API to send a message
-            fetch(`https://api.telegram.org/bot${BOT_API_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: message
+            // Setting up the payment details
+            tg.MainButton.text = `Pay ${item.price} ⭐ for ${item.name}`;
+            tg.MainButton.setParams({ payload });
+
+            // Enable the main button (payment initiation)
+            tg.MainButton.show();
+
+            // Handle payment when the user clicks the main button
+            tg.MainButton.onClick(() => {
+                tg.sendInvoice({
+                    title: item.name,
+                    description: item.description,
+                    payload: payload,
+                    providerToken: "",  // Empty for digital goods
+                    currency: "XTR",  // Telegram Stars currency code
+                    prices: [
+                        {
+                            label: item.name,
+                            amount: item.price * 100  // Telegram Stars uses cents (multiply by 100)
+                        }
+                    ],
+                    startParameter: "start_parameter"
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    alert(`You have successfully purchased ${item.name}. Your secret code: ${item.secret}`);
-                } else {
-                    alert('Something went wrong, please try again later.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error processing your request.');
+                .then((response) => {
+                    const transactionId = response.transaction_id;
+                    document.getElementById('message').textContent = `Thank you for purchasing ${item.name}! Your secret code is: ${item.secret}`;
+                    tg.MainButton.hide();
+                    // Optionally, send the transaction ID for processing or save it to a database
+                    console.log('Transaction ID:', transactionId);
+                })
+                .catch((error) => {
+                    console.error('Payment error:', error);
+                    alert('Something went wrong with the payment. Please try again later.');
+                });
             });
         }
     </script>
