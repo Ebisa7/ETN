@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: gray;
+            background-color: #f7f7f7;
             color: #333;
             text-align: center;
         }
@@ -109,7 +109,8 @@
         tg.MainButton.text = "Pay with Telegram Stars";
         tg.MainButton.show();
 
-        const botToken = "7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo";  // Replace with your bot token
+        // Bot token for handling payment and interaction
+        const botToken = "7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo";  // Replace with your actual bot token
 
         function purchaseItem(itemId) {
             const item = ITEMS[itemId];
@@ -142,7 +143,12 @@
                                 amount: item.price * 100  // Telegram Stars uses cents (multiply by 100)
                             }
                         ],
-                        start_parameter: "start_parameter"
+                        start_parameter: "start_parameter",
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{ text: "Pay Now", callback_data: "pay_now" }]
+                            ]
+                        }
                     })
                 })
                 .then(response => response.json())
