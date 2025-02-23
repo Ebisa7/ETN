@@ -4,68 +4,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital Store</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        .hidden { display: none; }
-        .transaction { border: 1px solid #ccc; padding: 10px; margin: 10px; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .item button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .item button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
-    <h2>Welcome to the Digital Store! 🎉</h2>
-    <p>Enter the number of Stars to pay:</p>
-    <input type="number" id="starAmount" min="1" value="1">
-    <button onclick="requestPayment()">Pay with Stars</button>
-    
-    <h3>Transaction History</h3>
-    <div id="transactions"></div>
-    
-   <script>
-    const tg = window.Telegram.WebApp;
-    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    const botToken = "7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo"; // Replace with your bot token
-    const chatId = tg.initDataUnsafe?.user?.id; // Get user ID from Telegram WebApp
+    <h1>Welcome to the Digital Store! 🎉</h1>
+    <div id="items">
+        <!-- Items will be dynamically inserted here -->
+    </div>
 
-    function requestPayment() {
-        const amount = parseInt(document.getElementById('starAmount').value, 10);
-        if (amount < 1) {
-            tg.showAlert('Please enter a valid amount.');
-            return;
+    <script>
+        const BOT_TOKEN = 'YOUR_BOT_TOKEN'; // Replace with your bot token
+        const ITEMS = {
+            'ice_cream': {
+                'name': 'Ice Cream 🍦',
+                'price': 1,
+                'description': 'A delicious virtual ice cream',
+                'secret': 'FROZEN2025'
+            },
+            'cookie': {
+                'name': 'Cookie 🍪',
+                'price': 3,
+                'description': 'A sweet virtual cookie',
+                'secret': 'SWEET2025'
+            },
+            'hamburger': {
+                'name': 'Hamburger 🍔',
+                'price': 5,
+                'description': 'A tasty virtual hamburger',
+                'secret': 'BURGER2025'
+            }
+        };
+
+        function initWebApp() {
+            const itemsContainer = document.getElementById('items');
+            for (const [itemId, item] of Object.entries(ITEMS)) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'item';
+                itemDiv.innerHTML = `
+                    <h3>${item.name} - ${item.price} ⭐</h3>
+                    <p>${item.description}</p>
+                    <button onclick="purchaseItem('${itemId}')">Buy Now</button>
+                `;
+                itemsContainer.appendChild(itemDiv);
+            }
         }
 
-        tg.requestPayment({
-            provider_token: "", // Replace with actual provider token
-            currency: "XTR",
-            total_amount: amount * 100, // Telegram uses smallest currency unit
-            description: `Payment for ${amount} Stars`
-        }, (result) => {
-            if (result.status === "ok") {
-                const transaction = {
-                    id: result.payment_charge_id,
-                    amount: amount,
-                    refunded: false
-                };
-                transactions.push(transaction);
-                localStorage.setItem('transactions', JSON.stringify(transactions));
-                updateTransactions();
-                tg.showAlert(`Payment successful: ${amount}⭐`);
+        async function purchaseItem(itemId) {
+            const item = ITEMS[itemId];
+            if (!item) {
+                alert('Item not found!');
+                return;
+            }
 
-                // Send payment details to your bot
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendInvoice`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
-                        chat_id: chatId,
-                        text: `✅ Payment received!\n\n💰 Amount: ${amount}⭐\n🆔 Transaction ID: ${result.payment_charge_id}`
+                        chat_id: Telegram.WebApp.initDataUnsafe.user.id,
+                        title: item.name,
+                        description: item.description,
+                        payload: itemId,
+                        provider_token: "YOUR_PROVIDER_TOKEN", // Replace with your provider token
+                        currency: "XTR",
+                        prices: [{ label: item.name, amount: item.price * 100 }], // Amount in cents
+                        start_parameter: "start_parameter"
                     })
                 });
 
-            } else {
-                tg.showAlert(`Payment failed: ${result.error}`);
+                const data = await response.json();
+                if (data.ok) {
+                    Telegram.WebApp.openInvoice(data.result.invoice_payload, function(status) {
+                        if (status === 'paid') {
+                            alert(`Thank you for your purchase! 🎉\n\nHere's your secret code for ${item.name}:\n${item.secret}`);
+                        } else {
+                            alert('Payment failed or was cancelled.');
+                        }
+                    });
+                } else {
+                    alert('Failed to create invoice.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while processing your request.');
             }
-        });
-    }
-</script>
+        }
 
+        function handleRefund() {
+            const transactionId = prompt("Enter your transaction ID:");
+            if (!transactionId) {
+                alert("Transaction ID is required.");
+                return;
+            }
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/refundStarPayment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: Telegram.WebApp.initDataUnsafe.user.id,
+                    telegram_payment_charge_id: transactionId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    alert("✅ Refund processed successfully!\nThe Stars have been returned to your balance.");
+                } else {
+                    alert("❌ Refund could not be processed.\nPlease try again later or contact support.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while processing your refund.");
+            });
+        }
+
+        // Initialize the Web App
+        Telegram.WebApp.ready();
+        initWebApp();
+    </script>
 </body>
 </html>
