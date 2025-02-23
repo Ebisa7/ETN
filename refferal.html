@@ -20,57 +20,52 @@
     <h3>Transaction History</h3>
     <div id="transactions"></div>
     
-    <script>
-        const tg = window.Telegram.WebApp;
-        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+   <script>
+    const tg = window.Telegram.WebApp;
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    const botToken = "7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo"; // Replace with your bot token
+    const chatId = tg.initDataUnsafe?.user?.id; // Get user ID from Telegram WebApp
 
-        function requestPayment() {
-            const amount = document.getElementById('starAmount').value;
-            if (amount < 1) {
-                tg.showAlert('Please enter a valid amount.');
-                return;
+    function requestPayment() {
+        const amount = parseInt(document.getElementById('starAmount').value, 10);
+        if (amount < 1) {
+            tg.showAlert('Please enter a valid amount.');
+            return;
+        }
+
+        tg.requestPayment({
+            provider_token: "", // Replace with actual provider token
+            currency: "XTR",
+            total_amount: amount * 100, // Telegram uses smallest currency unit
+            description: `Payment for ${amount} Stars`
+        }, (result) => {
+            if (result.status === "ok") {
+                const transaction = {
+                    id: result.payment_charge_id,
+                    amount: amount,
+                    refunded: false
+                };
+                transactions.push(transaction);
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                updateTransactions();
+                tg.showAlert(`Payment successful: ${amount}⭐`);
+
+                // Send payment details to your bot
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: `✅ Payment received!\n\n💰 Amount: ${amount}⭐\n🆔 Transaction ID: ${result.payment_charge_id}`
+                    })
+                });
+
+            } else {
+                tg.showAlert(`Payment failed: ${result.error}`);
             }
-            
-            const transactionId = `txn_${Date.now()}`;
-            const transaction = { id: transactionId, amount: amount, refunded: false };
-            transactions.push(transaction);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            updateTransactions();
-            
-            tg.showAlert(`Payment request sent: ${amount}⭐`);
-        }
-        
-        function requestRefund(id) {
-            const transaction = transactions.find(t => t.id === id);
-            if (!transaction || transaction.refunded) return;
-            
-            transaction.refunded = true;
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            updateTransactions();
-            tg.showAlert(`Refund requested for ${transaction.amount}⭐`);
-        }
-        
-        function updateTransactions() {
-            const container = document.getElementById('transactions');
-            container.innerHTML = '';
-            transactions.forEach(tx => {
-                const div = document.createElement('div');
-                div.className = 'transaction';
-                div.innerHTML = `<p>Paid: ${tx.amount}⭐</p>`;
-                if (!tx.refunded) {
-                    const btn = document.createElement('button');
-                    btn.innerText = 'Request Refund';
-                    btn.onclick = () => requestRefund(tx.id);
-                    div.appendChild(btn);
-                } else {
-                    div.innerHTML += '<p style="color: red;">Refunded</p>';
-                }
-                container.appendChild(div);
-            });
-        }
-        
-        tg.expand();
-        updateTransactions();
-    </script>
+        });
+    }
+</script>
+
 </body>
 </html>
