@@ -29,13 +29,13 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to the Digital Store! 🎉</h1>
+    <h1>Welcome to the Digital Store! �</h1>
     <div id="items">
         <!-- Items will be dynamically inserted here -->
     </div>
 
     <script>
-        const BOT_TOKEN = 'YOUR_BOT_TOKEN'; // Replace with your bot token
+        const BOT_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo'; // Replace with your bot token
         const ITEMS = {
             'ice_cream': {
                 'name': 'Ice Cream 🍦',
@@ -89,8 +89,8 @@
                         title: item.name,
                         description: item.description,
                         payload: itemId,
-                        provider_token: "YOUR_PROVIDER_TOKEN", // Replace with your provider token
-                        currency: "XTR",
+                        provider_token: "", // Empty for digital goods
+                        currency: "XTR", // Telegram Stars currency code
                         prices: [{ label: item.name, amount: item.price * 100 }], // Amount in cents
                         start_parameter: "start_parameter"
                     })
