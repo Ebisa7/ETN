@@ -3,189 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Stars Sender</title>
+    <title>Send Stars ✨</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: white;
             text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
         }
         .slider-container {
-            margin: 50px 0;
+            margin: 20px auto;
+            width: 80%;
         }
         .slider {
-            width: 80%;
-            margin: 20px auto;
+            width: 100%;
         }
-        .star-display {
-            font-size: 2em;
+        .big-text {
+            font-size: 50px;
+            font-weight: bold;
             margin: 20px 0;
         }
-        .send-button {
-            background-color: #28a745;
+        .send-button, .refund-button {
+            background-color: #007bff;
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 5px;
+            padding: 15px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 1.2em;
+            font-size: 20px;
+            margin-top: 10px;
         }
-        .send-button:hover {
-            background-color: #218838;
+        .send-button:hover, .refund-button:hover {
+            background-color: #0056b3;
         }
-        .message {
-            margin: 20px 0;
+        .refund-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
             padding: 10px;
-            border-radius: 5px;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .refund-form {
-            margin-top: 50px;
-        }
-        .refund-form input {
-            padding: 10px;
-            margin-right: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .refund-form button {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .refund-form button:hover {
-            background-color: #c82333;
+            font-size: 16px;
+            width: 200px;
         }
     </style>
 </head>
 <body>
-    <h1>Telegram Stars Sender 🌟</h1>
-    <p>Select the number of Stars you want to send:</p>
-
+    <h1>Send Telegram Stars ✨</h1>
+    <p>Select the amount of Stars to send:</p>
+    
     <div class="slider-container">
-        <input type="range" id="starSlider" class="slider" min="1" max="10" value="1">
-        <div class="star-display" id="starDisplay">1 ⭐</div>
-        <button class="send-button" onclick="sendStars()">Send Stars</button>
+        <input type="range" id="starSlider" class="slider" min="1" max="100" value="1">
+        <div class="big-text" id="starAmount">1 ⭐</div>
     </div>
-
-    <div id="message" class="message"></div>
-
-    <div class="refund-form">
+    
+    <button class="send-button" onclick="sendStars()">Send Stars</button>
+    
+    <div class="refund-container">
         <h2>Request a Refund</h2>
-        <form id="refundForm">
-            <label for="transactionId">Transaction ID:</label>
-            <input type="text" id="transactionId" name="transactionId" required>
-            <button type="submit">Request Refund</button>
-        </form>
+        <input type="text" id="transactionId" placeholder="Transaction ID">
+        <button class="refund-button" onclick="requestRefund()">Request Refund</button>
     </div>
-
+    
     <script>
-        // Replace with your bot token (⚠️ WARNING: Exposing your bot token is unsafe!)
         const BOT_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo';
+        const USER_ID = 6373984454; // Replace with dynamic user ID if possible
 
-        const starSlider = document.getElementById('starSlider');
-        const starDisplay = document.getElementById('starDisplay');
-        const messageDiv = document.getElementById('message');
-
-        // Update the star display when the slider changes
-        starSlider.addEventListener('input', () => {
-            starDisplay.textContent = `${starSlider.value} ⭐`;
+        document.getElementById('starSlider').addEventListener('input', function() {
+            document.getElementById('starAmount').innerText = this.value + ' ⭐';
         });
 
-        // Send Stars
         async function sendStars() {
-            const stars = parseInt(starSlider.value);
-            const price = stars * 100; // 1 Star = 100 cents
-
+            const starCount = document.getElementById('starSlider').value;
             try {
-                // Create an invoice link using the Telegram Bot API
                 const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/createInvoiceLink`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        title: `Send ${stars} Stars`,
-                        description: `You are sending ${stars} Telegram Stars.`,
-                        payload: 'stars_payment',
-                        provider_token: '', // Empty for Telegram Stars
-                        currency: 'XTR', // Telegram Stars currency
-                        prices: [{ label: `${stars} Stars`, amount: price }], // Amount in cents
+                        title: `${starCount} Telegram Stars`,
+                        description: `Sending ${starCount} Telegram Stars`,
+                        payload: `stars_${starCount}`,
+                        provider_token: '', // Leave empty for Telegram Stars
+                        currency: 'XTR',
+                        prices: [{ label: `${starCount} Stars`, amount: starCount * 100 }], // Correctly requests exact stars
                         start_parameter: 'start_parameter'
                     })
                 });
-
                 const data = await response.json();
                 if (data.ok) {
-                    // Redirect to the payment link
                     window.location.href = data.result;
                 } else {
-                    showMessage('Payment initiation failed. Please try again.', 'error');
+                    alert('Payment failed. Please try again.');
                 }
             } catch (error) {
-                showMessage(`Error: ${error.message}`, 'error');
+                alert('Error: ' + error.message);
             }
         }
 
-        // Refund form submission
-        document.getElementById('refundForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        async function requestRefund() {
             const transactionId = document.getElementById('transactionId').value;
-
+            if (!transactionId) {
+                alert('Please enter a Transaction ID');
+                return;
+            }
             try {
-                // Refund using the Telegram Bot API
                 const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/refundStarPayment`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        user_id: 6373984454, // Replace with the user's ID (you need to track this)
+                        user_id: USER_ID,
                         telegram_payment_charge_id: transactionId
                     })
                 });
-
                 const data = await response.json();
                 if (data.ok) {
-                    showMessage('✅ Refund processed successfully!', 'success');
+                    alert('Refund processed successfully!');
                 } else {
-                    showMessage('❌ Refund could not be processed.', 'error');
+                    alert('Refund request failed.');
                 }
             } catch (error) {
-                showMessage(`Error: ${error.message}`, 'error');
-            }
-        });
-
-        // Show messages
-        function showMessage(message, type = 'success') {
-            messageDiv.className = `message ${type}`;
-            messageDiv.innerHTML = message;
-        }
-
-        // Check for payment verification data when the Mini App reopens
-        function checkPaymentVerification() {
-            const params = new URLSearchParams(window.location.hash.substring(1));
-            const paymentStatus = params.get('payment_status');
-            const transactionId = params.get('transaction_id');
-
-            if (paymentStatus === 'success' && transactionId) {
-                showMessage('✅ Payment successful! Thank you for your purchase.', 'success');
+                alert('Error: ' + error.message);
             }
         }
-
-        // Run payment verification check on page load
-        checkPaymentVerification();
     </script>
 </body>
 </html>
