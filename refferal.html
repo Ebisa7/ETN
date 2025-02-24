@@ -3,27 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Store</title>
+    <title>Telegram Stars Sender</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            text-align: center;
         }
-        .item {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
+        .slider-container {
+            margin: 50px 0;
         }
-        .item button {
+        .slider {
+            width: 80%;
+            margin: 20px auto;
+        }
+        .star-display {
+            font-size: 2em;
+            margin: 20px 0;
+        }
+        .send-button {
             background-color: #28a745;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 15px 30px;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1.2em;
         }
-        .item button:hover {
+        .send-button:hover {
             background-color: #218838;
         }
         .message {
@@ -39,73 +46,66 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+        .refund-form {
+            margin-top: 50px;
+        }
+        .refund-form input {
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .refund-form button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .refund-form button:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
-    <h1>Welcome to the Digital Store! 🎉</h1>
-    <p>Select an item to purchase:</p>
+    <h1>Telegram Stars Sender 🌟</h1>
+    <p>Select the number of Stars you want to send:</p>
 
-    <div id="items">
-        <!-- Items will be dynamically loaded here -->
+    <div class="slider-container">
+        <input type="range" id="starSlider" class="slider" min="1" max="10" value="1">
+        <div class="star-display" id="starDisplay">1 ⭐</div>
+        <button class="send-button" onclick="sendStars()">Send Stars</button>
     </div>
 
     <div id="message" class="message"></div>
 
-    <h2>Request a Refund</h2>
-    <form id="refundForm">
-        <label for="transactionId">Transaction ID:</label>
-        <input type="text" id="transactionId" name="transactionId" required>
-        <button type="submit">Request Refund</button>
-    </form>
+    <div class="refund-form">
+        <h2>Request a Refund</h2>
+        <form id="refundForm">
+            <label for="transactionId">Transaction ID:</label>
+            <input type="text" id="transactionId" name="transactionId" required>
+            <button type="submit">Request Refund</button>
+        </form>
+    </div>
 
     <script>
         // Replace with your bot token (⚠️ WARNING: Exposing your bot token is unsafe!)
-        const BOT_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo';
+        const BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
 
-        // Items available for purchase
-        const ITEMS = {
-            ice_cream: {
-                name: 'Ice Cream 🍦',
-                price: 100, // Price in cents (1 Star = 100 cents)
-                description: 'A delicious virtual ice cream',
-                secret: 'FROZEN2025'
-            },
-            cookie: {
-                name: 'Cookie 🍪',
-                price: 300, // Price in cents (3 Stars = 300 cents)
-                description: 'A sweet virtual cookie',
-                secret: 'SWEET2025'
-            },
-            hamburger: {
-                name: 'Hamburger 🍔',
-                price: 500, // Price in cents (5 Stars = 500 cents)
-                description: 'A tasty virtual hamburger',
-                secret: 'BURGER2025'
-            }
-        };
-
+        const starSlider = document.getElementById('starSlider');
+        const starDisplay = document.getElementById('starDisplay');
         const messageDiv = document.getElementById('message');
 
-        // Load items dynamically
-        const itemsDiv = document.getElementById('items');
-        for (const [id, item] of Object.entries(ITEMS)) {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'item';
-            itemDiv.innerHTML = `
-                <h3>${item.name} - ${item.price / 100} ⭐</h3>
-                <p>${item.description}</p>
-                <button onclick="purchaseItem('${id}')">Purchase</button>
-            `;
-            itemsDiv.appendChild(itemDiv);
-        }
+        // Update the star display when the slider changes
+        starSlider.addEventListener('input', () => {
+            starDisplay.textContent = `${starSlider.value} ⭐`;
+        });
 
-        // Purchase item
-        async function purchaseItem(itemId) {
-            const item = ITEMS[itemId];
-            if (!item) {
-                showMessage('Item not found.', 'error');
-                return;
-            }
+        // Send Stars
+        async function sendStars() {
+            const stars = parseInt(starSlider.value);
+            const price = stars * 100; // 1 Star = 100 cents
 
             try {
                 // Create an invoice link using the Telegram Bot API
@@ -115,12 +115,12 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        title: item.name,
-                        description: item.description,
-                        payload: itemId,
+                        title: `Send ${stars} Stars`,
+                        description: `You are sending ${stars} Telegram Stars.`,
+                        payload: 'stars_payment',
                         provider_token: '', // Empty for Telegram Stars
                         currency: 'XTR', // Telegram Stars currency
-                        prices: [{ label: item.name, amount: item.price }], // Amount in cents
+                        prices: [{ label: `${stars} Stars`, amount: price }], // Amount in cents
                         start_parameter: 'start_parameter'
                     })
                 });
