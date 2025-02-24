@@ -66,19 +66,19 @@
         const ITEMS = {
             ice_cream: {
                 name: 'Ice Cream 🍦',
-                price: 1,
+                price: 100, // Price in cents (1 Star = 100 cents)
                 description: 'A delicious virtual ice cream',
                 secret: 'FROZEN2025'
             },
             cookie: {
                 name: 'Cookie 🍪',
-                price: 3,
+                price: 300, // Price in cents (3 Stars = 300 cents)
                 description: 'A sweet virtual cookie',
                 secret: 'SWEET2025'
             },
             hamburger: {
                 name: 'Hamburger 🍔',
-                price: 5,
+                price: 500, // Price in cents (5 Stars = 500 cents)
                 description: 'A tasty virtual hamburger',
                 secret: 'BURGER2025'
             }
@@ -92,7 +92,7 @@
             const itemDiv = document.createElement('div');
             itemDiv.className = 'item';
             itemDiv.innerHTML = `
-                <h3>${item.name} - ${item.price} ⭐</h3>
+                <h3>${item.name} - ${item.price / 100} ⭐</h3>
                 <p>${item.description}</p>
                 <button onclick="purchaseItem('${id}')">Purchase</button>
             `;
@@ -120,7 +120,7 @@
                         payload: itemId,
                         provider_token: '', // Empty for Telegram Stars
                         currency: 'XTR', // Telegram Stars currency
-                        prices: [{ label: item.name, amount: item.price * 100 }], // Amount in cents
+                        prices: [{ label: item.name, amount: item.price }], // Amount in cents
                         start_parameter: 'start_parameter'
                     })
                 });
@@ -150,7 +150,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        user_id: 123456789, // Replace with the user's ID (you need to track this)
+                        user_id: 6373984454, // Replace with the user's ID (you need to track this)
                         telegram_payment_charge_id: transactionId
                     })
                 });
@@ -171,6 +171,20 @@
             messageDiv.className = `message ${type}`;
             messageDiv.innerHTML = message;
         }
+
+        // Check for payment verification data when the Mini App reopens
+        function checkPaymentVerification() {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const paymentStatus = params.get('payment_status');
+            const transactionId = params.get('transaction_id');
+
+            if (paymentStatus === 'success' && transactionId) {
+                showMessage('✅ Payment successful! Thank you for your purchase.', 'success');
+            }
+        }
+
+        // Run payment verification check on page load
+        checkPaymentVerification();
     </script>
 </body>
 </html>
