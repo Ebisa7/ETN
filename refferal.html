@@ -4,96 +4,92 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digital Store - Telegram Stars Payment</title>
-
-</head>
   <style>
-  * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-}
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+    }
 
-.container {
-  width: 90%;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
+    .container {
+      width: 90%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-.header {
-  text-align: center;
-  margin-bottom: 30px;
-}
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
 
-.header h1 {
-  font-size: 2.5rem;
-  color: #0d47a1;
-}
+    .header h1 {
+      font-size: 2.5rem;
+      color: #0d47a1;
+    }
 
-.header p {
-  font-size: 1.2rem;
-  color: #555;
-}
+    .header p {
+      font-size: 1.2rem;
+      color: #555;
+    }
 
-.item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
 
-.item {
-  background-color: #fafafa;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
+    .item {
+      background-color: #fafafa;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
 
-.item h2 {
-  font-size: 1.8rem;
-  color: #0d47a1;
-}
+    .item h2 {
+      font-size: 1.8rem;
+      color: #0d47a1;
+    }
 
-.item p {
-  font-size: 1rem;
-  color: #777;
-}
+    .item p {
+      font-size: 1rem;
+      color: #777;
+    }
 
-.purchase-btn {
-  padding: 10px 20px;
-  background-color: #0d47a1;
-  color: #fff;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+    .purchase-btn {
+      padding: 10px 20px;
+      background-color: #0d47a1;
+      color: #fff;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-.purchase-btn:hover {
-  background-color: #1976d2;
-}
+    .purchase-btn:hover {
+      background-color: #1976d2;
+    }
 
-.footer {
-  text-align: center;
-  margin-top: 50px;
-  font-size: 0.9rem;
-  color: #777;
-}
-
-  
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #777;
+    }
   </style>
-  
-  <body>
+</head>
+<body>
 
   <div class="container">
     <header class="header">
@@ -126,74 +122,73 @@ body {
 
   <script>
     // Items data
-const items = {
-  ice_cream: {
-    name: "Ice Cream 🍦",
-    price: 1,
-    description: "A delicious virtual ice cream",
-    secret: "FROZEN2025"
-  },
-  cookie: {
-    name: "Cookie 🍪",
-    price: 3,
-    description: "A sweet virtual cookie",
-    secret: "SWEET2025"
-  },
-  hamburger: {
-    name: "Hamburger 🍔",
-    price: 5,
-    description: "A tasty virtual hamburger",
-    secret: "BURGER2025"
-  }
-};
+    const items = {
+      ice_cream: {
+        name: "Ice Cream 🍦",
+        price: 1,
+        description: "A delicious virtual ice cream",
+        secret: "FROZEN2025"
+      },
+      cookie: {
+        name: "Cookie 🍪",
+        price: 3,
+        description: "A sweet virtual cookie",
+        secret: "SWEET2025"
+      },
+      hamburger: {
+        name: "Hamburger 🍔",
+        price: 5,
+        description: "A tasty virtual hamburger",
+        secret: "BURGER2025"
+      }
+    };
 
-// Fetch bot token (replace with your bot's token)
-const botToken = "7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo";
+    // Fetch bot token (replace with your bot's token)
+    const botToken = "7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo";
 
-// Send invoice to Telegram using Bot API
-async function sendInvoice(itemId) {
-  const item = items[itemId];
-  const providerToken = ""; // Empty for digital goods
+    // Send invoice to Telegram using Bot API
+    async function sendInvoice(itemId) {
+      const item = items[itemId];
+      const providerToken = ""; // Empty for digital goods
 
-  const url = `https://api.telegram.org/bot${botToken}/sendInvoice`;
-  const payload = {
-    chat_id: "6373984454",  // Replace with actual chat ID
-    title: item.name,
-    description: item.description,
-    payload: itemId,
-    provider_token: providerToken,
-    currency: "XTR",  // Telegram Stars currency code
-    prices: [{ label: item.name, amount: item.price * 100 }]  // Prices in cents
-  };
+      const url = `https://api.telegram.org/bot${botToken}/sendInvoice`;
+      const payload = {
+        chat_id: "6373984454",  // Replace with actual chat ID
+        title: item.name,
+        description: item.description,
+        payload: itemId,
+        provider_token: providerToken,
+        currency: "XTR",  // Telegram Stars currency code
+        prices: [{ label: item.name, amount: item.price * 100 }]  // Prices in cents
+      };
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json();
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
 
-    if (data.ok) {
-      alert(`Successfully sent invoice for ${item.name}!`);
-    } else {
-      throw new Error("Failed to send invoice");
+        if (data.ok) {
+          alert(`Successfully sent invoice for ${item.name}!`);
+        } else {
+          throw new Error("Failed to send invoice");
+        }
+      } catch (error) {
+        console.error("Error sending invoice:", error);
+        alert("An error occurred. Please try again.");
+      }
     }
-  } catch (error) {
-    console.error("Error sending invoice:", error);
-    alert("An error occurred. Please try again.");
-  }
-}
 
-// Add event listeners to purchase buttons
-document.querySelectorAll(".purchase-btn").forEach(button => {
-  button.addEventListener("click", () => {
-    const itemId = button.closest(".item").dataset.itemId;
-    sendInvoice(itemId);
-  });
-});
+    // Add event listeners to purchase buttons
+    document.querySelectorAll(".purchase-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        const itemId = button.closest(".item").dataset.itemId;
+        sendInvoice(itemId);
+      });
+    });
+  </script>
 
-    
-    </script>
 </body>
 </html>
