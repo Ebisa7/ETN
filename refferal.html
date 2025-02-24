@@ -6,67 +6,146 @@
     <title>Send Stars ✨</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            transition: background-color 0.3s ease;
         }
+
+        h1 {
+            font-size: 2.5em;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.1em;
+            color: #555;
+        }
+
         .slider-container {
-            margin: 20px auto;
             width: 80%;
+            max-width: 400px;
+            margin-top: 20px;
         }
+
         .slider {
             width: 100%;
+            margin: 0;
+            appearance: none;
+            background: #ddd;
+            height: 10px;
+            border-radius: 5px;
+            transition: background 0.3s ease;
         }
+
+        .slider:focus {
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
         .big-text {
-            font-size: 50px;
+            font-size: 1.8em;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 10px 0;
+            color: #007bff;
         }
+
         .send-button, .refund-button {
             background-color: #007bff;
             color: white;
             border: none;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 20px;
-            margin-top: 10px;
+            font-size: 1.2em;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
         }
+
         .send-button:hover, .refund-button:hover {
             background-color: #0056b3;
         }
+
         .refund-container {
             margin-top: 30px;
             padding: 20px;
-            background: white;
+            background: #fff;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
         }
+
         input {
-            padding: 10px;
-            font-size: 16px;
-            width: 200px;
+            padding: 12px;
+            font-size: 1em;
+            width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #007bff;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            color: #777;
         }
     </style>
 </head>
 <body>
     <h1>Send Telegram Stars ✨</h1>
     <p>Select the amount of Stars to send:</p>
-    
+
     <div class="slider-container">
         <input type="range" id="starSlider" class="slider" min="1" max="100" value="1">
         <div class="big-text" id="starAmount">1 ⭐</div>
     </div>
-    
+
     <button class="send-button" onclick="sendStars()">Send Stars</button>
-    
+
     <div class="refund-container">
         <h2>Request a Refund</h2>
         <input type="text" id="transactionId" placeholder="Transaction ID">
         <button class="refund-button" onclick="requestRefund()">Request Refund</button>
     </div>
-    
+
+    <div class="footer">
+        <p>&copy; 2025 SendStars. All Rights Reserved.</p>
+    </div>
+
     <script>
         const BOT_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo';
         const USER_ID = 6373984454; // Replace with dynamic user ID if possible
@@ -87,7 +166,7 @@
                         payload: `stars_${starCount}`,
                         provider_token: '', // Leave empty for Telegram Stars
                         currency: 'XTR',
-                        prices: [{ label: `${starCount} Stars`, amount: starCount * 100 }], // Correctly requests exact stars
+                        prices: [{ label: `${starCount} Stars`, amount: starCount }], // Correctly requests exact stars
                         start_parameter: 'start_parameter'
                     })
                 });
