@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digital Store</title>
+    <title>Telegram Stars Example</title>
     <script src="https://telegram.org/js/telegram-webapp.js"></script>
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,40 +20,25 @@
         .success {
             color: green;
         }
-        .item-button {
-            @apply w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out text-center;
-        }
-        .refund-button {
-            @apply w-full bg-red-500 hover:bg-red-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out;
-        }
-        .verify-button {
-            @apply w-full bg-green-500 hover:bg-green-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out text-center;
-        }
     </style>
-    <script>
-        const Telegram = window.Telegram;
-        const WebApp = Telegram.WebApp;
-        //WebApp.ready(); // Remove this line
-    </script>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 w-full max-w-md">
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Digital Store</h1>
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6 text-center">New Telegram Stars Example</h1>
 
         <div id="mainContent" class="space-y-4">
-            <p id="welcomeMessage" class="text-gray-700 dark:text-gray-300 text-center">
-                Welcome to the Digital Store! 🎉 Select an item to purchase with Telegram Stars:
-            </p>
+            <p class="text-gray-700 dark:text-gray-300 text-center">Click the button below to send 10 Stars.</p>
 
-            <div id="itemList" class="space-y-2">
-                </div>
+            <button id="sendStarsButton" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out">
+                Send 10 Stars
+            </button>
 
             <div id="refundSection" class="hidden space-y-4">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mt-6">Refund</h2>
                 <p class="text-gray-700 dark:text-gray-300">Enter the Telegram payment charge ID to request a refund.</p>
                 <input type="text" id="refundChargeId" placeholder="Enter charge ID" class="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <div id="refundResult" class="mt-2 text-center font-medium"></div>
-                <button id="refundButton" class="refund-button">
+                <button id="refundButton" class="w-full bg-red-500 hover:bg-red-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out">
                     Refund
                 </button>
             </div>
@@ -62,7 +47,7 @@
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mt-6">Verify Payment</h2>
                 <p class="text-gray-700 dark:text-gray-300">Click the button below to verify your payment.</p>
                 <div id="verificationResult" class="mt-2 text-center font-medium"></div>
-                <button id="verifyButton" class="verify-button">
+                <button id="verifyButton" class="w-full bg-green-500 hover:bg-green-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out">
                     Verify Payment
                 </button>
             </div>
@@ -72,54 +57,12 @@
     </div>
 
     <script>
-        //  bot token
-        const BOT_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo'; //  Replace with your actual bot token
-        const ITEMS = {
-            'ice_cream': {
-                name: 'Ice Cream 🍦',
-                price: 1,
-                description: 'A delicious virtual ice cream',
-                secret: 'FROZEN2025'
-            },
-            'cookie': {
-                name: 'Cookie 🍪',
-                price: 3,
-                description: 'A sweet virtual cookie',
-                secret: 'SWEET2025'
-            },
-            'hamburger': {
-                name: 'Hamburger 🍔',
-                price: 5,
-                description: 'A tasty virtual hamburger',
-                secret: 'BURGER2025'
-            }
-        };
-
-        const MESSAGES = {
-            'welcome': "Welcome to the Digital Store! 🎉 Select an item to purchase with Telegram Stars:",
-            'help': "🛍 *Digital Store Bot Help*\n\n" +
-                "Commands:\n" +
-                "/start - View available items\n" +
-                "/help - Show this help message\n" +
-                "/refund - Request a refund (requires transaction ID)\n\n" +
-                "How to use:\n" +
-                "1. Use /start to see available items\n" +
-                "2. Click on an item to purchase\n" +
-                "3. Pay with Stars\n" +
-                "4. Receive your secret code\n" +
-                "5. Use /refund to get a refund if needed",
-            'refund_success': "✅ Refund processed successfully!\nThe Stars have been returned to your balance.",
-            'refund_failed': "❌ Refund could not be processed.\nPlease try again later or contact support.",
-            'refund_usage': "Please provide the transaction ID after the /refund command.\nExample: `/refund YOUR_TRANSACTION_ID`"
-        };
-
         const Telegram = window.Telegram;
         const WebApp = Telegram.WebApp;
 
-        //WebApp.ready(); // Remove this line
+        WebApp.ready();
 
-        const mainContent = document.getElementById('mainContent');
-        const itemList = document.getElementById('itemList');
+        const sendStarsButton = document.getElementById('sendStarsButton');
         const refundButton = document.getElementById('refundButton');
         const refundChargeIdInput = document.getElementById('refundChargeId');
         const refundResult = document.getElementById('refundResult');
@@ -128,8 +71,9 @@
         const verificationSection = document.getElementById('verificationSection');
         const verifyButton = document.getElementById('verifyButton');
         const verificationResult = document.getElementById('verificationResult');
-        const welcomeMessage = document.getElementById('welcomeMessage');
 
+        //  bot token
+        const BOT_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo'; //  Replace with your actual bot token
 
         let chargeId = null;
         let isSandbox = true;
@@ -145,54 +89,33 @@
             errorContainer.textContent = '';
         }
 
-        function addItemList() {
-            itemList.innerHTML = '';
-            for (const itemId in ITEMS) {
-                const item = ITEMS[itemId];
-                const itemButton = document.createElement('button');
-                itemButton.className = 'item-button';
-                itemButton.textContent = `${item.name} - ${item.price} ⭐`;
-                itemButton.dataset.itemId = itemId;
-                itemButton.addEventListener('click', handleItemClick);
-                itemList.appendChild(itemButton);
-            }
-        }
-
-        function handleItemClick(event) {
+        sendStarsButton.addEventListener('click', () => {
             hideError();
-            const itemId = event.target.dataset.itemId;
-            const item = ITEMS[itemId];
-
-            if (WebApp && WebApp.initData) {
-                WebApp.invoke('sendInvoice', {
-                    title: item.name,
-                    description: item.description,
-                    payload: itemId,
-                    provider_token: BOT_TOKEN,
-                    currency: 'XTR',
-                    prices: [{ label: item.name, amount: item.price * 100 }],
-                    start_parameter: 'start_parameter',
-                    is_test: isSandbox
-                }).then(result => {
-                    if (result.ok) {
-                        chargeId = result.order_info.charge_id;
-                        console.log('Payment successful! Charge ID:', chargeId);
-                        alert(`Payment successful! Charge ID: ${chargeId}. To complete your purchase, please send ${item.price} Stars to the bot and then click "Verify Payment".`);
-                        refundSection.classList.remove('hidden');
-                        verificationSection.classList.remove('hidden');
-                    } else {
-                        console.error('Payment failed:', result.error);
-                        showError(`Payment failed: ${result.error}`);
-                    }
-                }).catch(error => {
-                    console.error('Error initiating payment:', error);
-                    showError(`Error initiating payment: ${error.message}`);
-                });
-            } else {
-                alert("Payment not initiated.  This page is not running in Telegram.");
-            }
-
-        }
+            WebApp.invoke('sendInvoice', {
+                title: 'Send 10 Stars',
+                description: 'Send 10 Stars to the bot',
+                payload: 'send_stars_payload',
+                provider_token: BOT_TOKEN,
+                currency: 'XTR',
+                prices: [{ label: 'Stars', amount: 1000 }],
+                start_parameter: 'start_parameter',
+                is_test: isSandbox
+            }).then(result => {
+                if (result.ok) {
+                    chargeId = result.order_info.charge_id;
+                    console.log('Payment successful! Charge ID:', chargeId);
+                    alert(`Payment successful! Charge ID: ${chargeId}. To complete your purchase, please send 10 Stars to the bot and then click "Verify Payment".`);
+                    refundSection.classList.remove('hidden');
+                    verificationSection.classList.remove('hidden');
+                } else {
+                    console.error('Payment failed:', result.error);
+                    showError(`Payment failed: ${result.error}`);
+                }
+            }).catch(error => {
+                console.error('Error initiating payment:', error);
+                showError(`Error initiating payment: ${error.message}`);
+            });
+        });
 
         refundButton.addEventListener('click', () => {
             hideError();
@@ -259,9 +182,6 @@
                 }
             }, 2000);
         });
-
-        // Initialize the item list on page load
-        addItemList();
     </script>
 </body>
 </html>
