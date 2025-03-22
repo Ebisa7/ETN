@@ -22,7 +22,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen">
+<body class="bg-red-100 dark:bg-red-900 flex items-center justify-center min-h-screen">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 w-full max-w-md">
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Telegram Stars Example</h1>
 
@@ -36,10 +36,19 @@
             <div id="refundSection" class="hidden space-y-4">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white mt-6">Refund</h2>
                 <p class="text-gray-700 dark:text-gray-300">Enter the Telegram payment charge ID to request a refund.</p>
-                <input type="text" id="refundChargeId" placeholder="Enter charge ID" class="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <input type="text" id="refundChargeId" placeholder="Enter charge ID" class="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <div id="refundResult" class="mt-2 text-center font-medium"></div>
                 <button id="refundButton" class="w-full bg-red-500 hover:bg-red-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out">
                     Refund
+                </button>
+            </div>
+
+            <div id="verificationSection" class="hidden space-y-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mt-6">Verify Payment</h2>
+                <p class="text-gray-700 dark:text-gray-300">Click the button below to verify your payment.</p>
+                <div id="verificationResult" class="mt-2 text-center font-medium"></div>
+                <button id="verifyButton" class="w-full bg-green-500 hover:bg-green-700 text-white font-semibold rounded-md py-2 transition duration-300 ease-in-out">
+                    Verify Payment
                 </button>
             </div>
 
@@ -59,11 +68,16 @@
         const refundResult = document.getElementById('refundResult');
         const refundSection = document.getElementById('refundSection');
         const errorContainer = document.getElementById('errorContainer');
+        const verificationSection = document.getElementById('verificationSection');
+        const verifyButton = document.getElementById('verifyButton');
+        const verificationResult = document.getElementById('verificationResult');
 
-        //  bot token 
+        //  bot token
         const BOT_TOKEN = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo'; //  Replace with your actual bot token
 
         let chargeId = null; // Store the charge ID after a successful payment
+        let isSandbox = true; //  Use sandbox for testing, set to false for production
+        let paymentVerified = false;
 
         function showError(message) {
             errorContainer.textContent = message;
@@ -86,12 +100,14 @@
                 currency: 'XTR', // Telegram Stars
                 prices: [{ label: 'Goods', amount: 1000 }], // 金额单位是 百分之一的 Star (1000  10 Stars)
                 start_parameter: 'start_parameter',
+                is_test: isSandbox // Use is_test parameter
             }).then(result => {
                 if (result.ok) {
                     chargeId = result.order_info.charge_id; // 保存 charge_id
                     console.log('Payment successful! Charge ID:', chargeId);
-                    alert(`Payment successful! Charge ID: ${chargeId}. This ID is saved for the refund process.`);
+                    alert(`Payment successful! Charge ID: ${chargeId}.  To complete your purchase, please send 10 Stars to the bot and then click "Verify Payment".`);
                     refundSection.classList.remove('hidden'); // Show refund section
+                    verificationSection.classList.remove('hidden');
                 } else {
                     console.error('Payment failed:', result.error);
                     showError(`Payment failed: ${result.error}`);
@@ -115,6 +131,7 @@
                 charge_id: chargeIdToRefund,
                 amount: 1000, //  退款金额 (10 Stars)
                 reason: 'Customer request', //  退款原因
+                is_test: isSandbox  // Use is_test parameter here too
             }).then(result => {
                 if (result.ok) {
                     refundResult.textContent = 'Refund successful!';
@@ -125,6 +142,8 @@
                     chargeId = null; // Clear charge ID after successful refund
                     refundSection.classList.add('hidden'); // Hide refund section after successful refund
                     refundChargeIdInput.value = ''; // Clear the input field
+                    verificationSection.classList.add('hidden');
+                    paymentVerified = false;
                 } else {
                     refundResult.textContent = `Refund failed: ${result.error}`;
                     refundResult.classList.add('text-red-500');
@@ -139,6 +158,31 @@
                 console.error('Error initiating refund:', error);
                 showError(`Error initiating refund: ${error.message}`);
             });
+        });
+
+        verifyButton.addEventListener('click', () => {
+            hideError();
+            //  Replace this with actual verification logic with your bot
+            //  This is just a placeholder
+            setTimeout(() => {
+                if (chargeId && !paymentVerified) {
+                    verificationResult.textContent = 'Payment verified successfully!';
+                    verificationResult.classList.remove('text-red-500');
+                    verificationResult.classList.add('text-green-500');
+                    paymentVerified = true;
+                    alert('Payment verified! Thank you for your purchase.');
+                } else if (paymentVerified) {
+                    verificationResult.textContent = 'Payment already verified.';
+                    verificationResult.classList.remove('text-red-500');
+                    verificationResult.classList.add('text-green-500');
+                }
+                 else {
+                    verificationResult.textContent = 'Payment verification failed. Please ensure you have sent the Stars to the bot.';
+                    verificationResult.classList.add('text-red-500');
+                    verificationResult.classList.remove('text-green-500');
+                    showError('Payment verification failed. Please ensure you have sent the Stars to the bot.');
+                }
+            }, 2000); // Simulate a 2-second delay for verification
         });
     </script>
 </body>
