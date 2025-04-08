@@ -3,220 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Preview</title>
+    <title>Code Editor</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto Mono', monospace; /* Modern monospaced font */
             height: 100vh;
             margin: 0;
-            background-color: #17212b;
+            background-color: #1e1f28; /* Dark background */
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: white;
-            overflow: hidden;
-            position: relative;
+            justify-content: flex-start; /* Align items to the top */
+            color: #abb2bf; /* Light gray text */
+            padding-top: 20px;
         }
         h2 {
-            display: none;
+            color: #c678dd; /* Purple heading */
+            margin-bottom: 20px;
         }
-        iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
+        textarea {
+            width: 90%; /* Take up more horizontal space */
+            height: 70vh; /* More vertical space */
+            background-color: #282c34; /* Darker editor background */
+            color: #d19a66; /* Light orange/beige code color */
             border: none;
+            padding: 16px;
+            font-size: 16px;
+            outline: none;
+            resize: vertical; /* Allow vertical resizing */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+            line-height: 1.5; /* Improved readability */
         }
-        .update-button-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        textarea::selection {
+            background-color: #61afef; /* Highlight color */
+            color: #282c34;
         }
-        button#updateButton {
+        button {
+            margin-top: 20px;
             padding: 12px 24px;
-            color: white;
+            background-color: #61afef; /* Blue action button */
+            color: #282c34; /* Dark text on button */
             border: none;
             cursor: pointer;
+            border-radius: 6px;
             font-size: 16px;
-            background-color: #0088cc; /* Telegram main button color */
-            transition: background-color 0.3s ease, opacity 0.3s ease;
-            opacity: 0.9;
-            padding-right: 36px; /* Make space for the indicator */
-            position: relative; /* For absolute positioning of text */
+            transition: background-color 0.3s ease;
         }
-        button#updateButton:hover {
-            opacity: 1;
+        button:hover {
+            background-color: #98c379; /* Green hover effect */
+            color: #282c34;
         }
-        .button-indicator {
+        .button-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 12px;
-            color: white;
-        }
-        .loading-indicator {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-        }
-        .loaded-indicator {
-            background-color: #4caf50; /* Green for loaded */
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-        .error-indicator {
-            background-color: #f44336; /* Red for error */
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            gap: 10px;
+            margin-top: 20px;
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h2>Preview</h2>
-    <iframe id="outputFrame"></iframe>
-    <div class="update-button-container">
-        <button id="updateButton" onclick="loadCodeWithIndicator()">Update Preview</button>
-        <div id="buttonIndicator" class="button-indicator"></div>
+    <h2>Code Editor</h2>
+    <textarea id="codeEditor" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html lang=&quot;en&quot;&gt;&#10;&lt;head&gt;&#10;    &lt;meta charset=&quot;UTF-8&quot;&gt;&#10;    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;&#10;    &lt;title&gt;Document&lt;/title&gt;&#10;&lt;/head&gt;&#10;&lt;body&gt;&#10;    &lt;h1&gt;Hello World!&lt;/h1&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;"></textarea>
+    <div class="button-container">
+        <button onclick="saveCode()">Save Code</button>
+        <button onclick="window.open('pre.html', '_blank')">Open Preview</button>
     </div>
 
     <script>
-        const updateButton = document.getElementById("updateButton");
-        const buttonIndicator = document.getElementById("buttonIndicator");
-
-        // Initialize Telegram Web App
-        Telegram.WebApp.ready();
-
-        // Function to set the button state
-        function setButtonState(state, message = "") {
-            buttonIndicator.innerHTML = "";
-            updateButton.disabled = false; // Re-enable by default
-
-            switch (state) {
-                case "loading":
-                    buttonIndicator.innerHTML = '<div class="loading-indicator"></div>';
-                    updateButton.disabled = true;
-                    updateButton.textContent = "Updating";
-                    break;
-                case "loaded":
-                    buttonIndicator.innerHTML = '<span class="loaded-indicator">&#10003;</span>'; // Checkmark
-                    updateButton.textContent = "Preview Updated";
-                    // Revert text after a short delay
-                    setTimeout(() => {
-                        updateButton.textContent = "Update Preview";
-                    }, 1500);
-                    break;
-                case "error":
-                    buttonIndicator.innerHTML = '<span class="error-indicator">&#10005;</span>'; // X mark
-                    updateButton.textContent = "Update Failed";
-                    // Revert text after a short delay
-                    setTimeout(() => {
-                        updateButton.textContent = "Update Preview";
-                    }, 1500);
-                    break;
-                default:
-                    updateButton.textContent = "Update Preview";
-                    break;
-            }
-        }
-
-        // Function to simulate loading code with an indicator
-        async function loadCodeWithIndicator() {
-            setButtonState("loading");
-            const code = localStorage.getItem("savedCode");
-
-            // Simulate an asynchronous operation (e.g., fetching data)
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            if (code) {
-                try {
-                    const iframe = document.getElementById("outputFrame").contentWindow.document;
-                    iframe.open();
-                    iframe.write(code);
-                    iframe.close();
-                    setButtonState("loaded");
-                } catch (error) {
-                    console.error("Error loading code:", error);
-                    setButtonState("error");
-                }
-            } else {
-                setButtonState("error", "No code saved.");
-            }
-        }
-
-        // Make the button Telegram's main button
-        Telegram.WebApp.MainButton.setParams({
-            text: "Update Preview",
-            color: "#0088cc", // Main Telegram button color
-            isVisible: true
-        });
-
-        // Set button callback for Telegram interaction
-        Telegram.WebApp.MainButton.onClick(() => {
-            loadCodeWithIndicator();
-        });
-
-        // Event listener to handle the button's click
         document.addEventListener("DOMContentLoaded", () => {
-            loadCodeWithIndicator(); // Initial load with indicator
+            if (localStorage.getItem("savedCode")) {
+                document.getElementById("codeEditor").value = localStorage.getItem("savedCode");
+            }
         });
 
-        // Inject Telegram SDK script into the iframe
-        function injectTelegramScript(iframeDocument) {
-            const script = iframeDocument.createElement("script");
-            script.src = "https://telegram.org/js/telegram-web-app.js";
-            script.onload = () => {
-                iframeDocument.addEventListener("DOMContentLoaded", () => {
-                    Telegram.WebApp.ready();
-                    // Example of setting the header color within the iframe
-                    Telegram.WebApp.setHeaderColor("#0088cc");
-                });
-            };
-            iframeDocument.body.appendChild(script);
+        function saveCode() {
+            const code = document.getElementById("codeEditor").value;
+            localStorage.setItem("savedCode", code);
         }
-
-        // Override the iframe document load to inject the Telegram SDK script
-        document.getElementById("outputFrame").addEventListener("load", function() {
-            const iframe = this;
-            const iframeDocument = iframe.contentWindow.document;
-            injectTelegramScript(iframeDocument);
-        });
-
     </script>
 </body>
 </html>
