@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Editor</title>
+    <style>
+        body {
+            font-family: 'Roboto Mono', monospace; /* Modern monospaced font */
+            height: 100vh;
+            margin: 0;
+            background-color: #1e1f28; /* Dark background */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align items to the top */
+            color: #abb2bf; /* Light gray text */
+            padding-top: 20px;
+        }
+        h2 {
+            color: #c678dd; /* Purple heading */
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 90%; /* Take up more horizontal space */
+            height: 70vh; /* More vertical space */
+            background-color: #282c34; /* Darker editor background */
+            color: #d19a66; /* Light orange/beige code color */
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            outline: none;
+            resize: vertical; /* Allow vertical resizing */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+            line-height: 1.5; /* Improved readability */
+        }
+        textarea::selection {
+            background-color: #61afef; /* Highlight color */
+            color: #282c34;
+        }
+        button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #61afef; /* Blue action button */
+            color: #282c34; /* Dark text on button */
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #98c379; /* Green hover effect */
+            color: #282c34;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h2>Code Editor</h2>
+    <textarea id="codeEditor" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html lang=&quot;en&quot;&gt;&#10;&lt;head&gt;&#10;    &lt;meta charset=&quot;UTF-8&quot;&gt;&#10;    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;&#10;    &lt;title&gt;Document&lt;/title&gt;&#10;&lt;/head&gt;&#10;&lt;body&gt;&#10;    &lt;h1&gt;Hello World!&lt;/h1&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;"></textarea>
+    <div class="button-container">
+        <button onclick="saveCode()">Save Code</button>
+        <button onclick="window.open('pre.html', '_blank')">Open Preview</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("savedCode")) {
+                document.getElementById("codeEditor").value = localStorage.getItem("savedCode");
+            }
+        });
+
+        function saveCode() {
+            const code = document.getElementById("codeEditor").value;
+            localStorage.setItem("savedCode", code);
+        }
+    </script>
+</body>
+</html>
