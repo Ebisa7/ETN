@@ -39,7 +39,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 24px;
-            overflow: hidden; /* Clip the indicator */
+            overflow: hidden;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         button#updateButton {
@@ -119,9 +119,6 @@
         const updateButton = document.getElementById("updateButton");
         const buttonIndicator = document.getElementById("buttonIndicator");
 
-        // Initialize Telegram Web App
-        Telegram.WebApp.ready();
-
         // Function to set the button state
         function setButtonState(state, message = "") {
             buttonIndicator.innerHTML = "";
@@ -179,17 +176,46 @@
             }
         }
 
-        // Make the button Telegram style
+        // Make the button Telegram's main button
         Telegram.WebApp.MainButton.setParams({
             text: "Update Preview",
             color: "#0088cc", // Main Telegram button color
             isVisible: true
         });
 
+        // Set button callback for Telegram interaction
+        Telegram.WebApp.MainButton.onClick(() => {
+            loadCodeWithIndicator();
+        });
+
         // Event listener to handle the button's click
         document.addEventListener("DOMContentLoaded", () => {
             loadCodeWithIndicator(); // Initial load with indicator
         });
+
+        // Inject Telegram SDK script into the iframe
+        function injectTelegramScript(iframeDocument) {
+            const script = iframeDocument.createElement("script");
+            script.src = "https://telegram.org/js/telegram-web-app.js";
+            script.onload = () => {
+                iframeDocument.addEventListener("DOMContentLoaded", () => {
+                    Telegram.WebApp.ready();
+                    // Example of setting the header color within the iframe
+                    Telegram.WebApp.setHeaderColor("#0088cc"); // Set header color
+                });
+            };
+            iframeDocument.body.appendChild(script);
+        }
+
+        // Override the iframe document load to inject the Telegram SDK script
+        document.getElementById("outputFrame").addEventListener("load", function() {
+            const iframe = this;
+            const iframeDocument = iframe.contentWindow.document;
+
+            // Inject the Telegram SDK script dynamically when the iframe content loads
+            injectTelegramScript(iframeDocument);
+        });
+
     </script>
 </body>
 </html>
