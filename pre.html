@@ -26,7 +26,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: calc(100% - 40px);
             background: white;
             border: none;
         }
@@ -41,6 +41,7 @@
             border-radius: 24px;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
         }
         button#updateButton {
             padding: 12px 24px;
@@ -48,11 +49,11 @@
             border: none;
             cursor: pointer;
             font-size: 16px;
-            background-color: #0088cc; /* Telegram main button color */
+            background-color: #0088cc;
             transition: background-color 0.3s ease, opacity 0.3s ease;
             opacity: 0.9;
-            padding-right: 36px; /* Make space for the indicator */
-            position: relative; /* For absolute positioning of text */
+            padding-right: 36px;
+            position: relative;
         }
         button#updateButton:hover {
             opacity: 1;
@@ -80,7 +81,7 @@
             animation: spin 1s linear infinite;
         }
         .loaded-indicator {
-            background-color: #4caf50; /* Green for loaded */
+            background-color: #4caf50;
             width: 16px;
             height: 16px;
             border-radius: 50%;
@@ -90,7 +91,7 @@
             font-size: 14px;
         }
         .error-indicator {
-            background-color: #f44336; /* Red for error */
+            background-color: #f44336;
             width: 16px;
             height: 16px;
             border-radius: 50%;
@@ -104,6 +105,78 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Console styles */
+        .console-container {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background-color: #1e1e1e;
+            color: #f1f1f1;
+            border-top: 1px solid #333;
+            display: none;
+            flex-direction: column;
+            z-index: 999;
+        }
+        .console-header {
+            padding: 8px 12px;
+            background-color: #252526;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .console-title {
+            font-weight: bold;
+        }
+        .console-close {
+            cursor: pointer;
+            padding: 4px;
+        }
+        .console-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .console-log {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #333;
+        }
+        .log-info {
+            color: #4fc3f7;
+        }
+        .log-success {
+            color: #81c784;
+        }
+        .log-warning {
+            color: #ffb74d;
+        }
+        .log-error {
+            color: #ff8a65;
+        }
+        .toggle-console {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -115,14 +188,83 @@
         <div id="buttonIndicator" class="button-indicator"></div>
     </div>
 
+    <!-- Console elements -->
+    <button class="toggle-console" onclick="toggleConsole()">☰</button>
+    <div class="console-container" id="consoleContainer">
+        <div class="console-header">
+            <div class="console-title">Telegram Web App Requests</div>
+            <div class="console-close" onclick="toggleConsole()">×</div>
+        </div>
+        <div class="console-content" id="consoleContent"></div>
+    </div>
+
     <script>
         const updateButton = document.getElementById("updateButton");
         const buttonIndicator = document.getElementById("buttonIndicator");
+        const consoleContainer = document.getElementById("consoleContainer");
+        const consoleContent = document.getElementById("consoleContent");
+
+        // Initialize Telegram Web App
+        Telegram.WebApp.ready();
+        
+        // Storage for console logs
+        let consoleLogs = JSON.parse(localStorage.getItem("telegramConsoleLogs") || "[]");
+        
+        // Function to add log to console
+        function addConsoleLog(type, message, data = null) {
+            const timestamp = new Date().toISOString();
+            const logEntry = {
+                type,
+                message,
+                data,
+                timestamp
+            };
+            
+            consoleLogs.push(logEntry);
+            if (consoleLogs.length > 100) {
+                consoleLogs.shift(); // Keep only last 100 entries
+            }
+            
+            localStorage.setItem("telegramConsoleLogs", JSON.stringify(consoleLogs));
+            renderConsoleLogs();
+        }
+        
+        // Function to render console logs
+        function renderConsoleLogs() {
+            consoleContent.innerHTML = "";
+            consoleLogs.forEach(log => {
+                const logElement = document.createElement("div");
+                logElement.className = `console-log log-${log.type}`;
+                
+                const time = new Date(log.timestamp).toLocaleTimeString();
+                let logText = `[${time}] ${log.message}`;
+                
+                if (log.data) {
+                    logText += `\n${JSON.stringify(log.data, null, 2)}`;
+                }
+                
+                logElement.textContent = logText;
+                consoleContent.appendChild(logElement);
+            });
+            
+            // Auto-scroll to bottom
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+        }
+        
+        // Function to toggle console visibility
+        function toggleConsole() {
+            if (consoleContainer.style.display === "flex") {
+                consoleContainer.style.display = "none";
+            } else {
+                consoleContainer.style.display = "flex";
+                renderConsoleLogs();
+            }
+        }
 
         // Function to set the button state
         function setButtonState(state, message = "") {
             buttonIndicator.innerHTML = "";
-            updateButton.disabled = false; // Re-enable by default
+            updateButton.disabled = false;
 
             switch (state) {
                 case "loading":
@@ -131,17 +273,15 @@
                     updateButton.textContent = "Updating";
                     break;
                 case "loaded":
-                    buttonIndicator.innerHTML = '<span class="loaded-indicator">&#10003;</span>'; // Checkmark
+                    buttonIndicator.innerHTML = '<span class="loaded-indicator">&#10003;</span>';
                     updateButton.textContent = "Preview Updated";
-                    // Revert text after a short delay
                     setTimeout(() => {
                         updateButton.textContent = "Update Preview";
                     }, 1500);
                     break;
                 case "error":
-                    buttonIndicator.innerHTML = '<span class="error-indicator">&#10005;</span>'; // X mark
+                    buttonIndicator.innerHTML = '<span class="error-indicator">&#10005;</span>';
                     updateButton.textContent = "Update Failed";
-                    // Revert text after a short delay
                     setTimeout(() => {
                         updateButton.textContent = "Update Preview";
                     }, 1500);
@@ -152,70 +292,387 @@
             }
         }
 
-        // Function to simulate loading code with an indicator
+        // Function to proxy Telegram Web App requests
+        function setupTelegramProxy(iframeWindow) {
+            const originalPostMessage = iframeWindow.postMessage.bind(iframeWindow);
+            
+            // Override postMessage to intercept Telegram requests
+            iframeWindow.postMessage = function(message, targetOrigin, transfer) {
+                try {
+                    const parsed = typeof message === "string" ? JSON.parse(message) : message;
+                    
+                    if (parsed && parsed.eventType === "web_app_request") {
+                        handleTelegramRequest(parsed.data);
+                        return;
+                    }
+                } catch (e) {
+                    // Not a JSON message or not our format
+                }
+                
+                // Forward original message
+                originalPostMessage(message, targetOrigin, transfer);
+            };
+            
+            // Inject our proxy into the iframe
+            const scriptContent = `
+                window.Telegram = {
+                    WebApp: {
+                        initData: ${JSON.stringify(Telegram.WebApp.initData || "")},
+                        initDataUnsafe: ${JSON.stringify(Telegram.WebApp.initDataUnsafe || {})},
+                        version: "${Telegram.WebApp.version}",
+                        platform: "${Telegram.WebApp.platform}",
+                        colorScheme: "${Telegram.WebApp.colorScheme}",
+                        themeParams: ${JSON.stringify(Telegram.WebApp.themeParams || {})},
+                        isExpanded: ${Telegram.WebApp.isExpanded},
+                        viewportHeight: ${Telegram.WebApp.viewportHeight},
+                        viewportStableHeight: ${Telegram.WebApp.viewportStableHeight},
+                        headerColor: "${Telegram.WebApp.headerColor}",
+                        backgroundColor: "${Telegram.WebApp.backgroundColor}",
+                        isClosingConfirmationEnabled: ${Telegram.WebApp.isClosingConfirmationEnabled},
+                        
+                        // Methods that can be called from the iframe
+                        ready: function() {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "ready",
+                                    params: []
+                                }
+                            }), "*");
+                        },
+                        expand: function() {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "expand",
+                                    params: []
+                                }
+                            }), "*");
+                        },
+                        close: function() {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "close",
+                                    params: []
+                                }
+                            }), "*");
+                        },
+                        showAlert: function(message) {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "showAlert",
+                                    params: [message]
+                                }
+                            }), "*");
+                        },
+                        showConfirm: function(message, callback) {
+                            const callbackId = "cb_" + Math.random().toString(36).substr(2, 8);
+                            window._telegramCallbacks = window._telegramCallbacks || {};
+                            window._telegramCallbacks[callbackId] = callback;
+                            
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "showConfirm",
+                                    params: [message, callbackId]
+                                }
+                            }), "*");
+                        },
+                        setHeaderColor: function(color) {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "setHeaderColor",
+                                    params: [color]
+                                }
+                            }), "*");
+                        },
+                        setBackgroundColor: function(color) {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "setBackgroundColor",
+                                    params: [color]
+                                }
+                            }), "*");
+                        },
+                        enableClosingConfirmation: function() {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "enableClosingConfirmation",
+                                    params: []
+                                }
+                            }), "*");
+                        },
+                        disableClosingConfirmation: function() {
+                            window.parent.postMessage(JSON.stringify({
+                                eventType: "web_app_request",
+                                data: {
+                                    method: "disableClosingConfirmation",
+                                    params: []
+                                }
+                            }), "*");
+                        },
+                        MainButton: {
+                            isVisible: false,
+                            isActive: false,
+                            text: "",
+                            color: "",
+                            textColor: "",
+                            _params: {},
+                            
+                            setParams: function(params) {
+                                window.parent.postMessage(JSON.stringify({
+                                    eventType: "web_app_request",
+                                    data: {
+                                        method: "MainButton.setParams",
+                                        params: [params]
+                                    }
+                                }), "*");
+                            },
+                            show: function() {
+                                window.parent.postMessage(JSON.stringify({
+                                    eventType: "web_app_request",
+                                    data: {
+                                        method: "MainButton.show",
+                                        params: []
+                                    }
+                                }), "*");
+                            },
+                            hide: function() {
+                                window.parent.postMessage(JSON.stringify({
+                                    eventType: "web_app_request",
+                                    data: {
+                                        method: "MainButton.hide",
+                                        params: []
+                                    }
+                                }), "*");
+                            },
+                            enable: function() {
+                                window.parent.postMessage(JSON.stringify({
+                                    eventType: "web_app_request",
+                                    data: {
+                                        method: "MainButton.enable",
+                                        params: []
+                                    }
+                                }), "*");
+                            },
+                            disable: function() {
+                                window.parent.postMessage(JSON.stringify({
+                                    eventType: "web_app_request",
+                                    data: {
+                                        method: "MainButton.disable",
+                                        params: []
+                                    }
+                                }), "*");
+                            },
+                            onClick: function(callback) {
+                                window._telegramMainButtonClick = callback;
+                                window.parent.postMessage(JSON.stringify({
+                                    eventType: "web_app_request",
+                                    data: {
+                                        method: "MainButton.onClick",
+                                        params: []
+                                    }
+                                }), "*");
+                            }
+                        }
+                    }
+                };
+                
+                // Listen for responses from parent
+                window.addEventListener("message", function(event) {
+                    try {
+                        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+                        
+                        if (data.eventType === "web_app_response") {
+                            // Handle callback responses
+                            if (data.data.callbackId && window._telegramCallbacks && window._telegramCallbacks[data.data.callbackId]) {
+                                const callback = window._telegramCallbacks[data.data.callbackId];
+                                delete window._telegramCallbacks[data.data.callbackId];
+                                callback(data.data.result);
+                            }
+                            
+                            // Handle MainButton click
+                            if (data.data.method === "MainButton.click" && window._telegramMainButtonClick) {
+                                window._telegramMainButtonClick();
+                            }
+                        }
+                    } catch (e) {
+                        console.error("Error handling message:", e);
+                    }
+                });
+            `;
+            
+            const script = iframeWindow.document.createElement("script");
+            script.textContent = scriptContent;
+            iframeWindow.document.head.appendChild(script);
+        }
+        
+        // Function to handle Telegram requests from the iframe
+        function handleTelegramRequest(request) {
+            addConsoleLog("info", `Telegram WebApp request: ${request.method}`, request.params);
+            
+            try {
+                switch (request.method) {
+                    case "ready":
+                        Telegram.WebApp.ready();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "expand":
+                        Telegram.WebApp.expand();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "close":
+                        Telegram.WebApp.close();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "showAlert":
+                        Telegram.WebApp.showAlert(request.params[0]);
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "showConfirm":
+                        Telegram.WebApp.showConfirm(request.params[0], (confirmed) => {
+                            sendResponseToIframe(request, { result: confirmed }, request.params[1]);
+                        });
+                        break;
+                        
+                    case "setHeaderColor":
+                        Telegram.WebApp.setHeaderColor(request.params[0]);
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "setBackgroundColor":
+                        Telegram.WebApp.setBackgroundColor(request.params[0]);
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "enableClosingConfirmation":
+                        Telegram.WebApp.enableClosingConfirmation();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "disableClosingConfirmation":
+                        Telegram.WebApp.disableClosingConfirmation();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "MainButton.setParams":
+                        Telegram.WebApp.MainButton.setParams(request.params[0]);
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "MainButton.show":
+                        Telegram.WebApp.MainButton.show();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "MainButton.hide":
+                        Telegram.WebApp.MainButton.hide();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "MainButton.enable":
+                        Telegram.WebApp.MainButton.enable();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "MainButton.disable":
+                        Telegram.WebApp.MainButton.disable();
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    case "MainButton.onClick":
+                        // Store the click handler
+                        Telegram.WebApp.MainButton.onClick(() => {
+                            const iframe = document.getElementById("outputFrame");
+                            iframe.contentWindow.postMessage(JSON.stringify({
+                                eventType: "web_app_response",
+                                data: {
+                                    method: "MainButton.click",
+                                    result: true
+                                }
+                            }), "*");
+                        });
+                        sendResponseToIframe(request, { success: true });
+                        break;
+                        
+                    default:
+                        addConsoleLog("warning", `Unknown Telegram WebApp method: ${request.method}`);
+                        sendResponseToIframe(request, { error: "Unknown method" });
+                        break;
+                }
+            } catch (error) {
+                addConsoleLog("error", `Error handling Telegram request: ${request.method}`, error);
+                sendResponseToIframe(request, { error: error.message });
+            }
+        }
+        
+        // Function to send response back to iframe
+        function sendResponseToIframe(originalRequest, response, callbackId = null) {
+            const iframe = document.getElementById("outputFrame");
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    eventType: "web_app_response",
+                    data: {
+                        method: originalRequest.method,
+                        callbackId: callbackId || (originalRequest.params && originalRequest.params.length > 1 ? originalRequest.params[1] : null),
+                        ...response
+                    }
+                }), "*");
+            }
+        }
+
+        // Function to load code with indicator
         async function loadCodeWithIndicator() {
             setButtonState("loading");
             const code = localStorage.getItem("savedCode");
 
-            // Simulate an asynchronous operation (e.g., fetching data)
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             if (code) {
                 try {
-                    const iframe = document.getElementById("outputFrame").contentWindow.document;
-                    iframe.open();
-                    iframe.write(code);
-                    iframe.close();
+                    const iframe = document.getElementById("outputFrame");
+                    const iframeDoc = iframe.contentWindow.document;
+                    
+                    iframeDoc.open();
+                    iframeDoc.write(code);
+                    iframeDoc.close();
+                    
+                    // Setup our Telegram proxy after content is loaded
+                    setupTelegramProxy(iframe.contentWindow);
+                    
                     setButtonState("loaded");
+                    addConsoleLog("success", "Preview updated successfully");
                 } catch (error) {
                     console.error("Error loading code:", error);
                     setButtonState("error");
+                    addConsoleLog("error", "Error loading preview", error.message);
                 }
             } else {
                 setButtonState("error", "No code saved.");
+                addConsoleLog("error", "No code saved in localStorage");
             }
         }
 
-        // Make the button Telegram's main button
-        Telegram.WebApp.MainButton.setParams({
-            text: "Update Preview",
-            color: "#0088cc", // Main Telegram button color
-            isVisible: true
-        });
-
-        // Set button callback for Telegram interaction
-        Telegram.WebApp.MainButton.onClick(() => {
-            loadCodeWithIndicator();
-        });
-
-        // Event listener to handle the button's click
+        // Initial load
         document.addEventListener("DOMContentLoaded", () => {
-            loadCodeWithIndicator(); // Initial load with indicator
+            loadCodeWithIndicator();
+            
+            // Make the button Telegram style
+            Telegram.WebApp.MainButton.setParams({
+                text: "Update Preview",
+                color: "#0088cc",
+                isVisible: true
+            });
         });
-
-        // Inject Telegram SDK script into the iframe
-        function injectTelegramScript(iframeDocument) {
-            const script = iframeDocument.createElement("script");
-            script.src = "https://telegram.org/js/telegram-web-app.js";
-            script.onload = () => {
-                iframeDocument.addEventListener("DOMContentLoaded", () => {
-                    Telegram.WebApp.ready();
-                    // Example of setting the header color within the iframe
-                    Telegram.WebApp.setHeaderColor("#0088cc"); // Set header color
-                });
-            };
-            iframeDocument.body.appendChild(script);
-        }
-
-        // Override the iframe document load to inject the Telegram SDK script
-        document.getElementById("outputFrame").addEventListener("load", function() {
-            const iframe = this;
-            const iframeDocument = iframe.contentWindow.document;
-
-            // Inject the Telegram SDK script dynamically when the iframe content loads
-            injectTelegramScript(iframeDocument);
-        });
-
     </script>
 </body>
 </html>
