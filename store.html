@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LT Quiz</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+
+  <style>
+    /* General Body Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, #ffdeaa 1%, #fff4ec 99%);
+      background-attachment: fixed;
+      background-size: cover;
+      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+  
+    
+  
+    /* Container */
+    .container {
+      padding: 20px;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+  
+    /* Content View */
+    .content-view {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-top: 20px;
+      border: 1px solid #f0f0f0;
+      border-radius: 15px;
+      background-color: #fff;
+      margin-bottom: 15px;
+      transition: transform 0.3s ease;
+      box-sizing: border-box;
+      width: 100%;
+      justify-content: space-between;
+      position: relative;
+    }
+  
+    .content-view:hover {
+      background-color: #f9f9f9;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  
+    .content-view img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      margin-right: 15px;
+    }
+  
+    .content-view .folder-text {
+      font-size: 16px;
+      color: #333;
+      flex-grow: 1;
+      margin-right: 15px;
+    }
+  
+    /* Bookmark Button */
+    .bookmark-btn {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 20px;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      padding: 5px;
+    }
+  
+    .bookmark-btn:hover {
+      color: #f39c12;
+    }
+  
+    .bookmark-btn.bookmarked {
+      color: #f39c12;
+    }
+  
+    /* Rating Stars */
+    .rating-container {
+      display: flex;
+      gap: 5px;
+    }
+  
+    .rating-star {
+      font-size: 18px;
+      color: #ccc;
+      cursor: pointer;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+  
+    .rating-star.rated {
+      color: #f39c12;
+    }
+  
+    .rating-star:hover {
+      transform: scale(1.2);
+    }
+  
+    /* Send to Telegram Button */
+    .send-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      min-width: 120px;
+    }
+  
+    .send-btn:hover {
+      background-color: #e67e22;
+      transform: scale(1.05);
+    }
+  
+    /* Footer */
+    .footer {
+      background-color: #fcf0e8;
+      color: #000;
+      padding: 20px 0;
+      text-align: center;
+    }
+  
+    /* Desktop Layout */
+    @media (min-width: 769px) {
+      .container {
+        max-width: 80%;
+        margin: 0 auto;
+      }
+  
+      .file-item-content {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+  
+      .file-info {
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+  
+      .file-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+  
+      .bookmark-btn {
+        margin-left: 20px;
+      }
+    }
+  
+    /* Mobile Layout */
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px; /* Reduce padding for smaller screens */
+      }
+  
+      #fileList li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+  
+      .file-item-content {
+        width: 100%;
+      }
+  
+      .file-info {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+  
+      .file-actions {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+      }
+  
+      .rating-container {
+        margin-left: auto;
+        margin-right: 10px;
+      }
+  
+      .bookmark-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 18px;
+      }
+  
+      .send-btn {
+        width: 100%;
+        margin-top: 10px;
+      }
+    }
+
+    .buttons-container {
+      position: relative;
+      width: 100%;
+      height: 60px;
+    }
+    .back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      border: none;
+      background: none;
+      color: rgb(0, 0, 0);
+      padding: 10px 15px;
+      border-radius: 50px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 20px;
+      z-index: 9999;
+    }
+    .back:hover {
+      color: #f39c12;
+    }
+    .footer {
+      background-color: #fcf0e8;
+      color: #000;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+
+  /* Category Container */
+  .category-container {
+    display: flex;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    gap: 15px;
+    padding: 10px 0;
+    scrollbar-width: thin; /* For modern browsers */
+    scrollbar-color: gray transparent; /* Gray scrollbar with transparent track */
+  }
+
+  /* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+  .category-container::-webkit-scrollbar {
+    height: 8px; /* Adjust scrollbar height */
+  }
+
+  .category-container::-webkit-scrollbar-thumb {
+    background-color: gray; /* Gray scrollbar thumb */
+    border-radius: 10px; /* Rounded scrollbar */
+  }
+
+  .category-container::-webkit-scrollbar-track {
+    background-color: transparent; /* Transparent track */
+  }
+
+
+    /* Category Card */
+    .category-card {
+      background-color: white;
+      border-radius: 25px; /* Rounded corners */
+      padding: 7px 20px; /* Adjust padding for a rectangular look */
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      border: 1px solid #f0f0f0;
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 15px; /* Ensure consistent width */
+      flex-shrink: 0; /* Prevent shrinking when scrolling */
+    }
+
+    .category-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      background-color: #fff9f3;
+    }
+
+    /* Active Category */
+    .active-category {
+      background-color: #f39c12;
+      color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .category-card {
+        padding: 10px 20px; /* Adjust padding for smaller screens */
+        font-size: 14px;
+      }
+    }
+
+
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 90%;
+  }
+
+  .modal-content h4 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+  }
+
+  .modal-content p {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .btn-primary {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn-primary:hover {
+    background-color: #e67e22;
+  }
+
+  .btn-outline {
+    background: none;
+    color: #f39c12;
+    border: 1px solid #f39c12;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .btn-outline:hover {
+    background-color: #f39c12;
+    color: white;
+  }
+
+  </style>
+</head>
+<body>
+
+  <!-- Popup Modal -->
+<div id="downloadModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <h4>Download Tasks</h4>
+    <p>1. Start the bot on Telegram.</p>
+    <p>2. Check the bot for the file.</p>
+    <div class="modal-actions">
+      <button id="okButton" class="btn-primary">OK</button>
+      <button id="dontShowAgainButton" class="btn-outline">Don't Show Again</button>
+    </div>
+  </div>
+</div>
+  <!-- Navbar Placeholder -->
+  <div id="navbar-placeholder"></div>
+  <div class="buttons-container">
+    <button onclick="back()" class="back">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+  </div>
+
+  <section class="py-5">
+    <div class="container">
+      <h3 class="text-center mb-3">Available Books</h3>
+
+      <!-- Category Selection -->
+      <div class="category-container">
+        <div class="category-card active-category" onclick="loadCategory('all')">
+          All Books
+        </div>
+        <div class="category-card" onclick="loadCategory('grade9')">
+          Grade 9
+        </div>
+        <div class="category-card" onclick="loadCategory('grade10')">
+          Grade 10
+        </div>
+        <div class="category-card" onclick="loadCategory('grade11')">
+          Grade 11
+        </div>
+        <div class="category-card" onclick="loadCategory('grade12')">
+          Grade 12
+        </div>
+        <div class="category-card" onclick="loadCategory('other')">
+          Other
+        </div>
+      </div>
+
+      <!-- Book List -->
+      <ul id="fileList"></ul>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="text-center">
+        <small>
+          © 2016-2024 Oromia Education Bureau (OEB) <br>
+          Used under educational fair use policy<br>
+          LT Quiz is not affiliated with OEB
+          <br><br>
+          <strong>Disclaimer:</strong> This site may display third-party advertisements. We do not control or endorse these ads. Please exercise caution when interacting with them.
+        </small>
+      </div>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    // Navigation functions
+    function back() {
+      window.location.href = '/quiz';
+    }
+    function home() {
+      window.location.href = '/';
+    }
+
+    const botToken = '7676381576:AAGkIhPfuEupEW5_1QtqSe4ytTcR2bcfQFo';
+    const pdfDirectory = '/pdf/';
+    const folderIconUrl = 'folder.png';
+    const fileListElement = document.getElementById('fileList');
+    let userId = null; // User ID from Telegram WebApp
+    const dontShowAgainKey = 'dontShowDownloadModal';
+
+    // Initialize Telegram WebApp and get user ID
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    userId = tg.initDataUnsafe?.user?.id || null;
+
+    // Show the modal if "Don't Show Again" is not set
+    function showDownloadModal() {
+      const dontShowAgain = localStorage.getItem(dontShowAgainKey);
+      if (!dontShowAgain) {
+        const modal = document.getElementById('downloadModal');
+        modal.style.display = 'flex';
+
+        // Handle OK button
+        document.getElementById('okButton').onclick = () => {
+          modal.style.display = 'none';
+        };
+
+        // Handle "Don't Show Again" button
+        document.getElementById('dontShowAgainButton').onclick = () => {
+          localStorage.setItem(dontShowAgainKey, 'true');
+          modal.style.display = 'none';
+        };
+      }
+    }
+
+    // Function to load file list with bookmark and rating
+    async function loadFileList() {
+      try {
+        const response = await fetch(`${pdfDirectory}pdf_files.json`);
+        if (!response.ok) {
+          throw new Error(`Error fetching file list: ${response.status}`);
+        }
+        const data = await response.json();
+
+        // Ensure data.files is an array
+        if (data && data.files && Array.isArray(data.files)) {
+          data.files.forEach(filename => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('content-view');
+
+            // File info (icon + name)
+            const fileItemContent = document.createElement('div');
+            fileItemContent.classList.add('file-item-content');
+
+            const fileInfo = document.createElement('div');
+            fileInfo.classList.add('file-info');
+
+            const folderImg = document.createElement('img');
+            folderImg.src = folderIconUrl;
+            folderImg.alt = 'PDF File';
+
+            const fileNameSpan = document.createElement('span');
+            fileNameSpan.classList.add('folder-text');
+            fileNameSpan.textContent = filename;
+
+            fileInfo.appendChild(folderImg);
+            fileInfo.appendChild(fileNameSpan);
+
+            // Actions container (rating + download)
+            const fileActions = document.createElement('div');
+            fileActions.classList.add('file-actions');
+
+            // Rating Stars
+            const ratingContainer = document.createElement('div');
+            ratingContainer.classList.add('rating-container');
+            for (let i = 1; i <= 5; i++) {
+              const ratingStar = document.createElement('i');
+              ratingStar.classList.add('fas', 'fa-star', 'rating-star');
+              ratingStar.dataset.rating = i;
+              ratingStar.addEventListener('click', () => saveRating(filename, i, ratingContainer));
+              ratingContainer.appendChild(ratingStar);
+            }
+
+            // Send to Telegram Button
+            const sendButton = document.createElement('button');
+            sendButton.textContent = 'Download';
+            sendButton.classList.add('send-btn');
+            sendButton.addEventListener('click', () => sendFileToTelegram(pdfDirectory, filename, sendButton));
+
+            // Bookmark Button (Star Icon)
+            const bookmarkButton = document.createElement('button');
+            bookmarkButton.innerHTML = '<i class="fas fa-star"></i>';
+            bookmarkButton.classList.add('bookmark-btn');
+            bookmarkButton.addEventListener('click', () => toggleBookmark(filename, bookmarkButton));
+
+            // Build the structure
+            fileActions.appendChild(ratingContainer);
+            fileActions.appendChild(sendButton);
+
+            fileItemContent.appendChild(fileInfo);
+            fileItemContent.appendChild(fileActions);
+
+            listItem.appendChild(fileItemContent);
+            listItem.appendChild(bookmarkButton);
+
+            fileListElement.appendChild(listItem);
+
+            // Load saved bookmark and rating
+            loadSavedBookmark(filename, bookmarkButton);
+            loadSavedRating(filename, ratingContainer);
+          });
+        } else {
+          const listItem = document.createElement('li');
+          listItem.textContent = 'No PDF files found in the list.';
+          fileListElement.appendChild(listItem);
+        }
+      } catch (error) {
+        const listItem = document.createElement('li');
+        listItem.textContent = `Error loading file list: ${error.message}`;
+        fileListElement.appendChild(listItem);
+      }
+    }
+
+    // Toggle bookmark and save to localStorage
+    function toggleBookmark(filename, button) {
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
+      if (bookmarks[filename]) {
+        delete bookmarks[filename];
+        button.classList.remove('bookmarked');
+      } else {
+        bookmarks[filename] = true;
+        button.classList.add('bookmarked');
+      }
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    }
+
+    // Load saved bookmark from localStorage
+    function loadSavedBookmark(filename, button) {
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || {};
+      if (bookmarks[filename]) {
+        button.classList.add('bookmarked');
+      }
+    }
+
+    // Save rating to localStorage
+    function saveRating(filename, rating, container) {
+      const ratings = JSON.parse(localStorage.getItem('ratings')) || {};
+      ratings[filename] = rating;
+      localStorage.setItem('ratings', JSON.stringify(ratings));
+      updateRatingUI(container, rating);
+    }
+
+    // Load saved rating from localStorage
+    function loadSavedRating(filename, container) {
+      const ratings = JSON.parse(localStorage.getItem('ratings')) || {};
+      if (ratings[filename]) {
+        updateRatingUI(container, ratings[filename]);
+      }
+    }
+
+    // Update rating UI
+    function updateRatingUI(container, rating) {
+      Array.from(container.children).forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('rated');
+        } else {
+          star.classList.remove('rated');
+        }
+      });
+    }
+
+    async function sendFileToTelegram(directoryPath, filename, button) {
+      if (!userId) {
+        alert('Unable to fetch Telegram user ID. Please ensure the WebApp is running in Telegram.');
+        return;
+      }
+
+      showDownloadModal(); // Show the modal before sending the file
+
+      const originalButtonText = button.textContent;
+
+      // Set loading state
+      button.innerHTML = '<span class="loading-spinner"></span> Sending...';
+      button.classList.add('loading');
+      button.disabled = true;
+
+      const filePath = `${directoryPath}${filename}`;
+      const sendDocumentUrl = `https://api.telegram.org/bot${botToken}/sendDocument`;
+      const formData = new FormData();
+      formData.append('chat_id', userId);
+
+      try {
+        const fileResponse = await fetch(filePath);
+        if (!fileResponse.ok) {
+          throw new Error(`Error fetching file: ${fileResponse.status}`);
+        }
+        const blob = await fileResponse.blob();
+        formData.append('document', blob, filename);
+
+        const telegramResponse = await fetch(sendDocumentUrl, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const telegramData = await telegramResponse.json();
+        if (telegramData.ok) {
+          // Set success state
+          button.innerHTML = '<i class="fas fa-check"></i> Sent!';
+          button.classList.remove('loading');
+          button.classList.add('success');
+        } else {
+          throw new Error(telegramData.description || 'Unknown error from Telegram');
+        }
+      } catch (error) {
+        // Set error state
+        button.innerHTML = '<i class="fas fa-times"></i> Error';
+        button.classList.remove('loading');
+        button.classList.add('error');
+      } finally {
+        setTimeout(() => {
+          // Reset button after 2 seconds
+          button.textContent = originalButtonText;
+          button.innerHTML = originalButtonText;
+          button.classList.remove('loading', 'success', 'error');
+          button.disabled = false;
+        }, 2000);
+      }
+    }
+
+    // Load file list automatically on page load
+    window.onload = loadFileList;
+  </script>
+  <script src="navbar.js"></script>
+</body>
+</html>
