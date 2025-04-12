@@ -1,0 +1,196 @@
+<!-- Navbar Content Only -->
+<nav class="navbar navbar-expand-lg navbar-light">
+  <div class="container">
+    <a class="navbar-brand" ><img onclick="home()" src="logo.png" alt="Logo" height="50"> Store</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+   
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="/"><i class="fa-solid fa-home"></i> Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/quizzes"><i class="fa-solid fa-book"></i> Quizzes</a></li>
+        <li class="nav-item"><a class="nav-link" href="/about"><i class="fa-solid fa-info-circle"></i> About Us</a></li>
+      </ul>
+      
+      <div id="auth-widget" class="d-flex align-items-center">
+        <div id="logged-out-view" class="d-none">
+          <button class="btn btn-outline" onclick="login()">Sign In</button>
+          <button class="btn btn-primary" onclick="login()">Sign Up</button>
+        </div>
+        
+        <div id="logged-in-view" class="d-none dropdown">
+          <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" 
+             id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <img id="navbar-avatar" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
+                 alt="Profile" class="rounded-circle" width="40" height="40">
+            <span id="navbar-username" class="ms-2 d-none d-md-inline" style="color: black;">Username</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" onclick="handleSignOut()"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script> 
+
+
+
+// Initialize Firebase Auth
+function initFirebaseAuth() {
+  const firebaseConfig = {
+    apiKey: "AIzaSyDelPBnpY0xv-_ShgWreMZpld_SUWdRwJk",
+    authDomain: "lt-website-bf509.firebaseapp.com",
+    projectId: "lt-website-bf509",
+    storageBucket: "lt-website-bf509.appspot.com",
+    messagingSenderId: "43884867628",
+    appId: "1:43884867628:web:617a17c06d37b014a86189",
+    measurementId: "G-XL54K0J9BX"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // Auth state listener
+  auth.onAuthStateChanged((user) => {
+    const loggedOutView = document.getElementById('logged-out-view');
+    const loggedInView = document.getElementById('logged-in-view');
+    const navbarAvatar = document.getElementById('navbar-avatar');
+    const navbarUsername = document.getElementById('navbar-username');
+
+    if (user) {
+      loggedOutView.classList.add('d-none');
+      loggedInView.classList.remove('d-none');
+      
+      const displayName = user.displayName || user.email.split('@')[0];
+      navbarUsername.textContent = displayName;
+
+      if (user.photoURL) {
+        navbarAvatar.src = user.photoURL;
+      } else {
+        const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase();
+        navbarAvatar.src = `https://ui-avatars.com/api/?name=${initials}&background=f39c12&color=fff`;
+      }
+    } else {
+      loggedOutView.classList.remove('d-none');
+      loggedInView.classList.add('d-none');
+    }
+  });
+
+  // Make functions global
+  window.login = () => {
+    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+  };
+
+  window.handleSignOut = () => {
+    auth.signOut().then(() => {
+      console.log("User signed out");
+    }).catch((error) => {
+      console.error('Sign out error:', error);
+    });
+  };
+}
+
+// Initialize Telegram Web App if available
+function initTelegram() {
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.expand();
+    Telegram.WebApp.setHeaderColor("#fff4ec");
+    Telegram.WebApp.BackButton.show();
+    Telegram.WebApp.BackButton.onClick(() => {
+      window.history.back();
+    });
+  }
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener("DOMContentLoaded", function() {
+  initFirebaseAuth();
+  initTelegram();
+  
+  // Make navigation functions global
+  window.home = home;
+  window.back = back;
+  window.ministry = ministry;
+});
+</script>
+
+<style>
+       .btn-outline {
+      color: #f39c12;
+      
+      border-color: #f39c12;
+      background-color: none;
+      cursor: wait;
+      transition: transform 0.1s ease;
+    }
+    
+    .btn-outline:hover {
+      background-color: none;
+      transform: scale(1.05);
+      color:#f39c12;
+      border-color: #f39c12;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background-color: transparent;
+      padding: 15px 30px;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      color: #000 !important;
+    }
+    
+    /* Navbar Auth Widget Styles */
+    #auth-widget {
+      gap: 10px;
+    }
+    
+    #navbar-avatar {
+      object-fit: cover;
+      border: 2px solid #f39c12;
+      transition: all 0.3s ease;
+    }
+    
+    #navbar-avatar:hover {
+      transform: scale(1.1);
+    }
+    
+    .dropdown-menu {
+      border: none;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      padding: 10px 0;
+    }
+    
+    .dropdown-item {
+      padding: 8px 15px;
+      border-radius: 15px;
+      margin: 2px 10px;
+      font-weight: 500;
+    }
+    
+    .dropdown-item:hover {
+      background-color: #fff4ec;
+      color: #e67e22;
+    }
+    
+    .btn-primary {
+      background-color: #f39c12;
+      border: none;
+      transition: transform 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+      background-color: #e67e22;
+      transform: scale(1.05);
+    }
+</style>
