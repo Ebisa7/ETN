@@ -780,24 +780,39 @@ if (invitedBy) {
                     }
                 }
 
-         function setupShareButton() {
+       function setupShareButton() {
     const shareTelegramBtn = document.getElementById('shareTelegramBtn');
-    shareTelegramBtn.addEventListener('click', () => {
-        const inviteLink = document.getElementById('inviteLink').textContent;
-        const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
 
-        // Construct the Telegram share URL
-        const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
+    if (shareTelegramBtn) { // Always good to check if the element exists
+        shareTelegramBtn.addEventListener('click', () => {
+            const inviteLinkElement = document.getElementById('inviteLink');
+            const inviteLink = inviteLinkElement ? inviteLinkElement.textContent : 'https://example.com/default-invite'; // Fallback for safety
+            const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
 
-        // Open the Telegram share URL in the current window/tab
-        window.location.href = telegramShareUrl;
+            // Construct the Telegram share URL
+            const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
 
-        // Haptic feedback (keep this if you still want it)
-        if (window.Telegram?.WebApp?.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.impactOccurred('light');
-        }
-    });
+            // Directly navigate the current window to the Telegram share URL
+            // This is the most direct way to change the current page.
+            // When run within a Telegram Mini App, Telegram *should* intercept this
+            // and handle it internally as a share action.
+            window.location.href = telegramShareUrl;
+
+            // Haptic feedback (keep this if you still want it, but it's secondary to navigation)
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
+        });
+    } else {
+        console.error("Share Telegram Button not found!");
+    }
 }
+
+// Make sure to call this function after the DOM is loaded
+// For example, if your script is in the <head>, use:
+// document.addEventListener('DOMContentLoaded', setupShareButton);
+// Or if your script is at the end of <body>, just call:
+// setupShareButton();
                 
                 // 4. Setup Firestore document
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
