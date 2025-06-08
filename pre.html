@@ -708,7 +708,7 @@
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     firebaseUser = userCredential.user;
                     
-                  // Function to send Telegram message via bot
+                // (This should be at the top level with other utility functions)
 async function sendTelegramMessage(chatId, text) {
     const botToken = '8162193180:AAF-ZGiIWFL-3tLyrkpaaLO2Y48RmrHRcwE';
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -730,8 +730,10 @@ async function sendTelegramMessage(chatId, text) {
         if (!data.ok) {
             console.error('Telegram API error:', data);
         }
+        return data;
     } catch (error) {
         console.error('Error sending Telegram message:', error);
+        throw error;
     }
 }
 
@@ -761,6 +763,8 @@ if (invitedBy) {
             // Send notification to inviter
             await sendTelegramMessage(inviterData.id, message);
         }
+    }
+}
 
                 } catch (createError) {
                     if (createError.code === 'auth/email-already-in-use') {
@@ -775,6 +779,23 @@ if (invitedBy) {
                         throw createError;
                     }
                 }
+
+               // In the share button handler, fix the URL encoding:
+shareTelegramBtn.addEventListener('click', () => {
+    const inviteLink = document.getElementById('inviteLink').textContent;
+    const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
+    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
+    
+    if (window.Telegram?.WebApp?.openLink) {
+        Telegram.WebApp.openLink(tgShareUrl);
+    } else {
+        window.open(tgShareUrl, '_blank');
+    }
+    
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+        Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+});
                 
                 // 4. Setup Firestore document
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
@@ -819,29 +840,10 @@ if (invitedBy) {
                 // Load invited users
                 loadInvitedUsers();
 
-                    // Add this with your other DOM elements
-const shareTelegramBtn = document.getElementById('shareTelegramBtn');
+                    
 
-// Add this to your initGame function where you setup other event listeners
-shareTelegramBtn.addEventListener('click', () => {
-    const inviteLink = document.getElementById('inviteLink').textContent;
-    const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
     
-    // Open Telegram share dialog
-    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
-    
-    if (window.Telegram?.WebApp?.openLink) {
-        Telegram.WebApp.openLink(tgShareUrl);
-    } else {
-        // Fallback for browser testing
-        window.open(tgShareUrl, '_blank');
-    }
-    
-    // Haptic feedback
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-        Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
-});
+
                 
                 // 6. Setup navigation
                 navGame.addEventListener('click', () => {
