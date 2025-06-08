@@ -781,37 +781,23 @@ if (invitedBy) {
                 }
 
           // Setup share button functionality
-// Setup share button functionality
 function setupShareButton() {
     const shareTelegramBtn = document.getElementById('shareTelegramBtn');
     shareTelegramBtn.addEventListener('click', () => {
         const inviteLink = document.getElementById('inviteLink').textContent;
+        const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
         
-        // Use Telegram's built-in share method
-        if (window.Telegram?.WebApp?.showShareAlert) {
-            Telegram.WebApp.showShareAlert(
-                `Join my Tap Game and earn coins! 🎮💰`, 
-                `Use my invite link: ${inviteLink}`,
-                (wasShared) => {
-                    if (wasShared && window.Telegram?.WebApp?.HapticFeedback) {
-                        Telegram.WebApp.HapticFeedback.impactOccurred('light');
-                    }
-                }
-            );
-        } 
-        // Fallback for older clients
-        else if (window.Telegram?.WebApp?.openTelegramLink) {
-            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent('Join this awesome game!')}`;
-            Telegram.WebApp.openTelegramLink(shareUrl);
+        // Use Telegram.WebApp.showSharePopup for direct sharing within Telegram
+        if (window.Telegram?.WebApp?.showSharePopup) {
+            // Note: showSharePopup takes the URL and an optional message.
+            // The message here acts as a pre-filled text in the share dialogue.
+            Telegram.WebApp.showSharePopup({ url: inviteLink, text: message });
+        } else {
+            // Fallback for when not in Telegram Web App or if showSharePopup is not available
+            alert('Please open this game in Telegram to use the share feature.');
+            // Optionally, you could still try opening the t.me share URL for desktop browsers
+            // window.open(`https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`, '_blank');
         }
-        // Fallback for non-Telegram
-        else {
-            navigator.clipboard.writeText(inviteLink).then(() => {
-                alert('Invite link copied to clipboard!');
-            });
-        }
-    });
-}
         
         // Haptic feedback
         if (window.Telegram?.WebApp?.HapticFeedback) {
