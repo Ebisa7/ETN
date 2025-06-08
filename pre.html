@@ -780,20 +780,23 @@ if (invitedBy) {
                     }
                 }
 
-             // Setup share button functionality
+          // Setup share button functionality
 function setupShareButton() {
     const shareTelegramBtn = document.getElementById('shareTelegramBtn');
     shareTelegramBtn.addEventListener('click', () => {
         const inviteLink = document.getElementById('inviteLink').textContent;
         const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
-        const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
         
-        // Only use Telegram's openLink method (no fallback)
-        if (window.Telegram?.WebApp?.openLink) {
-            Telegram.WebApp.openLink(tgShareUrl);
+        // Use Telegram.WebApp.showSharePopup for direct sharing within Telegram
+        if (window.Telegram?.WebApp?.showSharePopup) {
+            // Note: showSharePopup takes the URL and an optional message.
+            // The message here acts as a pre-filled text in the share dialogue.
+            Telegram.WebApp.showSharePopup({ url: inviteLink, text: message });
         } else {
-            // Optional: Show a message if not in Telegram
-            alert('Please share this link from within Telegram');
+            // Fallback for when not in Telegram Web App or if showSharePopup is not available
+            alert('Please open this game in Telegram to use the share feature.');
+            // Optionally, you could still try opening the t.me share URL for desktop browsers
+            // window.open(`https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`, '_blank');
         }
         
         // Haptic feedback
