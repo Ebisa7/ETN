@@ -473,242 +473,100 @@
     </div>
 
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
-            authDomain: "mytestapp-f6913.firebaseapp.com",
-            databaseURL: "https://mytestapp-f6913-default-rtdb.firebaseio.com",
-            projectId: "mytestapp-f6913",
-            storageBucket: "mytestapp-f6913.firebasestorage.app",
-            messagingSenderId: "300150696072",
-            appId: "1:300150696072:web:1e29cb5a813d004018573d",
-            measurementId: "G-PPDR4TBQF5"
-        };
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+// Firebase configuration and initialization
+const firebaseConfig = {
+    apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
+    authDomain: "mytestapp-f6913.firebaseapp.com",
+    databaseURL: "https://mytestapp-f6913-default-rtdb.firebaseio.com",
+    projectId: "mytestapp-f6913",
+    storageBucket: "mytestapp-f6913.firebasestorage.app",
+    messagingSenderId: "300150696072",
+    appId: "1:300150696072:web:1e29cb5a813d004018573d",
+    measurementId: "G-PPDR4TBQF5"
+};
 
-        // DOM elements
-        const loadingScreen = document.getElementById('loadingScreen');
-        const gameScreen = document.getElementById('gameScreen');
-        const profilePic = document.getElementById('profilePic');
-        const profileInitials = document.getElementById('profileInitials');
-        const profileName = document.getElementById('profileName');
-        const balanceDisplay = document.getElementById('balance');
-        const tapCircle = document.getElementById('tapCircle');
-        const particlesContainer = document.getElementById('particles');
-        const navGame = document.getElementById('navGame');
-        const navInvite = document.getElementById('navInvite');
-        const inviteScreen = document.getElementById('inviteScreen');
-        const inviteLink = document.getElementById('inviteLink');
-        const copyBtn = document.getElementById('copyBtn');
-        const usersList = document.getElementById('usersList');
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        // Game state
-        let balance = 0;
-        let firebaseUser = null;
-        let userDocRef = null;
-        let coinsPerTap = 1;
-        let invitedBy = null;
-        const botUsername = 'guvuhgy7bot/kuyti'; // CHANGE THIS TO YOUR BOT'S USERNAME
+// DOM elements
+const loadingScreen = document.getElementById('loadingScreen');
+const gameScreen = document.getElementById('gameScreen');
+const profilePic = document.getElementById('profilePic');
+const profileInitials = document.getElementById('profileInitials');
+const profileName = document.getElementById('profileName');
+const balanceDisplay = document.getElementById('balance');
+const tapCircle = document.getElementById('tapCircle');
+const particlesContainer = document.getElementById('particles');
+const navGame = document.getElementById('navGame');
+const navInvite = document.getElementById('navInvite');
+const inviteScreen = document.getElementById('inviteScreen');
+const inviteLink = document.getElementById('inviteLink');
+const copyBtn = document.getElementById('copyBtn');
+const usersList = document.getElementById('usersList');
+const shareTelegramBtn = document.getElementById('shareTelegramBtn');
 
-        // Pad Telegram ID for password
-        function padTelegramId(id) {
-            return String(id).padStart(6, '0');
-        }
+// Game state
+let balance = 0;
+let firebaseUser = null;
+let userDocRef = null;
+let coinsPerTap = 1;
+let invitedBy = null;
 
-        // Create coin effect
-        function createCoinEffect(x, y) {
-            const coin = document.createElement('div');
-            coin.className = 'coin-effect';
-            coin.style.left = `${x - 15}px`;
-            coin.style.top = `${y - 15}px`;
-            document.body.appendChild(coin);
-            
-            // Remove after animation
-            setTimeout(() => {
-                coin.remove();
-            }, 1000);
-        }
+// Utility functions
+function padTelegramId(id) {
+    return String(id).padStart(6, '0');
+}
 
-        // Create particles
-        function createParticles(x, y) {
-            for (let i = 0; i < 10; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                const size = Math.random() * 10 + 5;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-                
-                particlesContainer.appendChild(particle);
-                
-                // Animate particle
-                const angle = Math.random() * Math.PI * 2;
-                const velocity = Math.random() * 5 + 2;
-                const lifetime = Math.random() * 1000 + 500;
-                
-                let startTime = Date.now();
-                
-                function animate() {
-                    const elapsed = Date.now() - startTime;
-                    const progress = elapsed / lifetime;
-                    
-                    if (progress >= 1) {
-                        particle.remove();
-                        return;
-                    }
-                    
-                    const distance = velocity * elapsed / 20;
-                    const currentX = x + Math.cos(angle) * distance;
-                    const currentY = y + Math.sin(angle) * distance;
-                    const opacity = 1 - progress;
-                    const scale = 1 - progress * 0.5;
-                    
-                    particle.style.transform = `translate(${currentX - x}px, ${currentY - y}px) scale(${scale})`;
-                    particle.style.opacity = opacity;
-                    
-                    requestAnimationFrame(animate);
-                }
-                
-                requestAnimationFrame(animate);
-            }
-        }
+function createCoinEffect(x, y) {
+    const coin = document.createElement('div');
+    coin.className = 'coin-effect';
+    coin.style.left = `${x - 15}px`;
+    coin.style.top = `${y - 15}px`;
+    document.body.appendChild(coin);
+    
+    setTimeout(() => {
+        coin.remove();
+    }, 1000);
+}
 
+function createParticles(x, y) {
+    for (let i = 0; i < 10; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.width = `${Math.random() * 10 + 5}px`;
+        particle.style.height = particle.style.width;
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particlesContainer.appendChild(particle);
         
-
-        // Handle tap
-        function handleTap(e) {
-            // Get tap position
-            const rect = tapCircle.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 5 + 2;
+        let startTime = Date.now();
+        
+        function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / 1500;
             
-            // Create effects
-            createCoinEffect(clientX, clientY);
-            createParticles(clientX, clientY);
-            
-            // Update balance
-            balance += coinsPerTap;
-            balanceDisplay.textContent = balance.toLocaleString();
-            
-            // Haptic feedback
-            if (window.Telegram?.WebApp?.HapticFeedback) {
-                Telegram.WebApp.HapticFeedback.impactOccurred('light');
-            }
-            
-            // Save balance to Firestore
-            if (userDocRef) {
-                userDocRef.update({
-                    balance: firebase.firestore.FieldValue.increment(coinsPerTap),
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }).catch(error => {
-                    console.error('Error updating balance:', error);
-                });
-            }
-        }
-
-        // Setup invite link
-        function setupInviteLink(userId) {
-            const link = `https://t.me/guvuhgy7bot/kuyti?startapp=invite_${userId}`;
-            inviteLink.textContent = link;
-            
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(link).then(() => {
-                    copyBtn.textContent = 'Copied!';
-                    setTimeout(() => {
-                        copyBtn.textContent = 'Copy';
-                    }, 2000);
-                });
-                
-                if (window.Telegram?.WebApp?.HapticFeedback) {
-                    Telegram.WebApp.HapticFeedback.impactOccurred('light');
-                }
-            });
-        }
-
-        // Load invited users
-        async function loadInvitedUsers() {
-            const userDoc = await userDocRef.get();
-            const invitedUserIds = userDoc.data().invitedUsers || [];
-            
-            if (invitedUserIds.length === 0) {
-                usersList.innerHTML = '<div class="empty-state">No invited users yet</div>';
+            if (progress >= 1) {
+                particle.remove();
                 return;
             }
             
-            // Clear existing list
-            usersList.innerHTML = '';
+            const distance = velocity * elapsed / 20;
+            const currentX = x + Math.cos(angle) * distance;
+            const currentY = y + Math.sin(angle) * distance;
             
-            // Get each user's data
-            for (const userId of invitedUserIds) {
-                try {
-                    const userDoc = await db.collection('users').doc(userId).get();
-                    if (userDoc.exists) {
-                        const userData = userDoc.data();
-                        
-                        const userCard = document.createElement('div');
-                        userCard.className = 'user-card';
-                        
-                        userCard.innerHTML = `
-                            <div class="user-info">
-                                ${userData.photo_url ? 
-                                    `<div class="user-avatar"><img src="${userData.photo_url}" alt="${userData.first_name}"></div>` : 
-                                    `<div class="user-avatar">${(userData.first_name?.[0] || '') + (userData.last_name?.[0] || '') || '?'}</div>`
-                                }
-                                <div class="user-name">${userData.first_name || 'User'}</div>
-                            </div>
-                            <div class="user-balance">${(userData.balance || 0).toLocaleString()}</div>
-                        `;
-                        
-                        usersList.appendChild(userCard);
-                    }
-                } catch (error) {
-                    console.error('Error loading user data:', error);
-                }
-            }
+            particle.style.transform = `translate(${currentX - x}px, ${currentY - y}px) scale(${1 - progress * 0.5})`;
+            particle.style.opacity = 1 - progress;
+            requestAnimationFrame(animate);
         }
+        requestAnimationFrame(animate);
+    }
+}
 
-        // Initialize game
-        async function initGame() {
-            try {
-                // 1. Initialize Telegram WebApp
-                if (!window.Telegram?.WebApp) {
-                    throw new Error('Please open in Telegram');
-                }
-                
-                Telegram.WebApp.ready();
-                Telegram.WebApp.expand();
-                
-                // 2. Get Telegram user and check for invite parameter
-                const tgUser = Telegram.WebApp.initDataUnsafe?.user;
-                if (!tgUser?.id || !tgUser?.username) {
-                    throw new Error('Telegram user data missing');
-                }
-                
-                // Check if user came from an invite link
-                const startParam = Telegram.WebApp.initDataUnsafe.start_param;
-                if (startParam && startParam.startsWith('invite_')) {
-                    invitedBy = startParam.replace('invite_', '');
-                }
-                
-                // 3. Authenticate with Firebase
-                const email = `${tgUser.username}@telegram.user`;
-                const password = padTelegramId(tgUser.id);
-                
-                try {
-                    // First try to create account (since we're new)
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    firebaseUser = userCredential.user;
-                    
-                // (This should be at the top level with other utility functions)
 async function sendTelegramMessage(chatId, text) {
     const botToken = '8162193180:AAF-ZGiIWFL-3tLyrkpaaLO2Y48RmrHRcwE';
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -716,78 +574,80 @@ async function sendTelegramMessage(chatId, text) {
     try {
         const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 chat_id: chatId,
                 text: text,
                 parse_mode: 'HTML'
             })
         });
-        
-        const data = await response.json();
-        if (!data.ok) {
-            console.error('Telegram API error:', data);
-        }
-        return data;
+        return await response.json();
     } catch (error) {
-        console.error('Error sending Telegram message:', error);
-        throw error;
+        console.error('Error sending message:', error);
     }
 }
 
-// Inside initGame(), modify the invitedBy section:
-if (invitedBy) {
-    // Add bonus to inviter
+async function handleInviterRewards(invitedBy, firebaseUser, tgUser) {
+    if (!invitedBy) return 0;
+    
     const inviterRef = db.collection('users').doc(invitedBy);
+    
+    // Update inviter's data
     await inviterRef.update({
         invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
-        balance: firebase.firestore.FieldValue.increment(100), // Bonus for inviter
+        balance: firebase.firestore.FieldValue.increment(100),
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-    // Add bonus to new user
-    balance = 50; // Starting bonus for invited user
-    
-    // Get inviter's Telegram ID to send notification
+    // Get inviter's data
     const inviterDoc = await inviterRef.get();
+    let inviterName = "a friend";
+    
     if (inviterDoc.exists) {
         const inviterData = inviterDoc.data();
+        
+        // Send notification to inviter
         if (inviterData.id) {
-            const newUserName = tgUser.first_name || 'New player';
-            const message = `🎉 <b>${newUserName}</b> joined using your invite link!\n\n` +
-                           `You received <b>100 coins</b> as a bonus!\n` +
-                           `Keep inviting to earn more rewards.`;
-            
-            // Send notification to inviter
-            await sendTelegramMessage(inviterData.id, message);
+            inviterName = inviterData.first_name || inviterName;
+            await sendTelegramMessage(
+                inviterData.id,
+                `🎉 <b>${tgUser.first_name || 'New player'}</b> joined using your invite link!\n\n` +
+                `You received <b>100 coins</b> as a bonus!`
+            );
         }
+        
+        // Send welcome message to new user
+        await sendTelegramMessage(
+            tgUser.id,
+            `👋 Welcome to Tap Game!\n\n` +
+            `You were invited by <b>${inviterName}</b>!\n` +
+            `You received <b>50 bonus coins</b> to start!\n\n` +
+            `Keep tapping to earn more!`
+        );
     }
+    
+    return 50; // Bonus for new user
 }
 
-                } catch (createError) {
-                    if (createError.code === 'auth/email-already-in-use') {
-                        // If user exists, sign in
-                        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                        firebaseUser = userCredential.user;
-                        
-                        // Load existing balance
-                        const userDoc = await db.collection('users').doc(firebaseUser.uid).get();
-                        balance = userDoc.data().balance || 0;
-                    } else {
-                        throw createError;
-                    }
-                }
+function setupInviteLink(userId) {
+    const link = `https://t.me/guvuhgy7bot/kuyti?startapp=invite_${userId}`;
+    inviteLink.textContent = link;
+    
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(link).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
+        });
+    });
+}
 
-          // Setup share button functionality
-// Setup share button functionality
 function setupShareButton() {
-    const shareTelegramBtn = document.getElementById('shareTelegramBtn');
     shareTelegramBtn.addEventListener('click', () => {
         const inviteLink = document.getElementById('inviteLink').textContent;
         
-        // Use Telegram's built-in share method
         if (window.Telegram?.WebApp?.showShareAlert) {
             Telegram.WebApp.showShareAlert(
                 `Join my Tap Game and earn coins! 🎮💰`, 
@@ -798,113 +658,158 @@ function setupShareButton() {
                     }
                 }
             );
-        } 
-        // Fallback for older clients
-        else if (window.Telegram?.WebApp?.openTelegramLink) {
+        } else {
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent('Join this awesome game!')}`;
-            Telegram.WebApp.openTelegramLink(shareUrl);
-        }
-        // Fallback for non-Telegram
-        else {
-            navigator.clipboard.writeText(inviteLink).then(() => {
-                alert('Invite link copied to clipboard!');
-            });
-        }
-    });
-}
-        
-        // Haptic feedback
-        if (window.Telegram?.WebApp?.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.impactOccurred('light');
-        }
-    });
-}
-                
-                // 4. Setup Firestore document
-                userDocRef = db.collection('users').doc(firebaseUser.uid);
-                
-                // Get or create user data
-                const userDoc = await userDocRef.get();
-                
-                if (!userDoc.exists) {
-                    // New user - create document
-                    await userDocRef.set({
-                        id: tgUser.id,
-                        first_name: tgUser.first_name || '',
-                        last_name: tgUser.last_name || '',
-                        username: tgUser.username || '',
-                        photo_url: tgUser.photo_url || '',
-                        balance: balance,
-                        invitedBy: invitedBy || null,
-                        invitedUsers: [],
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-                
-                // 5. Setup UI
-                // Profile picture
-                if (tgUser.photo_url) {
-                    profilePic.innerHTML = `<img src="${tgUser.photo_url}" alt="Profile">`;
-                } else {
-                    const initials = (tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '');
-                    profileInitials.textContent = initials || '?';
-                }
-                
-                // Profile name
-                profileName.textContent = tgUser.first_name || 'Player';
-                
-                // Balance
-                balanceDisplay.textContent = balance.toLocaleString();
-                
-                // Setup invite link
-                setupInviteLink(firebaseUser.uid);
-                
-                // Load invited users
-                loadInvitedUsers();
-
-                    
-
-    
-
-                
-                // 6. Setup navigation
-                navGame.addEventListener('click', () => {
-                    gameScreen.style.display = 'flex';
-                    inviteScreen.style.display = 'none';
-                    navGame.classList.add('active');
-                    navInvite.classList.remove('active');
-                });
-                
-                navInvite.addEventListener('click', () => {
-                    gameScreen.style.display = 'none';
-                    inviteScreen.style.display = 'block';
-                    navGame.classList.remove('active');
-                    navInvite.classList.add('active');
-                });
-                
-                // Default to game screen
-                navGame.classList.add('active');
-                
-                // 7. Setup tap listener
-                tapCircle.addEventListener('click', handleTap);
-                tapCircle.addEventListener('touchstart', handleTap);
-                
-                // 8. Switch to game screen
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    gameScreen.style.display = 'flex';
-                }, 500);
-                
-            } catch (error) {
-                console.error('Initialization error:', error);
-                alert(`Error: ${error.message}`);
+            if (window.Telegram?.WebApp?.openTelegramLink) {
+                Telegram.WebApp.openTelegramLink(shareUrl);
+            } else {
+                window.open(shareUrl, '_blank');
             }
         }
+    });
+}
 
-        // Start the game
-        document.addEventListener('DOMContentLoaded', initGame);
+async function loadInvitedUsers() {
+    const userDoc = await userDocRef.get();
+    const invitedUserIds = userDoc.data()?.invitedUsers || [];
+    
+    usersList.innerHTML = invitedUserIds.length ? '' : '<div class="empty-state">No invited users yet</div>';
+    
+    for (const userId of invitedUserIds) {
+        try {
+            const userDoc = await db.collection('users').doc(userId).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.innerHTML = `
+                    <div class="user-info">
+                        ${userData.photo_url ? 
+                            `<div class="user-avatar"><img src="${userData.photo_url}" alt="${userData.first_name}"></div>` : 
+                            `<div class="user-avatar">${(userData.first_name?.[0] || '') + (userData.last_name?.[0] || '') || '?'}</div>`
+                        }
+                        <div class="user-name">${userData.first_name || 'User'}</div>
+                    </div>
+                    <div class="user-balance">${(userData.balance || 0).toLocaleString()}</div>
+                `;
+                usersList.appendChild(userCard);
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+        }
+    }
+}
+
+// Main game initialization
+async function initGame() {
+    try {
+        if (!window.Telegram?.WebApp) {
+            throw new Error('Please open in Telegram');
+        }
+        
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+        
+        const tgUser = Telegram.WebApp.initDataUnsafe?.user;
+        if (!tgUser?.id) throw new Error('Telegram user data missing');
+        
+        // Check for invite parameter
+        const startParam = Telegram.WebApp.initDataUnsafe.start_param;
+        if (startParam?.startsWith('invite_')) {
+            invitedBy = startParam.replace('invite_', '');
+        }
+        
+        // Authenticate with Firebase
+        const email = `${tgUser.username || tgUser.id}@telegram.user`;
+        const password = padTelegramId(tgUser.id);
+        
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            firebaseUser = userCredential.user;
+            
+            // Handle inviter rewards and send welcome message
+            if (invitedBy) {
+                balance = await handleInviterRewards(invitedBy, firebaseUser, tgUser);
+            }
+        } catch (createError) {
+            if (createError.code === 'auth/email-already-in-use') {
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                firebaseUser = userCredential.user;
+                const userDoc = await db.collection('users').doc(firebaseUser.uid).get();
+                balance = userDoc.data()?.balance || 0;
+            } else {
+                throw createError;
+            }
+        }
+        
+        // Setup Firestore document
+        userDocRef = db.collection('users').doc(firebaseUser.uid);
+        const userDoc = await userDocRef.get();
+        
+        if (!userDoc.exists) {
+            await userDocRef.set({
+                id: tgUser.id,
+                first_name: tgUser.first_name || '',
+                last_name: tgUser.last_name || '',
+                username: tgUser.username || '',
+                photo_url: tgUser.photo_url || '',
+                balance: balance,
+                invitedBy: invitedBy || null,
+                invitedUsers: [],
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        
+        // Setup UI
+        if (tgUser.photo_url) {
+            profilePic.innerHTML = `<img src="${tgUser.photo_url}" alt="Profile">`;
+        } else {
+            profileInitials.textContent = (tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '') || '?';
+        }
+        
+        profileName.textContent = tgUser.first_name || 'Player';
+        balanceDisplay.textContent = balance.toLocaleString();
+        
+        setupInviteLink(firebaseUser.uid);
+        setupShareButton();
+        loadInvitedUsers();
+        
+        // Navigation setup
+        navGame.addEventListener('click', () => {
+            gameScreen.style.display = 'flex';
+            inviteScreen.style.display = 'none';
+            navGame.classList.add('active');
+            navInvite.classList.remove('active');
+        });
+        
+        navInvite.addEventListener('click', () => {
+            gameScreen.style.display = 'none';
+            inviteScreen.style.display = 'block';
+            navGame.classList.remove('active');
+            navInvite.classList.add('active');
+        });
+        
+        navGame.classList.add('active');
+        tapCircle.addEventListener('click', handleTap);
+        tapCircle.addEventListener('touchstart', handleTap);
+        
+        // Hide loading screen
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+        }, 500);
+        
+    } catch (error) {
+        console.error('Initialization error:', error);
+        loadingScreen.innerHTML = `<p>Error: ${error.message}</p><button onclick="location.reload()">Retry</button>`;
+    }
+}
+
+// Start the game
+document.addEventListener('DOMContentLoaded', initGame);
+        
     </script>
 </body>
 </html>
