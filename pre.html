@@ -369,6 +369,35 @@
             text-align: center;
             padding: 20px 0;
         }
+
+        /* Add to your style section */
+.share-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.share-btn {
+    background: #0088cc;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.share-btn:active {
+    background: #006699;
+}
+
+.share-icon {
+    font-size: 20px;
+}
     </style>
 </head>
 <body>
@@ -416,6 +445,12 @@
             <div class="invite-link" id="inviteLink">Loading invite link...</div>
             <button class="copy-btn" id="copyBtn">Copy</button>
         </div>
+        <!-- Add this inside your invite-screen div, after the invite-link-container -->
+<div class="share-buttons">
+    <button class="share-btn" id="shareTelegramBtn">
+        <span class="share-icon">📤</span> Share via Telegram
+    </button>
+</div>
         
         <div class="invited-users">
             <h3>Your Team</h3>
@@ -544,6 +579,8 @@
                 requestAnimationFrame(animate);
             }
         }
+
+        
 
         // Handle tap
         function handleTap(e) {
@@ -781,6 +818,30 @@ if (invitedBy) {
                 
                 // Load invited users
                 loadInvitedUsers();
+
+                    // Add this with your other DOM elements
+const shareTelegramBtn = document.getElementById('shareTelegramBtn');
+
+// Add this to your initGame function where you setup other event listeners
+shareTelegramBtn.addEventListener('click', () => {
+    const inviteLink = document.getElementById('inviteLink').textContent;
+    const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
+    
+    // Open Telegram share dialog
+    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
+    
+    if (window.Telegram?.WebApp?.openLink) {
+        Telegram.WebApp.openLink(tgShareUrl);
+    } else {
+        // Fallback for browser testing
+        window.open(tgShareUrl, '_blank');
+    }
+    
+    // Haptic feedback
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+        Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
+});
                 
                 // 6. Setup navigation
                 navGame.addEventListener('click', () => {
