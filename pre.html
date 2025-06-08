@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * {
@@ -403,8 +404,7 @@
 <body>
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
-        <div class="loading-logo">🪙</div>
-        <div class="loading-circle"></div>
+        <p>Loading...</p>
     </div>
     
     <!-- Main Game Screen -->
@@ -463,11 +463,11 @@
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item active" id="navGame">
-            <div class="nav-icon">🪙</div>
+           <div class="nav-icon"><i class="fas fa-gamepad"></i></div>
             <div class="nav-label">Game</div>
         </div>
         <div class="nav-item" id="navInvite">
-            <div class="nav-icon">👥</div>
+            <div class="nav-icon"><i class="fas fa-user"></i></div>
             <div class="nav-label">Invite</div>
         </div>
     </div>
@@ -780,22 +780,28 @@ if (invitedBy) {
                     }
                 }
 
-               // In the share button handler, fix the URL encoding:
-shareTelegramBtn.addEventListener('click', () => {
-    const inviteLink = document.getElementById('inviteLink').textContent;
-    const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
-    const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
-    
-    if (window.Telegram?.WebApp?.openLink) {
-        Telegram.WebApp.openLink(tgShareUrl);
-    } else {
-        window.open(tgShareUrl, '_blank');
-    }
-    
-    if (window.Telegram?.WebApp?.HapticFeedback) {
-        Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
-});
+             // Setup share button functionality
+function setupShareButton() {
+    const shareTelegramBtn = document.getElementById('shareTelegramBtn');
+    shareTelegramBtn.addEventListener('click', () => {
+        const inviteLink = document.getElementById('inviteLink').textContent;
+        const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${inviteLink}`;
+        const tgShareUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(message)}`;
+        
+        // Only use Telegram's openLink method (no fallback)
+        if (window.Telegram?.WebApp?.openLink) {
+            Telegram.WebApp.openLink(tgShareUrl);
+        } else {
+            // Optional: Show a message if not in Telegram
+            alert('Please share this link from within Telegram');
+        }
+        
+        // Haptic feedback
+        if (window.Telegram?.WebApp?.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+    });
+}
                 
                 // 4. Setup Firestore document
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
