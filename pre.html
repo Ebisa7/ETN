@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * {
@@ -42,18 +42,6 @@
             transition: opacity 0.5s ease;
         }
         
-        .loading-logo {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, #6e45e2, #88d3ce);
-            border-radius: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 36px;
-        }
-        
         .loading-circle {
             width: 60px;
             height: 60px;
@@ -70,7 +58,7 @@
         /* Main Game Screen */
         .game-screen {
             display: none;
-            height: calc(100% - 60px);
+            height: calc(100% - 70px); /* Adjusted for nav bar */
             flex-direction: column;
         }
         
@@ -171,10 +159,9 @@
         
         .coin-effect {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFD700"><path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"/></svg>') no-repeat center;
-            background-size: contain;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
             opacity: 0;
             pointer-events: none;
             animation: float-up 1s ease-out forwards;
@@ -182,7 +169,7 @@
         
         @keyframes float-up {
             0% {
-                transform: translateY(0) scale(0.5);
+                transform: translateY(0) scale(0.8);
                 opacity: 1;
             }
             100% {
@@ -191,92 +178,39 @@
             }
         }
         
-        /* Particles */
-        .particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        
-        .particle {
-            position: absolute;
-            background: linear-gradient(to right, #6e45e2, #88d3ce);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #1a1a1b;
-            display: flex;
-            padding: 10px 0;
-            border-top: 1px solid #2a2a2b;
-            z-index: 10;
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #666;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        .nav-item.active {
-            color: #6e45e2;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 12px;
-        }
-
-        /* Invite Screen */
-        .invite-screen {
-            display: none;
+        /* Page Styles */
+        .page {
+             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: calc(100% - 60px);
+            height: calc(100% - 70px); /* Adjusted for nav bar height */
             background: #0f0f10;
             padding: 20px;
             overflow-y: auto;
             z-index: 5;
         }
 
-        .invite-header {
+        .page-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        .invite-header h2 {
+        .page-header h2 {
             font-size: 24px;
             margin-bottom: 8px;
         }
 
-        .invite-header p {
+        .page-header p {
             color: #aaa;
             font-size: 14px;
         }
 
+        /* Invite Screen Specifics */
         .invite-link-container {
             display: flex;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             background: #1a1a1b;
             border-radius: 12px;
             overflow: hidden;
@@ -304,78 +238,10 @@
             background: #5a35c0;
         }
 
-        .invited-users {
-            background: #1a1a1b;
-            border-radius: 12px;
-            padding: 15px;
-        }
-
-        .invited-users h3 {
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .users-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .user-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #2a2a2b;
-        }
-
-        .user-card:last-child {
-            border-bottom: none;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #2a2a2b;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .user-name {
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .user-balance {
-            color: #88d3ce;
-            font-weight: bold;
-        }
-
-        .empty-state {
-            color: #666;
-            text-align: center;
-            padding: 20px 0;
-        }
-
-        /* Add to your style section */
         .share-buttons {
-            margin-top: 20px;
             display: flex;
             justify-content: center;
+            margin-bottom: 20px;
         }
 
         .share-btn {
@@ -395,58 +261,85 @@
         .share-btn:active {
             background: #006699;
         }
-
-        .share-icon {
-            font-size: 20px;
-        }
-
-        /* Leaderboard Styles */
-        .leaderboard-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 60px);
-            background: #0f0f10;
-            padding: 20px;
-            overflow-y: auto;
-            z-index: 5;
-        }
-
-        .leaderboard-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .leaderboard-header h2 {
-            font-size: 24px;
-        }
-
-        .leaderboard-list {
+        
+        .list-container {
             background: #1a1a1b;
             border-radius: 12px;
-            padding: 0 15px;
+            padding: 15px;
         }
 
-        .leaderboard-card {
+        .list-container h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .list-scrollable {
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        .user-card, .leaderboard-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 12px 0;
             border-bottom: 1px solid #2a2a2b;
         }
-        
-        .leaderboard-card:last-child {
+
+        .user-card:last-child, .leaderboard-card:last-child {
             border-bottom: none;
         }
 
-        .rank {
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2a2a2b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .user-balance {
+            color: #88d3ce;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            color: #666;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        /* Leaderboard Styles */
+        .leaderboard-card .rank {
             font-size: 18px;
             font-weight: bold;
             width: 40px;
             text-align: center;
             color: #aaa;
+            flex-shrink: 0;
         }
         
         .rank-1, .rank-2, .rank-3 {
@@ -455,73 +348,108 @@
         .rank-1 { color: #FFD700; } /* Gold */
         .rank-2 { color: #C0C0C0; } /* Silver */
         .rank-3 { color: #CD7F32; } /* Bronze */
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a1a1b;
+            display: flex;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-top: 1px solid #2a2a2b;
+            z-index: 10;
+        }
 
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: #6e45e2;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-circle"></div>
         <p>Loading...</p>
     </div>
     
+    <!-- Main Game Screen -->
     <div class="game-screen" id="gameScreen">
         <div class="header">
             <div class="profile" id="profile">
-                <div class="profile-pic" id="profilePic">
-                    <span id="profileInitials">?</span>
-                </div>
+                <div class="profile-pic" id="profilePic"><span>?</span></div>
                 <div class="profile-name" id="profileName"></div>
             </div>
         </div>
-        
         <div class="balance-container">
             <div class="balance-label">Your Balance</div>
             <div class="balance-amount" id="balance">0</div>
         </div>
-        
         <div class="tap-area">
-            <div class="particles" id="particles"></div>
             <div class="tap-circle" id="tapCircle">
                 <div class="tap-circle-inner">TAP</div>
             </div>
         </div>
     </div>
 
-    <div class="invite-screen" id="inviteScreen">
-        <div class="invite-header">
+    <!-- Invite Screen -->
+    <div class="page" id="inviteScreen">
+        <div class="page-header">
             <h2>Invite Friends</h2>
             <p>Earn bonuses when your friends join and play</p>
         </div>
-        
         <div class="invite-link-container">
-            <div class="invite-link" id="inviteLink">Loading invite link...</div>
+            <div class="invite-link" id="inviteLink">Loading...</div>
             <button class="copy-btn" id="copyBtn">Copy</button>
         </div>
-
         <div class="share-buttons">
             <button class="share-btn" id="shareTelegramBtn">
-                <i class="fab fa-telegram-plane share-icon"></i> Share via Telegram
+                <i class="fab fa-telegram-plane"></i> Share via Telegram
             </button>
         </div>
-        
-        <div class="invited-users">
+        <div class="list-container">
             <h3>Your Team</h3>
-            <div class="users-list" id="usersList">
+            <div class="list-scrollable" id="usersList">
                 <div class="empty-state">No invited users yet</div>
             </div>
         </div>
     </div>
     
-    <div class="leaderboard-screen" id="leaderboardScreen">
-        <div class="leaderboard-header">
+    <!-- Leaderboard Screen -->
+    <div class="page" id="leaderboardScreen">
+        <div class="page-header">
             <h2>🏆 Leaderboard 🏆</h2>
         </div>
-        <div class="leaderboard-list" id="leaderboardList">
-             <div class="empty-state">Loading leaderboard...</div>
+        <div class="list-container">
+             <div class="list-scrollable" id="leaderboardList">
+                <div class="empty-state">Loading...</div>
+             </div>
         </div>
     </div>
 
-
+    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item active" id="navGame">
            <div class="nav-icon"><i class="fas fa-gamepad"></i></div>
@@ -531,13 +459,14 @@
            <div class="nav-icon"><i class="fas fa-user-plus"></i></div>
             <div class="nav-label">Invite</div>
         </div>
-        <div class="nav-item" id="navLeaderboard"> <div class="nav-icon"><i class="fas fa-trophy"></i></div>
+        <div class="nav-item" id="navLeaderboard">
+            <div class="nav-icon"><i class="fas fa-trophy"></i></div>
             <div class="nav-label">Leaders</div>
         </div>
     </div>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration (RESTORED)
         const firebaseConfig = {
             apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
             authDomain: "mytestapp-f6913.firebaseapp.com",
@@ -558,22 +487,30 @@
         const loadingScreen = document.getElementById('loadingScreen');
         const gameScreen = document.getElementById('gameScreen');
         const profilePic = document.getElementById('profilePic');
-        const profileInitials = document.getElementById('profileInitials');
         const profileName = document.getElementById('profileName');
         const balanceDisplay = document.getElementById('balance');
         const tapCircle = document.getElementById('tapCircle');
-        const particlesContainer = document.getElementById('particles');
-        const navGame = document.getElementById('navGame');
-        const navInvite = document.getElementById('navInvite');
-        const navLeaderboard = document.getElementById('navLeaderboard'); // New
-        const inviteScreen = document.getElementById('inviteScreen');
-        const leaderboardScreen = document.getElementById('leaderboardScreen'); // New
+        
+        // Navigation
+        const navItems = {
+            game: document.getElementById('navGame'),
+            invite: document.getElementById('navInvite'),
+            leaderboard: document.getElementById('navLeaderboard')
+        };
+        const pages = {
+            game: gameScreen,
+            invite: document.getElementById('inviteScreen'),
+            leaderboard: document.getElementById('leaderboardScreen')
+        };
+
+        // Invite Screen Elements
         const inviteLink = document.getElementById('inviteLink');
         const copyBtn = document.getElementById('copyBtn');
         const usersList = document.getElementById('usersList');
-        const leaderboardList = document.getElementById('leaderboardList'); // New
         const shareTelegramBtn = document.getElementById('shareTelegramBtn');
 
+        // Leaderboard element
+        const leaderboardList = document.getElementById('leaderboardList');
 
         // Game state
         let balance = 0;
@@ -581,80 +518,32 @@
         let userDocRef = null;
         let coinsPerTap = 1;
         let invitedBy = null;
-        const botUsername = 'YOUR_BOT_USERNAME'; // CHANGE THIS
+        const botUsername = 'guvuhgy7bot/kuyti'; // RESTORED
 
-        // Pad Telegram ID for password
+        // Pad Telegram ID for a simple password
         function padTelegramId(id) {
             return String(id).padStart(6, '0');
         }
 
-        // Create coin effect
+        // Create coin effect on tap
         function createCoinEffect(x, y) {
             const coin = document.createElement('div');
             coin.className = 'coin-effect';
+            coin.textContent = `+${coinsPerTap}`;
             coin.style.left = `${x - 15}px`;
             coin.style.top = `${y - 15}px`;
             document.body.appendChild(coin);
             
-            setTimeout(() => {
-                coin.remove();
-            }, 1000);
+            setTimeout(() => coin.remove(), 1000);
         }
 
-        // Create particles
-        function createParticles(x, y) {
-            for (let i = 0; i < 10; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                const size = Math.random() * 10 + 5;
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
-                
-                particlesContainer.appendChild(particle);
-                
-                const angle = Math.random() * Math.PI * 2;
-                const velocity = Math.random() * 5 + 2;
-                const lifetime = Math.random() * 1000 + 500;
-                
-                let startTime = Date.now();
-                
-                function animate() {
-                    const elapsed = Date.now() - startTime;
-                    const progress = elapsed / lifetime;
-                    
-                    if (progress >= 1) {
-                        particle.remove();
-                        return;
-                    }
-                    
-                    const distance = velocity * elapsed / 20;
-                    const currentX = x + Math.cos(angle) * distance;
-                    const currentY = y + Math.sin(angle) * distance;
-                    const opacity = 1 - progress;
-                    const scale = 1 - progress * 0.5;
-                    
-                    particle.style.transform = `translate(${currentX - x}px, ${currentY - y}px) scale(${scale})`;
-                    particle.style.opacity = opacity;
-                    
-                    requestAnimationFrame(animate);
-                }
-                
-                requestAnimationFrame(animate);
-            }
-        }
-
-        // Handle tap
+        // Handle tap event
         function handleTap(e) {
+            e.preventDefault(); // Prevents double tap zoom
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
             
             createCoinEffect(clientX, clientY);
-            // createParticles is cool but can cause lag on some devices
-            // createParticles(clientX, clientY); 
             
             balance += coinsPerTap;
             balanceDisplay.textContent = balance.toLocaleString();
@@ -665,15 +554,12 @@
             
             if (userDocRef) {
                 userDocRef.update({
-                    balance: firebase.firestore.FieldValue.increment(coinsPerTap),
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }).catch(error => {
-                    console.error('Error updating balance:', error);
-                });
+                    balance: firebase.firestore.FieldValue.increment(coinsPerTap)
+                }).catch(error => console.error('Error updating balance:', error));
             }
         }
 
-        // Setup invite link
+        // Setup invite link and buttons
         function setupInviteLink(userId) {
             const link = `https://t.me/${botUsername}?startapp=invite_${userId}`;
             inviteLink.textContent = link;
@@ -681,14 +567,8 @@
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(link).then(() => {
                     copyBtn.textContent = 'Copied!';
-                    setTimeout(() => {
-                        copyBtn.textContent = 'Copy';
-                    }, 2000);
+                    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
                 });
-                
-                if (window.Telegram?.WebApp?.HapticFeedback) {
-                    Telegram.WebApp.HapticFeedback.impactOccurred('light');
-                }
             });
 
             shareTelegramBtn.addEventListener('click', () => {
@@ -700,23 +580,20 @@
         
         // Load Leaderboard data
         async function loadLeaderboard() {
-            leaderboardList.innerHTML = '<div class="empty-state">Loading leaderboard...</div>';
-            
+            leaderboardList.innerHTML = '<div class="empty-state">Loading...</div>';
             try {
                 const querySnapshot = await db.collection('users').orderBy('balance', 'desc').limit(100).get();
-                
                 if (querySnapshot.empty) {
-                    leaderboardList.innerHTML = '<div class="empty-state">Leaderboard is empty. Be the first!</div>';
+                    leaderboardList.innerHTML = '<div class="empty-state">Be the first on the leaderboard!</div>';
                     return;
                 }
 
-                leaderboardList.innerHTML = ''; // Clear loading state
+                leaderboardList.innerHTML = '';
                 let rank = 1;
-                
                 querySnapshot.forEach(doc => {
                     const userData = doc.data();
-                    const userCard = document.createElement('div');
-                    userCard.className = 'leaderboard-card';
+                    const card = document.createElement('div');
+                    card.className = 'leaderboard-card';
                     
                     let rankDisplay = rank;
                     let rankClass = `rank-${rank}`;
@@ -724,46 +601,70 @@
                     if(rank === 2) rankDisplay = '🥈';
                     if(rank === 3) rankDisplay = '🥉';
 
-                    userCard.innerHTML = `
+                    card.innerHTML = `
                         <div class="rank ${rank > 3 ? '' : rankClass}">${rankDisplay}</div>
                         <div class="user-info">
-                            ${userData.photo_url ? 
-                                `<div class="user-avatar"><img src="${userData.photo_url}" alt="${userData.first_name}"></div>` : 
-                                `<div class="user-avatar">${(userData.first_name?.[0] || '') + (userData.last_name?.[0] || '') || '?'}</div>`
-                            }
+                            <div class="user-avatar">${userData.photo_url ? `<img src="${userData.photo_url}" alt="">` : (userData.first_name?.[0] || '?')}</div>
                             <div class="user-name">${userData.first_name || 'User'}</div>
                         </div>
                         <div class="user-balance">${(userData.balance || 0).toLocaleString()}</div>
                     `;
-                    
-                    leaderboardList.appendChild(userCard);
+                    leaderboardList.appendChild(card);
                     rank++;
                 });
-
             } catch (error) {
                 console.error("Error loading leaderboard:", error);
                 leaderboardList.innerHTML = '<div class="empty-state">Could not load leaderboard.</div>';
             }
         }
 
-        // Load invited users
+        // Load invited users (FIXED)
         async function loadInvitedUsers() {
-            // ... (existing function is fine)
+            usersList.innerHTML = '<div class="empty-state">Loading team...</div>';
+            const userDoc = await userDocRef.get();
+            const invitedUserIds = userDoc.data().invitedUsers || [];
+            
+            if (invitedUserIds.length === 0) {
+                usersList.innerHTML = '<div class="empty-state">You haven\'t invited anyone yet.</div>';
+                return;
+            }
+            
+            usersList.innerHTML = '';
+            for (const userId of invitedUserIds) {
+                try {
+                    const invitedUserDoc = await db.collection('users').doc(userId).get();
+                    if (invitedUserDoc.exists) {
+                        const userData = invitedUserDoc.data();
+                        const card = document.createElement('div');
+                        card.className = 'user-card';
+                        card.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-avatar">${userData.photo_url ? `<img src="${userData.photo_url}" alt="">` : (userData.first_name?.[0] || '?')}</div>
+                                <div class="user-name">${userData.first_name || 'User'}</div>
+                            </div>
+                            <div class="user-balance">${(userData.balance || 0).toLocaleString()}</div>
+                        `;
+                        usersList.appendChild(card);
+                    }
+                } catch (error) {
+                    console.error('Error loading invited user data:', error);
+                }
+            }
         }
 
-        // Initialize game
+        // Initialize the game
         async function initGame() {
             try {
-                if (!window.Telegram?.WebApp) {
-                    throw new Error('Please open in Telegram');
+                if (!window.Telegram?.WebApp?.initDataUnsafe) {
+                     throw new Error('Please open in Telegram');
                 }
                 
                 Telegram.WebApp.ready();
                 Telegram.WebApp.expand();
                 
-                const tgUser = Telegram.WebApp.initDataUnsafe?.user;
+                const tgUser = Telegram.WebApp.initDataUnsafe.user;
                 if (!tgUser?.id || !tgUser?.username) {
-                    throw new Error('Telegram user data missing');
+                    throw new Error('Telegram user data is not available.');
                 }
                 
                 const startParam = Telegram.WebApp.initDataUnsafe.start_param;
@@ -777,34 +678,28 @@
                 try {
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     firebaseUser = userCredential.user;
-
-                    // Handle referral bonus for new user creation
-                    if (invitedBy) {
-                        const inviterRef = db.collection('users').doc(invitedBy);
-                        await inviterRef.update({
-                            invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
-                            balance: firebase.firestore.FieldValue.increment(10000) // Bonus for inviter
-                        });
-                        balance = 5000; // Starting bonus for new invited user
-                    }
-
                 } catch (createError) {
                     if (createError.code === 'auth/email-already-in-use') {
                         const userCredential = await auth.signInWithEmailAndPassword(email, password);
                         firebaseUser = userCredential.user;
-                        
-                        const userDoc = await db.collection('users').doc(firebaseUser.uid).get();
-                        balance = userDoc.data().balance || 0;
                     } else {
                         throw createError;
                     }
                 }
 
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
-                
                 const userDoc = await userDocRef.get();
                 
                 if (!userDoc.exists) {
+                     // New user bonus logic
+                    if (invitedBy) {
+                        const inviterRef = db.collection('users').doc(invitedBy);
+                        await inviterRef.update({
+                            invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
+                            balance: firebase.firestore.FieldValue.increment(10000)
+                        });
+                        balance = 5000; // Starting bonus for invited user
+                    }
                     await userDocRef.set({
                         id: tgUser.id,
                         first_name: tgUser.first_name || '',
@@ -814,67 +709,53 @@
                         balance: balance,
                         invitedBy: invitedBy || null,
                         invitedUsers: [],
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                } else {
+                    balance = userDoc.data().balance || 0;
                 }
                 
+                // Setup UI
                 if (tgUser.photo_url) {
                     profilePic.innerHTML = `<img src="${tgUser.photo_url}" alt="Profile">`;
                 } else {
-                    const initials = (tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '');
-                    profileInitials.textContent = initials || '?';
+                    profilePic.innerHTML = `<span>${(tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '?')}</span>`;
                 }
-                
                 profileName.textContent = tgUser.first_name || 'Player';
                 balanceDisplay.textContent = balance.toLocaleString();
                 setupInviteLink(firebaseUser.uid);
                 
-                // Navigation Setup
-                navGame.addEventListener('click', () => {
-                    gameScreen.style.display = 'flex';
-                    inviteScreen.style.display = 'none';
-                    leaderboardScreen.style.display = 'none';
-                    navGame.classList.add('active');
-                    navInvite.classList.remove('active');
-                    navLeaderboard.classList.remove('active');
-                });
-                
-                navInvite.addEventListener('click', () => {
-                    gameScreen.style.display = 'none';
-                    inviteScreen.style.display = 'block';
-                    leaderboardScreen.style.display = 'none';
-                    navGame.classList.remove('active');
-                    navInvite.classList.add('active');
-                    navLeaderboard.classList.remove('active');
-                    // Lazy load invited users list
-                    if(!usersList.hasChildNodes() || usersList.querySelector('.empty-state')){
-                       // loadInvitedUsers();
-                    }
-                });
-                
-                navLeaderboard.addEventListener('click', () => {
-                    gameScreen.style.display = 'none';
-                    inviteScreen.style.display = 'none';
-                    leaderboardScreen.style.display = 'block';
-                    navGame.classList.remove('active');
-                    navInvite.classList.remove('active');
-                    navLeaderboard.classList.add('active');
-                    loadLeaderboard(); // Load data when tab is opened
-                });
-                
+                // Setup Navigation
+                function switchTab(tabName) {
+                    Object.keys(pages).forEach(key => {
+                        pages[key].style.display = 'none';
+                        navItems[key].classList.remove('active');
+                    });
+                    pages[tabName].style.display = tabName === 'game' ? 'flex' : 'block';
+                    navItems[tabName].classList.add('active');
+
+                    if (tabName === 'invite') loadInvitedUsers();
+                    if (tabName === 'leaderboard') loadLeaderboard();
+                }
+
+                navItems.game.addEventListener('click', () => switchTab('game'));
+                navItems.invite.addEventListener('click', () => switchTab('invite'));
+                navItems.leaderboard.addEventListener('click', () => switchTab('leaderboard'));
+
+                // Setup tap listeners
                 tapCircle.addEventListener('click', handleTap);
                 tapCircle.addEventListener('touchstart', handleTap, { passive: true });
                 
+                // Show the game screen
                 loadingScreen.style.opacity = '0';
                 setTimeout(() => {
                     loadingScreen.style.display = 'none';
-                    gameScreen.style.display = 'flex';
+                    switchTab('game'); // Start on game tab
                 }, 500);
                 
             } catch (error) {
                 console.error('Initialization error:', error);
-                loadingScreen.innerHTML = `<p style="color:red; padding: 20px;">Error: ${error.message}. Please try again inside Telegram.</p>`;
+                loadingScreen.innerHTML = `<p style="color:red; padding: 20px;">Error: ${error.message}.</p>`;
             }
         }
 
