@@ -671,19 +671,60 @@
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     firebaseUser = userCredential.user;
                     
-                    // If this is a new user and came from an invite link
-                    if (invitedBy) {
-                        // Add bonus to inviter
-                        const inviterRef = db.collection('users').doc(invitedBy);
-                        await inviterRef.update({
-                            invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
-                            balance: firebase.firestore.FieldValue.increment(100), // Bonus for inviter
-                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        
-                        // Add bonus to new user
-                        balance = 50; // Starting bonus for invited user
-                    }
+                  // Function to send Telegram message via bot
+async function sendTelegramMessage(chatId, text) {
+    const botToken = '8162193180:AAF-ZGiIWFL-3tLyrkpaaLO2Y48RmrHRcwE';
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: text,
+                parse_mode: 'HTML'
+            })
+        });
+        
+        const data = await response.json();
+        if (!data.ok) {
+            console.error('Telegram API error:', data);
+        }
+    } catch (error) {
+        console.error('Error sending Telegram message:', error);
+    }
+}
+
+// Inside initGame(), modify the invitedBy section:
+if (invitedBy) {
+    // Add bonus to inviter
+    const inviterRef = db.collection('users').doc(invitedBy);
+    await inviterRef.update({
+        invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
+        balance: firebase.firestore.FieldValue.increment(100), // Bonus for inviter
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Add bonus to new user
+    balance = 50; // Starting bonus for invited user
+    
+    // Get inviter's Telegram ID to send notification
+    const inviterDoc = await inviterRef.get();
+    if (inviterDoc.exists) {
+        const inviterData = inviterDoc.data();
+        if (inviterData.id) {
+            const newUserName = tgUser.first_name || 'New player';
+            const message = `🎉 <b>${newUserName}</b> joined using your invite link!\n\n` +
+                           `You received <b>100 coins</b> as a bonus!\n` +
+                           `Keep inviting to earn more rewards.`;
+            
+            // Send notification to inviter
+            await sendTelegramMessage(inviterData.id, message);
+        }
+
                 } catch (createError) {
                     if (createError.code === 'auth/email-already-in-use') {
                         // If user exists, sign in
