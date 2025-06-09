@@ -983,7 +983,7 @@
             <div class="lobby-status">
                 <i class="fas fa-search" style="font-size: 36px; margin-bottom: 15px;"></i>
                 <div>Looking for an opponent</div>
-                <div class="player-count">1</div>
+                <div class="player-count" id="onlinePlayers">1</div>
                 <div class="player-count-label">players online</div>
                 
                 <div class="searching-indicator">
@@ -1100,11 +1100,16 @@
 
         // Leaderboard element
         const leaderboardList = document.getElementById('leaderboardList');
+        
+        // PvP Lobby
+        const onlinePlayersDisplay = document.getElementById('onlinePlayers');
+
 
         // Game state
         let balance = 0;
         let firebaseUser = null;
         let userDocRef = null;
+        let userData = {};
         let coinsPerTap = 1;
         let invitedBy = null;
         const botUsername = 'guvuhgy7bot/kuyti';
@@ -1260,7 +1265,9 @@
             }
         }
         
-        // **** FIX: Moved switchTab to the global scope ****
+        let pvpGameUnsubscribe = null;
+        let currentGameId = null;
+        
         // This function handles switching between different pages/tabs of the app.
         function switchTab(tabName) {
             // Hide all pages first
@@ -1307,6 +1314,8 @@
             const pvpBoardContainer = document.getElementById('pvpBoardContainer');
             const pvpBoard = document.getElementById('pvpBoard');
             const exitPvpGameBtn = document.getElementById('exitPvpGame');
+            const player1Avatar = document.getElementById('player1Avatar');
+            const player2Avatar = document.getElementById('player2Avatar');
             const player1Name = document.getElementById('player1Name');
             const player2Name = document.getElementById('player2Name');
             const player1Mark = document.getElementById('player1Mark');
@@ -1320,7 +1329,6 @@
             const prizeAmount = document.getElementById('prizeAmount');
             const modalBtn = document.getElementById('modalBtn');
             
-            let currentPlayer = 'X';
             let gameActive = true;
             let gameState = ['', '', '', '', '', '', '', '', ''];
             const winningCombinations = [
@@ -1329,276 +1337,339 @@
                 [0, 4, 8], [2, 4, 6]             // diagonals
             ];
             
-            // Game Mode: robot or pvp
             let gameMode = null;
             
-            // Handle cell played
-            function handleCellClick(e) {
+            // **** REAL-TIME PVP LOGIC ****
+            async function handlePvpCellClick(e, gameData) {
                 const cell = e.target;
                 const index = parseInt(cell.getAttribute('data-index'));
-                
-                if (gameState[index] !== '' || !gameActive) return;
-                
-                // Make the move
-                gameState[index] = currentPlayer;
-                cell.textContent = currentPlayer;
-                cell.classList.add(currentPlayer.toLowerCase());
-                
-                // Check if someone won
-                if (checkWin()) {
-                    endGame(false);
-                    return;
+
+                if (gameData.board[index] !== '' || !gameData.gameActive || gameData.currentPlayerId !== firebaseUser.uid) {
+                    return; // Not your turn or cell is taken
                 }
+
+                const newBoard = [...gameData.board];
+                newBoard[index] = gameData.players[firebaseUser.uid].mark;
                 
-                // Check for draw
-                if (!gameState.includes('')) {
-                    endGame(true);
-                    return;
+                const nextPlayerId = gameData.player1Id === firebaseUser.uid ? gameData.player2Id : gameData.player1Id;
+
+                const updates = {
+                    board: newBoard,
+                    currentPlayerId: nextPlayerId
+                };
+                
+                // Check for win/draw
+                const winInfo = checkWin(newBoard, gameData.players[firebaseUser.uid].mark);
+                if (winInfo.hasWinner) {
+                    updates.winnerId = firebaseUser.uid;
+                    updates.gameActive = false;
+                } else if (!newBoard.includes('')) { // Draw
+                    updates.winnerId = 'draw';
+                    updates.gameActive = false;
                 }
-                
-                // Switch player
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                
-                // Update status
-                if (gameMode === 'robot') {
-                    robotGameStatus.textContent = currentPlayer === 'X' ? 'Your turn!' : 'Robot is thinking...';
-                    
-                    // Robot's turn
-                    if (currentPlayer === 'O') {
-                        setTimeout(robotMove, 800);
-                    }
-                } else if (gameMode === 'pvp') {
-                    pvpGameStatus.textContent = currentPlayer === 'X' ? 'Player X turn' : 'Player O turn';
-                }
+
+                await db.collection('games').doc(currentGameId).update(updates);
             }
-            
-            // Check if current player won
-            function checkWin() {
-                for (let i = 0; i < winningCombinations.length; i++) {
-                    const [a, b, c] = winningCombinations[i];
-                    if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
-                        // Highlight winning cells
-                        const cells = document.querySelectorAll(`.cell[data-index="${a}"], .cell[data-index="${b}"], .cell[data-index="${c}"]`);
-                        cells.forEach(cell => cell.classList.add('win'));
-                        
-                        return true;
-                    }
-                }
-                return false;
-            }
-            
-            // End the game
-            function endGame(isDraw) {
-                gameActive = false;
+
+            function updatePvpUI(gameData) {
+                // Update player info display
+                const player1 = gameData.player1Data;
+                const player2 = gameData.player2Data || { first_name: 'Waiting...', photo_url: null };
+
+                player1Name.textContent = player1.first_name;
+                if(player1.photo_url) player1Avatar.innerHTML = `<img src="${player1.photo_url}" alt="">`;
+                else player1Avatar.innerHTML = `<span>${player1.first_name?.[0] || '?'}</span>`;
                 
-                let result = '';
-                let prize = 0;
-                
-                if (isDraw) {
-                    result = 'draw';
-                    resultIcon.innerHTML = '<i class="fas fa-handshake"></i>';
-                    resultTitle.textContent = 'Game Draw!';
-                    resultMessage.textContent = 'No winner this time. Try again!';
-                    prizeAmount.textContent = '+0 coins';
-                } else {
-                    const winner = currentPlayer;
-                    result = winner === 'X' ? 'win' : 'loss';
+                player2Name.textContent = player2.first_name;
+                if(player2.photo_url) player2Avatar.innerHTML = `<img src="${player2.photo_url}" alt="">`;
+                else player2Avatar.innerHTML = `<span>${player2.first_name?.[0] || '?'}</span>`;
+
+
+                if (gameData.status === 'active') {
+                    pvpLobby.style.display = 'none';
+                    pvpBoardContainer.style.display = 'block';
                     
-                    if (result === 'win') {
-                        resultIcon.innerHTML = '<i class="fas fa-trophy"></i>';
-                        resultTitle.textContent = 'Victory!';
-                        prize = gameMode === 'robot' ? 100 : 500;
-                        prizeAmount.textContent = `+${prize} coins`;
-                        
-                        if (gameMode === 'robot') {
-                            resultMessage.textContent = 'You won against the robot!';
+                    const myMark = gameData.players[firebaseUser.uid].mark;
+                    const opponentId = gameData.player1Id === firebaseUser.uid ? gameData.player2Id : gameData.player1Id;
+                    const opponentMark = gameData.players[opponentId].mark;
+
+                    player1Mark.textContent = gameData.player1Id === firebaseUser.uid ? myMark : opponentMark;
+                    player2Mark.textContent = gameData.player2Id === firebaseUser.uid ? myMark : opponentMark;
+                    
+                    // Render board
+                    const cells = pvpBoard.querySelectorAll('.cell');
+                    gameData.board.forEach((mark, index) => {
+                        cells[index].textContent = mark;
+                        cells[index].className = 'cell';
+                        if(mark) cells[index].classList.add(mark.toLowerCase());
+                    });
+                    
+                    if (!gameData.gameActive) {
+                        if (gameData.winnerId === 'draw') {
+                             pvpGameStatus.textContent = "It's a draw!";
+                             showGameResultModal('draw');
+                        } else if (gameData.winnerId === firebaseUser.uid) {
+                            pvpGameStatus.textContent = "You win!";
+                             showGameResultModal('win', 'pvp');
                         } else {
-                            resultMessage.textContent = 'You defeated your opponent!';
+                             pvpGameStatus.textContent = "You lose!";
+                             showGameResultModal('loss');
                         }
                     } else {
-                        resultIcon.innerHTML = '<i class="fas fa-times"></i>';
-                        resultTitle.textContent = 'Defeat!';
-                        prizeAmount.textContent = '+0 coins';
-                        
-                        if (gameMode === 'robot') {
-                            resultMessage.textContent = 'The robot outsmarted you!';
-                        } else {
-                            resultMessage.textContent = 'Your opponent was too strong!';
-                        }
+                        pvpGameStatus.textContent = gameData.currentPlayerId === firebaseUser.uid ? "Your turn!" : "Opponent's turn...";
                     }
+                } else {
+                     pvpLobby.style.display = 'block';
+                     pvpBoardContainer.style.display = 'none';
+                }
+            }
+
+
+            // Listen for game updates
+            function listenForPvpUpdates(gameId) {
+                currentGameId = gameId;
+                const cells = pvpBoard.querySelectorAll('.cell');
+                
+                pvpGameUnsubscribe = db.collection('games').doc(gameId).onSnapshot(async doc => {
+                    if (!doc.exists) { // Game deleted (e.g., opponent left lobby)
+                        console.log("Game no longer exists.");
+                        await cleanUpPvp();
+                        switchTab('games');
+                        return;
+                    }
+                    
+                    const gameData = doc.data();
+                    updatePvpUI(gameData);
+                    
+                    // Remove old listeners and add new ones
+                    cells.forEach(cell => {
+                       cell.onclick = (e) => handlePvpCellClick(e, gameData);
+                    });
+                });
+            }
+
+
+            // Matchmaking and starting PvP game
+            async function initPvpGame() {
+                gameMode = 'pvp';
+                switchTab('pvpGame');
+
+                const gamesRef = db.collection('games');
+                const q = gamesRef.where('status', '==', 'waiting').limit(1);
+                
+                const onlineUsersSnapshot = await db.collection('users').get();
+                onlinePlayersDisplay.textContent = onlineUsersSnapshot.size;
+
+                const querySnapshot = await q.get();
+
+                if (querySnapshot.empty) {
+                    // No waiting games, create a new one
+                    const newGameRef = await gamesRef.add({
+                        player1Id: firebaseUser.uid,
+                        player1Data: userData,
+                        player2Id: null,
+                        player2Data: null,
+                        status: 'waiting',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        board: ['', '', '', '', '', '', '', '', ''],
+                        currentPlayerId: null,
+                        winnerId: null,
+                        gameActive: false,
+                        players: {}
+                    });
+                    listenForPvpUpdates(newGameRef.id);
+                } else {
+                    // Join an existing game
+                    const gameDoc = querySnapshot.docs[0];
+                    const gameData = gameDoc.data();
+                    
+                    // Prevent joining your own game
+                    if(gameData.player1Id === firebaseUser.uid) {
+                        console.log("Waiting for another player in a game you created.");
+                        listenForPvpUpdates(gameDoc.id);
+                        return;
+                    }
+                    
+                    const players = {};
+                    const marks = ['X', 'O'];
+                    const firstMark = marks.splice(Math.floor(Math.random() * marks.length), 1)[0];
+                    const secondMark = marks[0];
+                    
+                    players[gameData.player1Id] = { mark: firstMark };
+                    players[firebaseUser.uid] = { mark: secondMark };
+                    
+                    const startingPlayerId = Math.random() < 0.5 ? gameData.player1Id : firebaseUser.uid;
+
+                    await gameDoc.ref.update({
+                        player2Id: firebaseUser.uid,
+                        player2Data: userData,
+                        status: 'active',
+                        gameActive: true,
+                        currentPlayerId: startingPlayerId,
+                        players: players
+                    });
+                    listenForPvpUpdates(gameDoc.id);
+                }
+            }
+            
+            async function cleanUpPvp() {
+                 if (pvpGameUnsubscribe) {
+                    pvpGameUnsubscribe();
+                    pvpGameUnsubscribe = null;
                 }
                 
-                // Show result modal
-                gameResultModal.classList.add('show');
+                if (currentGameId) {
+                    const gameRef = db.collection('games').doc(currentGameId);
+                    const gameDoc = await gameRef.get();
+                    if(gameDoc.exists) {
+                       const gameData = gameDoc.data();
+                       // if game is in waiting state, just delete it
+                       if(gameData.status === 'waiting' && gameData.player1Id === firebaseUser.uid) {
+                           await gameRef.delete();
+                       } else if (gameData.gameActive) {
+                           // if game is active, opponent wins
+                           const opponentId = gameData.player1Id === firebaseUser.uid ? gameData.player2Id : gameData.player1Id;
+                           await gameRef.update({ winnerId: opponentId, gameActive: false });
+                       }
+                    }
+                    currentGameId = null;
+                }
+                switchTab('games');
+            }
+
+
+            // **** ROBOT GAME LOGIC (Mostly Unchanged) ****
+            let robotCurrentPlayer = 'X';
+            
+            function handleRobotCellClick(e) {
+                if (!gameActive) return;
+                const cell = e.target;
+                const index = parseInt(cell.getAttribute('data-index'));
+
+                if (gameState[index] !== '' || robotCurrentPlayer !== 'X') return;
                 
-                // Update balance if player won
-                if (prize > 0) {
-                    balance += prize;
-                    balanceDisplay.textContent = balance.toLocaleString();
-                    
+                makeMove(index, robotBoard);
+                
+                if (gameActive) {
+                    setTimeout(() => robotMove(), 800);
+                }
+            }
+
+            function checkWin(board, mark) {
+                let hasWinner = false;
+                 for (let i = 0; i < winningCombinations.length; i++) {
+                    const [a, b, c] = winningCombinations[i];
+                    if (board[a] === mark && board[a] === board[b] && board[a] === board[c]) {
+                        hasWinner = true;
+                        break;
+                    }
+                }
+                return { hasWinner };
+            }
+
+            function showGameResultModal(result, mode = 'robot', prize=0) {
+                 if (result === 'win') {
+                    resultIcon.innerHTML = '<i class="fas fa-trophy"></i>';
+                    resultIcon.className = 'modal-icon win';
+                    resultTitle.textContent = 'Victory!';
+                    prize = mode === 'robot' ? 100 : 500;
+                    prizeAmount.textContent = `+${prize} coins`;
+                    resultMessage.textContent = mode === 'robot' ? 'You beat the robot!' : 'You defeated your opponent!';
+
                     if (userDocRef) {
                         userDocRef.update({
                             balance: firebase.firestore.FieldValue.increment(prize)
                         });
+                        balance += prize;
+                        balanceDisplay.textContent = balance.toLocaleString();
                     }
+
+                } else if (result === 'draw') {
+                    resultIcon.innerHTML = '<i class="fas fa-handshake"></i>';
+                    resultIcon.className = 'modal-icon draw';
+                    resultTitle.textContent = 'Game Draw!';
+                    resultMessage.textContent = 'No winner this time. Try again!';
+                    prizeAmount.textContent = '+0 coins';
+                } else { // loss
+                    resultIcon.innerHTML = '<i class="fas fa-times"></i>';
+                    resultIcon.className = 'modal-icon loss';
+                    resultTitle.textContent = 'Defeat!';
+                    prizeAmount.textContent = '+0 coins';
+                     resultMessage.textContent = mode === 'robot' ? 'The robot outsmarted you!' : 'Your opponent was too strong!';
+                }
+                gameResultModal.classList.add('show');
+            }
+            
+            function endGame(isDraw) {
+                gameActive = false;
+                if (isDraw) {
+                    showGameResultModal('draw');
+                } else {
+                    const winner = robotCurrentPlayer;
+                    showGameResultModal(winner === 'X' ? 'win' : 'loss');
                 }
             }
             
-            // Reset the game
-            function resetGame() {
-                currentPlayer = 'X';
+            function resetRobotGame() {
+                robotCurrentPlayer = 'X';
                 gameActive = true;
                 gameState = ['', '', '', '', '', '', '', '', ''];
                 
-                const cells = document.querySelectorAll('.cell');
+                const cells = robotBoard.querySelectorAll('.cell');
                 cells.forEach(cell => {
                     cell.textContent = '';
                     cell.className = 'cell';
-                    cell.classList.remove('x', 'o', 'win');
                 });
-                
-                if (gameMode === 'robot') {
-                    robotGameStatus.textContent = 'Your turn! You are playing as X';
-                } else if (gameMode === 'pvp') {
-                    pvpGameStatus.textContent = 'Your turn!';
-                }
-                
+                robotGameStatus.textContent = 'Your turn! You are playing as X';
                 gameResultModal.classList.remove('show');
             }
             
-            // Robot AI move
             function robotMove() {
                 if (!gameActive) return;
                 
-                // Try to win
-                for (let i = 0; i < winningCombinations.length; i++) {
-                    const [a, b, c] = winningCombinations[i];
-                    if (gameState[a] === 'O' && gameState[b] === 'O' && gameState[c] === '') {
-                        makeMove(c);
-                        return;
-                    }
-                    if (gameState[a] === 'O' && gameState[c] === 'O' && gameState[b] === '') {
-                        makeMove(b);
-                        return;
-                    }
-                    if (gameState[b] === 'O' && gameState[c] === 'O' && gameState[a] === '') {
-                        makeMove(a);
-                        return;
-                    }
+                let moveIndex = -1;
+                // Simple AI: find a random empty cell
+                let availableMoves = [];
+                gameState.forEach((cell, index) => {
+                    if (cell === '') availableMoves.push(index);
+                });
+                
+                if(availableMoves.length > 0) {
+                    moveIndex = availableMoves[Math.floor(Math.random() * availableMoves.length)];
                 }
-                
-                // Block player from winning
-                for (let i = 0; i < winningCombinations.length; i++) {
-                    const [a, b, c] = winningCombinations[i];
-                    if (gameState[a] === 'X' && gameState[b] === 'X' && gameState[c] === '') {
-                        makeMove(c);
-                        return;
-                    }
-                    if (gameState[a] === 'X' && gameState[c] === 'X' && gameState[b] === '') {
-                        makeMove(b);
-                        return;
-                    }
-                    if (gameState[b] === 'X' && gameState[c] === 'X' && gameState[a] === '') {
-                        makeMove(a);
-                        return;
-                    }
-                }
-                
-                // Take center if available
-                if (gameState[4] === '') {
-                    makeMove(4);
-                    return;
-                }
-                
-                // Take a corner
-                const corners = [0, 2, 6, 8];
-                const availableCorners = corners.filter(index => gameState[index] === '');
-                if (availableCorners.length > 0) {
-                    const randomCorner = availableCorners[Math.floor(Math.random() * availableCorners.length)];
-                    makeMove(randomCorner);
-                    return;
-                }
-                
-                // Take any available spot
-                const availableMoves = gameState
-                    .map((val, idx) => val === '' ? idx : null)
-                    .filter(val => val !== null);
-                
-                if (availableMoves.length > 0) {
-                    const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-                    makeMove(randomMove);
+
+                if (moveIndex !== -1) {
+                    makeMove(moveIndex, robotBoard);
                 }
             }
             
-            function makeMove(index) {
-                gameState[index] = currentPlayer;
-                const cell = document.querySelector(`.cell[data-index="${index}"]`);
-                cell.textContent = currentPlayer;
-                cell.classList.add(currentPlayer.toLowerCase());
+            function makeMove(index, board) {
+                gameState[index] = robotCurrentPlayer;
+                const cell = board.querySelector(`.cell[data-index="${index}"]`);
+                cell.textContent = robotCurrentPlayer;
+                cell.classList.add(robotCurrentPlayer.toLowerCase());
                 
-                if (checkWin()) {
+                if (checkWin(gameState, robotCurrentPlayer).hasWinner) {
                     endGame(false);
                     return;
                 }
-                
                 if (!gameState.includes('')) {
                     endGame(true);
                     return;
                 }
                 
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                
-                if (gameMode === 'robot') {
-                    robotGameStatus.textContent = currentPlayer === 'X' ? 'Your turn!' : 'Robot is thinking...';
-                }
+                robotCurrentPlayer = robotCurrentPlayer === 'X' ? 'O' : 'X';
+                robotGameStatus.textContent = robotCurrentPlayer === 'X' ? 'Your turn!' : 'Robot is thinking...';
             }
-            
-            // Initialize robot game
+
             function initRobotGame() {
                 gameMode = 'robot';
-                resetGame();
-                
-                // Add event listeners to cells
+                resetRobotGame();
                 const cells = robotBoard.querySelectorAll('.cell');
                 cells.forEach(cell => {
-                    cell.addEventListener('click', handleCellClick);
+                    cell.addEventListener('click', handleRobotCellClick);
                 });
-                
-                // Show the robot game screen
                 switchTab('robotGame');
-            }
-            
-            // Initialize PvP game
-            function initPvpGame() {
-                gameMode = 'pvp';
-                resetGame();
-                
-                // Simulate finding an opponent
-                pvpLobby.style.display = 'block';
-                pvpBoardContainer.style.display = 'none';
-                pvpGameStatus.textContent = 'Searching for opponent...';
-                player2Name.textContent = 'Searching...';
-                player2Mark.textContent = '?';
-                
-                // Show opponent after a delay (simulated)
-                setTimeout(() => {
-                    pvpLobby.style.display = 'none';
-                    pvpBoardContainer.style.display = 'block';
-                    pvpGameStatus.textContent = 'Your turn! You are playing as X';
-                    
-                    // Set opponent info
-                    player2Name.textContent = 'JohnDoe';
-                    player2Mark.textContent = 'O';
-                    
-                    // Add event listeners to cells
-                    const cells = pvpBoard.querySelectorAll('.cell');
-                    cells.forEach(cell => {
-                        cell.addEventListener('click', handleCellClick);
-                    });
-                }, 3000);
-                
-                // Show the pvp game screen
-                switchTab('pvpGame');
             }
             
             // Event listeners for game cards
@@ -1606,38 +1677,37 @@
             pvpGameCard.addEventListener('click', initPvpGame);
             
             // Game control buttons
-            restartRobotGameBtn.addEventListener('click', resetGame);
+            restartRobotGameBtn.addEventListener('click', resetRobotGame);
             exitRobotGameBtn.addEventListener('click', () => switchTab('games'));
-            exitPvpGameBtn.addEventListener('click', () => switchTab('games'));
+            exitPvpGameBtn.addEventListener('click', cleanUpPvp);
             
             // Modal button
             modalBtn.addEventListener('click', () => {
+                gameResultModal.classList.remove('show');
                 if (gameMode === 'robot') {
-                    resetGame(); // Allow restarting after modal
-                    gameResultModal.classList.remove('show');
-                } else {
-                    resetGame();
+                    resetRobotGame(); 
+                } else if(gameMode === 'pvp') {
+                    cleanUpPvp();
                 }
             });
             
-            // Set player info
+            // Set player info for different screens
             function setPlayerInfo(tgUser) {
-                const playerAvatar = document.getElementById('playerAvatar');
-                const playerName = document.getElementById('playerName');
-                const player1Avatar = document.getElementById('player1Avatar'); // PvP avatar
+                const playerAvatarRobot = document.getElementById('playerAvatar');
+                const playerNameRobot = document.getElementById('playerName');
+                const player1AvatarPvp = document.getElementById('player1Avatar');
                 
                 if (tgUser.photo_url) {
                     const imgHtml = `<img src="${tgUser.photo_url}" alt="Profile">`;
-                    playerAvatar.innerHTML = imgHtml;
-                    player1Avatar.innerHTML = imgHtml;
+                    playerAvatarRobot.innerHTML = imgHtml;
+                    player1AvatarPvp.innerHTML = imgHtml;
                 } else {
                     const initialHtml = `<span>${(tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '?')}</span>`;
-                    playerAvatar.innerHTML = initialHtml;
-                    player1Avatar.innerHTML = initialHtml;
+                    playerAvatarRobot.innerHTML = initialHtml;
+                    player1AvatarPvp.innerHTML = initialHtml;
                 }
                 
-                player1Name.textContent = tgUser.first_name || 'You';
-                playerName.textContent = tgUser.first_name || 'You';
+                playerNameRobot.textContent = tgUser.first_name || 'You';
             }
             
             return { setPlayerInfo };
@@ -1701,7 +1771,7 @@
                         }
                     }
 
-                    await userDocRef.set({
+                    userData = {
                         id: tgUser.id,
                         first_name: tgUser.first_name || '',
                         last_name: tgUser.last_name || '',
@@ -1711,12 +1781,13 @@
                         invitedBy: invitedBy || null,
                         invitedUsers: [],
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
+                    };
+                    await userDocRef.set(userData);
                     await sendTelegramMessage(tgUser.id, welcomeMessage);
 
                 } else {
-                    balance = userDoc.data().balance || 0;
+                    userData = userDoc.data();
+                    balance = userData.balance || 0;
                 }
                 
                 // Setup UI
