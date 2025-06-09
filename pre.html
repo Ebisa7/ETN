@@ -720,9 +720,9 @@
                         if (inviterDoc.exists) {
                             await inviterRef.update({
                                 invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
-                                balance: firebase.firestore.FieldValue.increment(10000)
+                                balance: firebase.firestore.FieldValue.increment(1000)
                             });
-                            balance = 5000; // Starting bonus for the invited user
+                            balance = 500; // Starting bonus for the invited user
 
                             // Customize welcome message if inviter is found
                             const inviterUsername = inviterDoc.data().username;
