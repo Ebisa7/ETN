@@ -1281,18 +1281,43 @@
                 const password = padTelegramId(tgUser.id);
                 
                 try {
-                    firebaseUser = (await auth.signInWithEmailAndPassword(email, password)).user;
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    firebaseUser = userCredential.user;
                 } catch (error) {
-                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                       firebaseUser = (await auth.createUserWithEmailAndPassword(email, password)).user;
-                    } else throw error;
+                    if (error.code === 'auth/user-not-found') {
+                        const newUserCredential = await auth.createUserWithEmailAndPassword(email, password);
+                        firebaseUser = newUserCredential.user;
+                    } else {
+                        throw error;
+                    }
                 }
 
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
                 const userDoc = await userDocRef.get();
 
                 if (!userDoc.exists) {
-                    // ... New user creation logic ...
+                    const startParam = Telegram.WebApp.initDataUnsafe.start_param;
+                    if (startParam && startParam.startsWith('invite_')) {
+                        invitedBy = startParam.replace('invite_', '');
+                    }
+                    
+                    userData = {
+                        telegramId: tgUser.id,
+                        firstName: tgUser.first_name || '',
+                        lastName: tgUser.last_name || '',
+                        username: tgUser.username || '',
+                        photoUrl: tgUser.photo_url || '',
+                        balance: 0,
+                        invitedBy: invitedBy,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    await userDocRef.set(userData);
+
+                    if (invitedBy) {
+                        const inviterRef = db.collection('users').doc(invitedBy);
+                        await inviterRef.update({ balance: firebase.firestore.FieldValue.increment(1000) });
+                        // Simple notification for inviter - more advanced could use FCM
+                    }
                 } else {
                     userData = userDoc.data();
                     balance = userData.balance || 0;
