@@ -466,7 +466,7 @@
     </div>
 
     <script>
-        // Firebase configuration (RESTORED)
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBX3g8wWxcTtwFDsJNJVcjUDIGxMd1L0Rk",
             authDomain: "mytestapp-f6913.firebaseapp.com",
@@ -518,11 +518,30 @@
         let userDocRef = null;
         let coinsPerTap = 1;
         let invitedBy = null;
-        const botUsername = 'guvuhgy7bot/kuyti'; // RESTORED
+        const botUsername = 'guvuhgy7bot/kuyti';
 
         // Pad Telegram ID for a simple password
         function padTelegramId(id) {
             return String(id).padStart(6, '0');
+        }
+        
+        // NEW: Function to send a message via Telegram bot
+        async function sendTelegramMessage(chatId, text) {
+            const botToken = '8162193180:AAF-ZGiIWFL-3tLyrkpaaLO2Y48RmrHRcwE';
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: text,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (error) {
+                console.error('Error sending Telegram message:', error);
+            }
         }
 
         // Create coin effect on tap
@@ -618,7 +637,7 @@
             }
         }
 
-        // Load invited users (FIXED)
+        // Load invited users
         async function loadInvitedUsers() {
             usersList.innerHTML = '<div class="empty-state">Loading team...</div>';
             const userDoc = await userDocRef.get();
@@ -690,16 +709,30 @@
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
                 const userDoc = await userDocRef.get();
                 
+                // UPDATED: Logic for new user creation
                 if (!userDoc.exists) {
-                     // New user bonus logic
+                    let welcomeMessage = "🎉 <b>Welcome to the Tap Game!</b>\n\nStart tapping to earn coins and climb the leaderboard. Good luck!";
+                    
+                    // Handle referral bonus logic
                     if (invitedBy) {
                         const inviterRef = db.collection('users').doc(invitedBy);
-                        await inviterRef.update({
-                            invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
-                            balance: firebase.firestore.FieldValue.increment(10000)
-                        });
-                        balance = 5000; // Starting bonus for invited user
+                        const inviterDoc = await inviterRef.get();
+                        if (inviterDoc.exists) {
+                            await inviterRef.update({
+                                invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
+                                balance: firebase.firestore.FieldValue.increment(10000)
+                            });
+                            balance = 5000; // Starting bonus for the invited user
+
+                            // Customize welcome message if inviter is found
+                            const inviterUsername = inviterDoc.data().username;
+                            if (inviterUsername) {
+                                welcomeMessage += `\n\nYou were invited by <b>@${inviterUsername}</b>. You both received a bonus!`;
+                            }
+                        }
                     }
+
+                    // Create the new user's document
                     await userDocRef.set({
                         id: tgUser.id,
                         first_name: tgUser.first_name || '',
@@ -711,6 +744,10 @@
                         invitedUsers: [],
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    
+                    // Send the welcome message to the new user
+                    await sendTelegramMessage(tgUser.id, welcomeMessage);
+
                 } else {
                     balance = userDoc.data().balance || 0;
                 }
