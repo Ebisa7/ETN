@@ -401,6 +401,7 @@
             overflow: hidden;
             box-shadow: 0 6px 16px rgba(0,0,0,0.3);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
         }
         
         .game-card:active {
@@ -1259,6 +1260,36 @@
             }
         }
         
+        // **** FIX: Moved switchTab to the global scope ****
+        // This function handles switching between different pages/tabs of the app.
+        function switchTab(tabName) {
+            // Hide all pages first
+            Object.keys(pages).forEach(key => {
+                pages[key].style.display = 'none';
+            });
+            
+            // Deactivate all navigation items
+            Object.keys(navItems).forEach(key => {
+                navItems[key].classList.remove('active');
+            });
+            
+            // Show the correct page and activate the corresponding nav item
+            if (tabName === 'game') {
+                pages.game.style.display = 'flex';
+                navItems.game.classList.add('active');
+            } else if (tabName === 'robotGame' || tabName === 'pvpGame') {
+                pages[tabName].style.display = 'block';
+                navItems.games.classList.add('active'); // Keep 'Games' tab active for sub-pages
+            } else {
+                pages[tabName].style.display = 'block';
+                navItems[tabName].classList.add('active');
+            }
+
+            // Load data for specific tabs when they are opened
+            if (tabName === 'invite') loadInvitedUsers();
+            if (tabName === 'leaderboard') loadLeaderboard();
+        }
+
         // Tic Tac Toe Game Logic
         function initTicTacToe() {
             const robotGameCard = document.getElementById('robotGameCard');
@@ -1582,7 +1613,8 @@
             // Modal button
             modalBtn.addEventListener('click', () => {
                 if (gameMode === 'robot') {
-                    switchTab('games');
+                    resetGame(); // Allow restarting after modal
+                    gameResultModal.classList.remove('show');
                 } else {
                     resetGame();
                 }
@@ -1592,11 +1624,16 @@
             function setPlayerInfo(tgUser) {
                 const playerAvatar = document.getElementById('playerAvatar');
                 const playerName = document.getElementById('playerName');
+                const player1Avatar = document.getElementById('player1Avatar'); // PvP avatar
                 
                 if (tgUser.photo_url) {
-                    playerAvatar.innerHTML = `<img src="${tgUser.photo_url}" alt="Profile">`;
+                    const imgHtml = `<img src="${tgUser.photo_url}" alt="Profile">`;
+                    playerAvatar.innerHTML = imgHtml;
+                    player1Avatar.innerHTML = imgHtml;
                 } else {
-                    playerAvatar.innerHTML = `<span>${(tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '?')}</span>`;
+                    const initialHtml = `<span>${(tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '?')}</span>`;
+                    playerAvatar.innerHTML = initialHtml;
+                    player1Avatar.innerHTML = initialHtml;
                 }
                 
                 player1Name.textContent = tgUser.first_name || 'You';
@@ -1644,11 +1681,9 @@
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
                 const userDoc = await userDocRef.get();
                 
-                // UPDATED: Logic for new user creation
                 if (!userDoc.exists) {
                     let welcomeMessage = "🎉 <b>Welcome to the Tap Game!</b>\n\nStart tapping to earn coins and climb the leaderboard. Good luck!";
                     
-                    // Handle referral bonus logic
                     if (invitedBy) {
                         const inviterRef = db.collection('users').doc(invitedBy);
                         const inviterDoc = await inviterRef.get();
@@ -1657,9 +1692,8 @@
                                 invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
                                 balance: firebase.firestore.FieldValue.increment(10000)
                             });
-                            balance = 5000; // Starting bonus for the invited user
+                            balance = 5000;
 
-                            // Customize welcome message if inviter is found
                             const inviterUsername = inviterDoc.data().username;
                             if (inviterUsername) {
                                 welcomeMessage += `\n\nYou were invited by <b>@${inviterUsername}</b>. You both received a bonus!`;
@@ -1667,7 +1701,6 @@
                         }
                     }
 
-                    // Create the new user's document
                     await userDocRef.set({
                         id: tgUser.id,
                         first_name: tgUser.first_name || '',
@@ -1680,7 +1713,6 @@
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     
-                    // Send the welcome message to the new user
                     await sendTelegramMessage(tgUser.id, welcomeMessage);
 
                 } else {
@@ -1697,35 +1729,10 @@
                 balanceDisplay.textContent = balance.toLocaleString();
                 setupInviteLink(firebaseUser.uid);
                 
-                // Initialize Tic Tac Toe and set player info
                 const ticTacToe = initTicTacToe();
                 ticTacToe.setPlayerInfo(tgUser);
                 
-                // Setup Navigation
-                function switchTab(tabName) {
-                    Object.keys(pages).forEach(key => {
-                        pages[key].style.display = 'none';
-                    });
-                    
-                    Object.keys(navItems).forEach(key => {
-                        navItems[key].classList.remove('active');
-                    });
-                    
-                    if (tabName === 'game') {
-                        pages.game.style.display = 'flex';
-                        navItems.game.classList.add('active');
-                    } else if (tabName === 'robotGame' || tabName === 'pvpGame') {
-                        pages[tabName].style.display = 'block';
-                        navItems.games.classList.add('active');
-                    } else {
-                        pages[tabName].style.display = 'block';
-                        navItems[tabName].classList.add('active');
-                    }
-
-                    if (tabName === 'invite') loadInvitedUsers();
-                    if (tabName === 'leaderboard') loadLeaderboard();
-                }
-
+                // Setup Navigation Event Listeners
                 navItems.game.addEventListener('click', () => switchTab('game'));
                 navItems.invite.addEventListener('click', () => switchTab('invite'));
                 navItems.leaderboard.addEventListener('click', () => switchTab('leaderboard'));
