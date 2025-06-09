@@ -2,25 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tap Game</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        :root {
-            --primary-color: #6e45e2;
-            --background-dark: #0f0f10;
-            --background-med: #1a1a1b;
-            --background-light: #1b1e2e;
-            --text-primary: #ffffff;
-            --text-secondary: #aaa;
-            --accent-color: #88d3ce;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -31,144 +20,387 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: var(--background-light);
-            color: var(--text-primary);
+            background: #1b1e2e;
+            color: white;
             height: 100vh;
             overflow: hidden;
         }
         
-        /* General Page & Navigation Styles */
-        .page {
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f0f10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-circle {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #6e45e2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Main Game Screen */
+        .game-screen {
             display: none;
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: calc(100% - 70px);
-            background: var(--background-dark);
+            height: calc(100% - 70px); /* Adjusted for nav bar */
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .header {
+            padding: 15px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2a2a2b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .profile-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* Balance */
+        .balance-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .balance-amount {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(to right, #6e45e2, #88d3ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Tap Circle */
+        .tap-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .tap-circle {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2a2a2b, #1a1a1b);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        
+        .tap-circle:active {
+            transform: scale(0.95);
+        }
+        
+        .tap-circle-inner {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3a3a3c, #2a2a2b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .coin-effect {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            opacity: 0;
+            pointer-events: none;
+            animation: float-up 1s ease-out forwards;
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(0) scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.2);
+                opacity: 0;
+            }
+        }
+        
+        /* Page Styles */
+        .page {
+             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px); /* Adjusted for nav bar height */
+            background: #0f0f10;
             padding: 20px;
             overflow-y: auto;
             z-index: 5;
-            flex-direction: column;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .page.active { 
-            display: flex; 
-            opacity: 1;
         }
 
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0;
-            width: 100%;
-            background: var(--background-med);
+        .page-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .page-header h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* Invite Screen Specifics */
+        .invite-link-container {
             display: flex;
-            padding: 10px 0;
+            margin-bottom: 20px;
+            background: #1a1a1b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .invite-link {
+            flex: 1;
+            padding: 15px;
+            font-size: 14px;
+            word-break: break-all;
+            color: #88d3ce;
+        }
+
+        .copy-btn {
+            background: #6e45e2;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .copy-btn:active {
+            background: #5a35c0;
+        }
+
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .share-btn {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .share-btn:active {
+            background: #006699;
+        }
+        
+        .list-container {
+            background: #1a1a1b;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .list-container h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .list-scrollable {
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        .user-card, .leaderboard-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a2a2b;
+        }
+
+        .user-card:last-child, .leaderboard-card:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #2a2a2b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .user-balance {
+            color: #88d3ce;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .empty-state {
+            color: #666;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        /* Leaderboard Styles */
+        .leaderboard-card .rank {
+            font-size: 18px;
+            font-weight: bold;
+            width: 40px;
+            text-align: center;
+            color: #aaa;
+            flex-shrink: 0;
+        }
+        
+        .rank-1, .rank-2, .rank-3 {
+            font-size: 24px;
+        }
+        .rank-1 { color: #FFD700; } /* Gold */
+        .rank-2 { color: #C0C0C0; } /* Silver */
+        .rank-3 { color: #CD7F32; } /* Bronze */
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1a1a1b;
+            display: flex;
+            padding-top: 10px;
+            padding-bottom: 10px;
             border-top: 1px solid #2a2a2b;
             z-index: 10;
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; cursor: pointer; transition: color 0.2s ease; }
-        .nav-item.active { color: var(--primary-color); }
-        .nav-icon { font-size: 24px; margin-bottom: 4px; }
-        .nav-label { font-size: 12px; }
 
-        .page-header { text-align: center; margin-bottom: 20px; flex-shrink: 0; }
-        .page-header h2 { font-size: 24px; margin-bottom: 8px; }
-        .page-header p { color: var(--text-secondary); font-size: 14px; }
-        
-        /* Loading & Utility */
-        .loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--background-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; transition: opacity 0.5s ease; }
-        .loading-circle { width: 60px; height: 60px; border: 4px solid rgba(255, 255, 255, 0.1); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
 
-        /* Main Tap Game Screen */
-        .game-screen { /* This page is always a flex container */ }
-        .header { padding: 15px; display: flex; justify-content: flex-end; }
-        .profile { display: flex; align-items: center; gap: 10px; }
-        .profile-pic { width: 40px; height: 40px; border-radius: 50%; background: #2a2a2b; display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-name { font-weight: bold; font-size: 14px; }
-        .balance-container { text-align: center; margin-top: 20px; }
-        .balance-label { font-size: 14px; color: var(--text-secondary); margin-bottom: 5px; }
-        .balance-amount { font-size: 36px; font-weight: bold; background: linear-gradient(to right, var(--primary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .tap-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
-        .tap-circle { width: 280px; height: 280px; border-radius: 50%; background: linear-gradient(135deg, #2a2a2b, #1a1a1b); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; position: relative; cursor: pointer; transition: transform 0.1s ease; }
-        .tap-circle:active { transform: scale(0.95); }
-        .tap-circle-inner { width: 240px; height: 240px; border-radius: 50%; background: linear-gradient(135deg, #3a3a3c, #2a2a2b); display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; }
-        .coin-effect { position: absolute; font-size: 24px; font-weight: bold; color: #FFD700; opacity: 0; pointer-events: none; animation: float-up 1s ease-out forwards; }
-        @keyframes float-up { 0% { transform: translateY(0) scale(0.8); opacity: 1; } 100% { transform: translateY(-100px) scale(1.2); opacity: 0; } }
+        .nav-item.active {
+            color: #6e45e2;
+        }
 
-        /* Game Selection Screen */
-        .games-page .page-header { margin-bottom: 40px; }
-        .game-card { background: var(--background-med); border-radius: 20px; padding: 25px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .game-card:active { transform: scale(0.97); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .game-card-icon { font-size: 40px; }
-        .game-card-icon.robot { color: var(--accent-color); }
-        .game-card-icon.p2p { color: var(--primary-color); }
-        .game-card-info h3 { font-size: 20px; margin-bottom: 5px; }
-        .game-card-info p { color: var(--text-secondary); font-size: 14px; }
-        .game-card .arrow-icon { font-size: 24px; color: #444; }
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
 
-        /* Tic-Tac-Toe Game Page */
-        .ttt-board { display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 10px; width: 90vw; max-width: 300px; margin: auto; aspect-ratio: 1 / 1; }
-        .ttt-cell { background: var(--background-med); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; transform: scale(1); }
-        .ttt-cell:active { transform: scale(0.9); }
-        .ttt-cell.x { color: var(--accent-color); }
-        .ttt-cell.o { color: var(--primary-color); }
-        .ttt-cell.win { background-color: #ffd700; color: black; animation: win-pulse 0.6s 3; }
-        @keyframes win-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        
-        .ttt-status { text-align: center; margin-top: 20px; font-size: 18px; height: 30px; }
-        .ttt-controls { text-align: center; margin-top: 20px; }
-        .ttt-btn { background: var(--primary-color); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-size: 16px; cursor: pointer; transition: background-color 0.2s; }
-        .ttt-btn:disabled { background-color: #555; }
-        
-        /* P2P Matchmaking UI */
-        .p2p-matchmaking-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 50; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
-        .p2p-matchmaking-overlay.active { display: flex; }
-        .p2p-searching-view, .p2p-found-view { display: none; }
-        .p2p-searching-view.active, .p2p-found-view.active { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } }
-        .p2p-searching-view .loading-circle { animation: spin 1s linear infinite, pulse 2s ease-in-out infinite; margin: auto; }
-        .p2p-searching-view p { margin-top: 20px; font-size: 18px; }
-        #livePlayersCount { font-weight: bold; }
-        .cancel-matchmaking-btn { margin-top: 30px; background-color: #902121; }
-        .p2p-found-view .players-container { display: flex; justify-content: space-around; align-items: center; width: 100%; margin: 30px 0; }
-        .player-display { display: flex; flex-direction: column; align-items: center; opacity: 0; animation: fade-in 0.5s forwards; }
-        .player-display:nth-child(1) { animation-delay: 0.2s; }
-        .player-display:nth-child(3) { animation-delay: 0.7s; }
-        .player-display .profile-pic { width: 80px; height: 80px; border-radius: 50%; background: var(--background-med); display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 30px; }
-        .player-display .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
-        .player-display .profile-name { margin-top: 10px; font-weight: bold; }
-        .vs-text { font-size: 40px; font-weight: bold; opacity: 0; animation: fade-in 0.5s 0.5s forwards; }
-        @keyframes fade-in { to { opacity: 1; } }
-
-        /* Common List Styles */
-        .list-container { background: var(--background-med); border-radius: 12px; padding: 15px; }
-        .list-container h3 { margin-bottom: 15px; font-size: 18px; }
-        .list-scrollable { max-height: 40vh; overflow-y: auto; }
-        .user-card, .leaderboard-card { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2a2a2b; }
-        .user-card:last-child, .leaderboard-card:last-child { border-bottom: none; }
-        .user-info { display: flex; align-items: center; gap: 12px; flex-grow: 1; }
-        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #2a2a2b; display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0; }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .user-name { font-weight: bold; font-size: 14px; }
-        .user-balance { color: var(--accent-color); font-weight: bold; flex-shrink: 0; }
-        .leaderboard-card .rank { font-size: 18px; font-weight: bold; width: 40px; text-align: center; color: #aaa; flex-shrink: 0; }
-        .rank-1, .rank-2, .rank-3 { font-size: 24px; }
-        .rank-1 { color: #FFD700; } .rank-2 { color: #C0C0C0; } .rank-3 { color: #CD7F32; }
-        .empty-state { color: #666; text-align: center; padding: 20px 0; }
+        .nav-label {
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
-        <div class="loading-circle"></div><p>Loading...</p>
+        <div class="loading-circle"></div>
+        <p>Loading...</p>
     </div>
     
     <!-- Main Game Screen -->
-    <div class="page game-screen" id="gameScreen">
+    <div class="game-screen" id="gameScreen">
         <div class="header">
             <div class="profile" id="profile">
                 <div class="profile-pic" id="profilePic"><span>?</span></div>
-                <div class="profile-name" id="profileName">Player</div>
+                <div class="profile-name" id="profileName"></div>
             </div>
         </div>
         <div class="balance-container">
@@ -184,64 +416,53 @@
 
     <!-- Invite Screen -->
     <div class="page" id="inviteScreen">
-        <div class="page-header"><h2>Invite Friends</h2><p>Earn bonuses for each friend that joins</p></div>
-        <!-- Invite content will be populated by JS -->
+        <div class="page-header">
+            <h2>Invite Friends</h2>
+            <p>Earn bonuses when your friends join and play</p>
+        </div>
+        <div class="invite-link-container">
+            <div class="invite-link" id="inviteLink">Loading...</div>
+            <button class="copy-btn" id="copyBtn">Copy</button>
+        </div>
+        <div class="share-buttons">
+            <button class="share-btn" id="shareTelegramBtn">
+                <i class="fab fa-telegram-plane"></i> Share via Telegram
+            </button>
+        </div>
+        <div class="list-container">
+            <h3>Your Team</h3>
+            <div class="list-scrollable" id="usersList">
+                <div class="empty-state">No invited users yet</div>
+            </div>
+        </div>
     </div>
     
     <!-- Leaderboard Screen -->
     <div class="page" id="leaderboardScreen">
-        <div class="page-header"><h2>🏆 Leaderboard 🏆</h2></div>
-        <div class="list-container"><div class="list-scrollable" id="leaderboardList"><div class="empty-state">Loading...</div></div></div>
-    </div>
-
-    <!-- Games Hub Screen -->
-    <div class="page games-page" id="gamesHubScreen">
-        <div class="page-header"><h2>Game Center</h2><p>Play games to earn more coins</p></div>
-        <div class="game-card" id="gameCardRobot">
-            <div class="game-card-icon robot"><i class="fas fa-robot"></i></div>
-            <div class="game-card-info"><h3>VS. Robot</h3><p>Win 100 coins</p></div>
-            <div class="arrow-icon"><i class="fas fa-chevron-right"></i></div>
+        <div class="page-header">
+            <h2>🏆 Leaderboard 🏆</h2>
         </div>
-        <div class="game-card" id="gameCardP2P">
-            <div class="game-card-icon p2p"><i class="fas fa-users"></i></div>
-            <div class="game-card-info"><h3>Player VS. Player</h3><p>Win 500 coins</p></div>
-            <div class="arrow-icon"><i class="fas fa-chevron-right"></i></div>
-        </div>
-    </div>
-
-    <!-- Tic-Tac-Toe Game Page -->
-    <div class="page tictactoe-page" id="tictactoeScreen">
-        <div class="page-header" id="tttHeader"><h2>Tic-Tac-Toe</h2></div>
-        <div class="ttt-board" id="tttBoard"></div>
-        <div class="ttt-status" id="tttStatus">Your turn (X)</div>
-        <div class="ttt-controls">
-            <button class="ttt-btn" id="tttRestartBtn">Play Again</button>
-            <button class="ttt-btn" id="tttBackBtn">Back to Games</button>
-        </div>
-    </div>
-    
-    <!-- P2P Matchmaking Overlay -->
-    <div class="p2p-matchmaking-overlay" id="p2pOverlay">
-        <div class="p2p-searching-view active" id="p2pSearchingView">
-            <div class="loading-circle"></div><p>Searching for an opponent...</p><p><span id="livePlayersCount">0</span> players online</p>
-            <button class="ttt-btn cancel-matchmaking-btn" id="cancelMatchmakingBtn">Cancel</button>
-        </div>
-        <div class="p2p-found-view" id="p2pFoundView">
-            <div class="players-container">
-                <div class="player-display" id="p2pPlayer1"><div class="profile-pic"></div><div class="profile-name"></div></div>
-                <div class="vs-text">VS</div>
-                <div class="player-display" id="p2pPlayer2"><div class="profile-pic"></div><div class="profile-name"></div></div>
-            </div>
-            <p>Game starting...</p>
+        <div class="list-container">
+             <div class="list-scrollable" id="leaderboardList">
+                <div class="empty-state">Loading...</div>
+             </div>
         </div>
     </div>
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <div class="nav-item active" id="navGame"><div class="nav-icon"><i class="fas fa-gamepad"></i></div><div class="nav-label">Game</div></div>
-        <div class="nav-item" id="navInvite"><div class="nav-icon"><i class="fas fa-user-plus"></i></div><div class="nav-label">Invite</div></div>
-        <div class="nav-item" id="navGamesHub"><div class="nav-icon"><i class="fas fa-dice"></i></div><div class="nav-label">Games</div></div>
-        <div class="nav-item" id="navLeaderboard"><div class="nav-icon"><i class="fas fa-trophy"></i></div><div class="nav-label">Leaders</div></div>
+        <div class="nav-item active" id="navGame">
+           <div class="nav-icon"><i class="fas fa-gamepad"></i></div>
+            <div class="nav-label">Game</div>
+        </div>
+        <div class="nav-item" id="navInvite">
+           <div class="nav-icon"><i class="fas fa-user-plus"></i></div>
+            <div class="nav-label">Invite</div>
+        </div>
+        <div class="nav-item" id="navLeaderboard">
+            <div class="nav-icon"><i class="fas fa-trophy"></i></div>
+            <div class="nav-label">Leaders</div>
+        </div>
     </div>
 
     <script>
@@ -261,137 +482,317 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const rtdb = firebase.database();
 
-        // DOM Elements
+        // DOM elements
         const loadingScreen = document.getElementById('loadingScreen');
-        const pages = {
-            game: document.getElementById('gameScreen'), invite: document.getElementById('inviteScreen'),
-            leaderboard: document.getElementById('leaderboardScreen'), gamesHub: document.getElementById('gamesHubScreen'),
-            tictactoe: document.getElementById('tictactoeScreen')
-        };
+        const gameScreen = document.getElementById('gameScreen');
+        const profilePic = document.getElementById('profilePic');
+        const profileName = document.getElementById('profileName');
+        const balanceDisplay = document.getElementById('balance');
+        const tapCircle = document.getElementById('tapCircle');
+        
+        // Navigation
         const navItems = {
-            game: document.getElementById('navGame'), invite: document.getElementById('navInvite'),
-            gamesHub: document.getElementById('navGamesHub'), leaderboard: document.getElementById('navLeaderboard'),
+            game: document.getElementById('navGame'),
+            invite: document.getElementById('navInvite'),
+            leaderboard: document.getElementById('navLeaderboard')
         };
-        // TTT Elements
-        const tttBoardEl = document.getElementById('tttBoard');
-        const tttStatusEl = document.getElementById('tttStatus');
-        const tttRestartBtn = document.getElementById('tttRestartBtn');
-        const tttBackBtn = document.getElementById('tttBackBtn');
-        // P2P Elements
-        const p2pOverlay = document.getElementById('p2pOverlay');
-        const p2pSearchingView = document.getElementById('p2pSearchingView');
-        const p2pFoundView = document.getElementById('p2pFoundView');
-        const cancelMatchmakingBtn = document.getElementById('cancelMatchmakingBtn');
-        const livePlayersCountEl = document.getElementById('livePlayersCount');
+        const pages = {
+            game: gameScreen,
+            invite: document.getElementById('inviteScreen'),
+            leaderboard: document.getElementById('leaderboardScreen')
+        };
 
-        // App State
+        // Invite Screen Elements
+        const inviteLink = document.getElementById('inviteLink');
+        const copyBtn = document.getElementById('copyBtn');
+        const usersList = document.getElementById('usersList');
+        const shareTelegramBtn = document.getElementById('shareTelegramBtn');
+
+        // Leaderboard element
+        const leaderboardList = document.getElementById('leaderboardList');
+
+        // Game state
+        let balance = 0;
         let firebaseUser = null;
         let userDocRef = null;
-        let currentUserProfile = {};
-        let balance = 0;
+        let coinsPerTap = 1;
+        let invitedBy = null;
         const botUsername = 'guvuhgy7bot/kuyti';
-        const botToken = '8162193180:AAF-ZGiIWFL-3tLyrkpaaLO2Y48RmrHRcwE';
 
-        // TTT Game State
-        let ttt_gameState = {};
-        const ttt_winningConditions = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
-        let matchmakingRef = rtdb.ref('matchmakingQueue');
-        let currentGameRef = null;
-
-        // --- Utility Functions ---
-        async function sendTelegramMessage(chatId, text) { /* ... same as before ... */ }
-        function awardCoins(amount) {
-            balance += amount;
-            document.getElementById('balance').textContent = balance.toLocaleString();
-            userDocRef.update({ balance: firebase.firestore.FieldValue.increment(amount) });
+        // Pad Telegram ID for a simple password
+        function padTelegramId(id) {
+            return String(id).padStart(6, '0');
         }
-
-        // --- TTT Game Logic ---
-        function ttt_resetGameState() {
-            ttt_gameState = { board: Array(9).fill(null), currentPlayer: 'X', isGameActive: true, mode: 'robot', gameId: null, playerSymbol: 'X', winner: null };
-        }
-        function ttt_startGame(mode) {
-            ttt_resetGameState();
-            ttt_gameState.mode = mode;
-            tttRestartBtn.style.display = 'none';
-            tttBoardEl.innerHTML = '';
-            for (let i = 0; i < 9; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('ttt-cell');
-                cell.id = `cell-${i}`;
-                cell.addEventListener('click', () => ttt_handleCellClick(i));
-                tttBoardEl.appendChild(cell);
+        
+        // NEW: Function to send a message via Telegram bot
+        async function sendTelegramMessage(chatId, text) {
+            const botToken = '8162193180:AAF-ZGiIWFL-3tLyrkpaaLO2Y48RmrHRcwE';
+            const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: text,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (error) {
+                console.error('Error sending Telegram message:', error);
             }
-            tttStatusEl.textContent = 'Your turn (X)';
-            switchTab('tictactoe');
-        }
-        function ttt_handleCellClick(index) { /* ... */ } // Placeholder
-        function ttt_checkResult() { /* ... */ } // Placeholder
-        function ttt_robotMove() { /* ... */ } // Placeholder
-        function ttt_endGame(winner, winningLine) { /* ... */ } // Placeholder
-
-        // --- P2P Matchmaking Logic ---
-        function startMatchmaking() { /* ... */ } // Placeholder
-        function cancelMatchmaking() { /* ... */ } // Placeholder
-        function createP2PGame(p1, p2) { /* ... */ } // Placeholder
-        function listenToGameUpdates() { /* ... */ } // Placeholder
-
-        // --- Main App Flow ---
-        function switchTab(tabName) {
-            Object.values(pages).forEach(p => p.classList.remove('active'));
-            Object.values(navItems).forEach(n => n.classList.remove('active'));
-            pages[tabName].classList.add('active');
-            navItems[tabName].classList.add('active');
         }
 
+        // Create coin effect on tap
+        function createCoinEffect(x, y) {
+            const coin = document.createElement('div');
+            coin.className = 'coin-effect';
+            coin.textContent = `+${coinsPerTap}`;
+            coin.style.left = `${x - 15}px`;
+            coin.style.top = `${y - 15}px`;
+            document.body.appendChild(coin);
+            
+            setTimeout(() => coin.remove(), 1000);
+        }
+
+        // Handle tap event
+        function handleTap(e) {
+            e.preventDefault(); // Prevents double tap zoom
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            
+            createCoinEffect(clientX, clientY);
+            
+            balance += coinsPerTap;
+            balanceDisplay.textContent = balance.toLocaleString();
+            
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
+            
+            if (userDocRef) {
+                userDocRef.update({
+                    balance: firebase.firestore.FieldValue.increment(coinsPerTap)
+                }).catch(error => console.error('Error updating balance:', error));
+            }
+        }
+
+        // Setup invite link and buttons
+        function setupInviteLink(userId) {
+            const link = `https://t.me/${botUsername}?startapp=invite_${userId}`;
+            inviteLink.textContent = link;
+            
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(link).then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+                });
+            });
+
+            shareTelegramBtn.addEventListener('click', () => {
+                const message = `Join this awesome Tap Game and get bonus coins! 🎮💰\n\nUse my invite link: ${link}`;
+                const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(message)}`;
+                window.open(telegramShareUrl, '_blank');
+            });
+        }
+        
+        // Load Leaderboard data
+        async function loadLeaderboard() {
+            leaderboardList.innerHTML = '<div class="empty-state">Loading...</div>';
+            try {
+                const querySnapshot = await db.collection('users').orderBy('balance', 'desc').limit(100).get();
+                if (querySnapshot.empty) {
+                    leaderboardList.innerHTML = '<div class="empty-state">Be the first on the leaderboard!</div>';
+                    return;
+                }
+
+                leaderboardList.innerHTML = '';
+                let rank = 1;
+                querySnapshot.forEach(doc => {
+                    const userData = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'leaderboard-card';
+                    
+                    let rankDisplay = rank;
+                    let rankClass = `rank-${rank}`;
+                    if(rank === 1) rankDisplay = '🥇';
+                    if(rank === 2) rankDisplay = '🥈';
+                    if(rank === 3) rankDisplay = '🥉';
+
+                    card.innerHTML = `
+                        <div class="rank ${rank > 3 ? '' : rankClass}">${rankDisplay}</div>
+                        <div class="user-info">
+                            <div class="user-avatar">${userData.photo_url ? `<img src="${userData.photo_url}" alt="">` : (userData.first_name?.[0] || '?')}</div>
+                            <div class="user-name">${userData.first_name || 'User'}</div>
+                        </div>
+                        <div class="user-balance">${(userData.balance || 0).toLocaleString()}</div>
+                    `;
+                    leaderboardList.appendChild(card);
+                    rank++;
+                });
+            } catch (error) {
+                console.error("Error loading leaderboard:", error);
+                leaderboardList.innerHTML = '<div class="empty-state">Could not load leaderboard.</div>';
+            }
+        }
+
+        // Load invited users
+        async function loadInvitedUsers() {
+            usersList.innerHTML = '<div class="empty-state">Loading team...</div>';
+            const userDoc = await userDocRef.get();
+            const invitedUserIds = userDoc.data().invitedUsers || [];
+            
+            if (invitedUserIds.length === 0) {
+                usersList.innerHTML = '<div class="empty-state">You haven\'t invited anyone yet.</div>';
+                return;
+            }
+            
+            usersList.innerHTML = '';
+            for (const userId of invitedUserIds) {
+                try {
+                    const invitedUserDoc = await db.collection('users').doc(userId).get();
+                    if (invitedUserDoc.exists) {
+                        const userData = invitedUserDoc.data();
+                        const card = document.createElement('div');
+                        card.className = 'user-card';
+                        card.innerHTML = `
+                            <div class="user-info">
+                                <div class="user-avatar">${userData.photo_url ? `<img src="${userData.photo_url}" alt="">` : (userData.first_name?.[0] || '?')}</div>
+                                <div class="user-name">${userData.first_name || 'User'}</div>
+                            </div>
+                            <div class="user-balance">${(userData.balance || 0).toLocaleString()}</div>
+                        `;
+                        usersList.appendChild(card);
+                    }
+                } catch (error) {
+                    console.error('Error loading invited user data:', error);
+                }
+            }
+        }
+
+        // Initialize the game
         async function initGame() {
             try {
-                // ... Telegram & Firebase Auth (same as before) ...
+                if (!window.Telegram?.WebApp?.initDataUnsafe) {
+                     throw new Error('Please open in Telegram');
+                }
                 
-                // This will run AFTER auth is successful
-                firebaseUser = auth.currentUser;
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                
+                const tgUser = Telegram.WebApp.initDataUnsafe.user;
+                if (!tgUser?.id || !tgUser?.username) {
+                    throw new Error('Telegram user data is not available.');
+                }
+                
+                const startParam = Telegram.WebApp.initDataUnsafe.start_param;
+                if (startParam && startParam.startsWith('invite_')) {
+                    invitedBy = startParam.replace('invite_', '');
+                }
+                
+                const email = `${tgUser.username}@telegram.user`;
+                const password = padTelegramId(tgUser.id);
+                
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    firebaseUser = userCredential.user;
+                } catch (createError) {
+                    if (createError.code === 'auth/email-already-in-use') {
+                        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                        firebaseUser = userCredential.user;
+                    } else {
+                        throw createError;
+                    }
+                }
+
                 userDocRef = db.collection('users').doc(firebaseUser.uid);
                 const userDoc = await userDocRef.get();
+                
+                // UPDATED: Logic for new user creation
+                if (!userDoc.exists) {
+                    let welcomeMessage = "🎉 <b>Welcome to the Tap Game!</b>\n\nStart tapping to earn coins and climb the leaderboard. Good luck!";
+                    
+                    // Handle referral bonus logic
+                    if (invitedBy) {
+                        const inviterRef = db.collection('users').doc(invitedBy);
+                        const inviterDoc = await inviterRef.get();
+                        if (inviterDoc.exists) {
+                            await inviterRef.update({
+                                invitedUsers: firebase.firestore.FieldValue.arrayUnion(firebaseUser.uid),
+                                balance: firebase.firestore.FieldValue.increment(10000)
+                            });
+                            balance = 5000; // Starting bonus for the invited user
 
-                if (userDoc.exists) {
-                    currentUserProfile = userDoc.data();
-                    balance = currentUserProfile.balance || 0;
+                            // Customize welcome message if inviter is found
+                            const inviterUsername = inviterDoc.data().username;
+                            if (inviterUsername) {
+                                welcomeMessage += `\n\nYou were invited by <b>@${inviterUsername}</b>. You both received a bonus!`;
+                            }
+                        }
+                    }
+
+                    // Create the new user's document
+                    await userDocRef.set({
+                        id: tgUser.id,
+                        first_name: tgUser.first_name || '',
+                        last_name: tgUser.last_name || '',
+                        username: tgUser.username || '',
+                        photo_url: tgUser.photo_url || '',
+                        balance: balance,
+                        invitedBy: invitedBy || null,
+                        invitedUsers: [],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // Send the welcome message to the new user
+                    await sendTelegramMessage(tgUser.id, welcomeMessage);
+
                 } else {
-                    // New user creation logic (same as before)
+                    balance = userDoc.data().balance || 0;
                 }
                 
-                // Update UI with user data
-                document.getElementById('profileName').textContent = currentUserProfile.first_name || 'Player';
-                document.getElementById('balance').textContent = balance.toLocaleString();
-                if (currentUserProfile.photo_url) {
-                    document.getElementById('profilePic').innerHTML = `<img src="${currentUserProfile.photo_url}" alt="PFP">`;
+                // Setup UI
+                if (tgUser.photo_url) {
+                    profilePic.innerHTML = `<img src="${tgUser.photo_url}" alt="Profile">`;
+                } else {
+                    profilePic.innerHTML = `<span>${(tgUser.first_name?.[0] || '') + (tgUser.last_name?.[0] || '?')}</span>`;
+                }
+                profileName.textContent = tgUser.first_name || 'Player';
+                balanceDisplay.textContent = balance.toLocaleString();
+                setupInviteLink(firebaseUser.uid);
+                
+                // Setup Navigation
+                function switchTab(tabName) {
+                    Object.keys(pages).forEach(key => {
+                        pages[key].style.display = 'none';
+                        navItems[key].classList.remove('active');
+                    });
+                    pages[tabName].style.display = tabName === 'game' ? 'flex' : 'block';
+                    navItems[tabName].classList.add('active');
+
+                    if (tabName === 'invite') loadInvitedUsers();
+                    if (tabName === 'leaderboard') loadLeaderboard();
                 }
 
-                // Setup Listeners
                 navItems.game.addEventListener('click', () => switchTab('game'));
                 navItems.invite.addEventListener('click', () => switchTab('invite'));
-                navItems.gamesHub.addEventListener('click', () => switchTab('gamesHub'));
                 navItems.leaderboard.addEventListener('click', () => switchTab('leaderboard'));
-                document.getElementById('gameCardRobot').addEventListener('click', () => ttt_startGame('robot'));
-                document.getElementById('gameCardP2P').addEventListener('click', startMatchmaking);
-                cancelMatchmakingBtn.addEventListener('click', cancelMatchmaking);
-                tttBackBtn.addEventListener('click', () => {
-                     if (currentGameRef) { currentGameRef.off(); currentGameRef = null; }
-                     switchTab('gamesHub');
-                });
 
-
+                // Setup tap listeners
+                tapCircle.addEventListener('click', handleTap);
+                tapCircle.addEventListener('touchstart', handleTap, { passive: true });
+                
+                // Show the game screen
                 loadingScreen.style.opacity = '0';
                 setTimeout(() => {
                     loadingScreen.style.display = 'none';
-                    switchTab('game');
+                    switchTab('game'); // Start on game tab
                 }, 500);
-
+                
             } catch (error) {
-                console.error("Initialization failed:", error);
-                loadingScreen.innerHTML = `<p style="color:red; padding: 20px;">Error: ${error.message}. Please restart.</p>`;
+                console.error('Initialization error:', error);
+                loadingScreen.innerHTML = `<p style="color:red; padding: 20px;">Error: ${error.message}.</p>`;
             }
         }
 
