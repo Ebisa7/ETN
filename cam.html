@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HandSketch — Pinch-to-Draw</title>
+  <style>
+    :root{--bg:#0f1724;--panel:#0b1220;--accent:#10b981}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--bg);color:#e6eef6}
+    .app{display:grid;grid-template-columns:1fr 320px;gap:12px;height:100%;padding:12px;box-sizing:border-box}
+    .stage{position:relative;border-radius:12px;overflow:hidden;background:#000000;border:1px solid rgba(255,255,255,0.03)}
+    video#cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:0.15}
+    canvas#guide, canvas#paint{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+    .panel{background:var(--panel);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+    h1{margin:0;font-size:16px}
+    .row{display:flex;gap:8px;align-items:center}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:8px;border-radius:8px;cursor:pointer}
+    .colors{display:flex;gap:8px}
+    .swatch{width:26px;height:26px;border-radius:6px;border:2px solid rgba(0,0,0,0.4);cursor:pointer}
+    .info{font-size:13px;opacity:0.8}
+    .big{font-size:14px}
+    footer{margin-top:auto;font-size:12px;opacity:0.7}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="stage" id="stage">
+      <video id="cam" autoplay playsinline></video>
+      <canvas id="guide"></canvas>
+      <canvas id="paint"></canvas>
+    </div>
+
+    <div class="panel">
+      <h1>HandSketch — pinch to draw</h1>
+      <div class="info">Allow camera. <strong>Pinch (index + thumb)</strong> to draw. Try gestures below.</div>
+      <div class="row">
+        <div class="colors" id="colors"></div>
+        <div style="flex:1"></div>
+        <button id="undo">Undo</button>
+        <button id="save">Save</button>
+      </div>
+
+      <div class="row">
+        <div class="info">Brush: <span id="brushVal">6</span> px</div>
+        <input id="brush" type="range" min="1" max="60" value="6" style="flex:1">
+      </div>
+
+      <div class="row">
+        <div class="info">Smoothing: <span id="smoothVal">0.6</span></div>
+        <input id="smooth" type="range" min="0" max="0.95" step="0.01" value="0.6" style="flex:1">
+      </div>
+
+      <div class="row big">
+        <div style="flex:1">
+          <strong>Gestures</strong>
+          <div class="info">• <strong>Pinch</strong> (thumb+index) → draw (hold).<br>
+          • <strong>Pinch + middle finger close</strong> → Eraser mode.<br>
+          • <strong>Open palm (all fingers straight)</strong> held 1s → Clear canvas.<br>
+          • <strong>Pinch + quick left/right swipe</strong> → change color (cycle).<br>
+          • <strong>Pinch pressure</strong> (pinch tighter) → thicker stroke (simulated).</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="toggleCam">Stop Camera</button>
+        <button id="resetCamera">Reset</button>
+      </div>
+
+      <footer>Tip: mirror on — the app flips the camera so drawing feels natural.</footer>
+    </div>
+  </div>
+
+<script type="module">
+// HandSketch — single-file app
+// Uses MediaPipe Hands (via CDN) for robust hand landmark detection.
+// Features implemented by default:
+// - Pinch (thumb tip = 4, index tip = 8) to draw
+// - If middle finger tip (12) is close while pinching -> eraser
+// - Open palm detected -> clear after 1s
+// - Swipe left/right during pinch -> cycle color
+// - Pinch distance -> simulated pressure -> stroke width
+// - Undo stack, Save PNG, brush size and smoothing sliders
+
+import {Hands} from 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js';
+import {Camera} from 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js';
+
+const video = document.getElementById('cam');
+const guide = document.getElementById('guide');
+const paint = document.getElementById('paint');
+const gctx = guide.getContext('2d');
+const pctx = paint.getContext('2d');
+
+function fitCanvases(){
+  const r = video.getBoundingClientRect();
+  [guide,paint].forEach(c=>{c.width = r.width; c.height = r.height; c.style.left = r.left + 'px';});
+}
+
+window.addEventListener('resize', ()=>{
+  fitCanvases();
+});
+
+// UI
+const colors = ['#10b981','#ef4444','#f59e0b','#3b82f6','#a78bfa','#ffffff','#000000'];
+const colorsEl = document.getElementById('colors');
+let color = colors[0];
+colors.forEach(c=>{const d=document.createElement('div');d.className='swatch';d.style.background=c;d.addEventListener('click',()=>{color=c});colorsEl.appendChild(d)});
+
+const brushEl = document.getElementById('brush');
+const brushVal = document.getElementById('brushVal');
+const smoothEl = document.getElementById('smooth');
+const smoothVal = document.getElementById('smoothVal');
+brushEl.addEventListener('input',()=>{brushVal.innerText=brushEl.value});
+smoothEl.addEventListener('input',()=>{smoothVal.innerText=smoothEl.value});
+
+document.getElementById('undo').addEventListener('click',undo);
+document.getElementById('save').addEventListener('click',savePNG);
+document.getElementById('toggleCam').addEventListener('click',toggleCam);
+document.getElementById('resetCamera').addEventListener('click',()=>{if(camera)camera.stop(); startCamera();});
+
+let drawingStack = [];
+function pushStack(){
+  try{drawingStack.push(paint.toDataURL()); if(drawingStack.length>20) drawingStack.shift();}catch(e){}
+}
+function undo(){if(drawingStack.length){const d=drawingStack.pop(); const img=new Image(); img.onload=()=>{pctx.clearRect(0,0,paint.width,paint.height); pctx.drawImage(img,0,0,paint.width,paint.height)}; img.src=d}}
+function savePNG(){const url=paint.toDataURL('image/png'); const a=document.createElement('a'); a.href=url; a.download='handsketch.png'; a.click();}
+
+// Drawing helpers
+let last = null; // last smoothed point
+let smoothing = parseFloat(smoothEl.value);
+let brushBase = parseInt(brushEl.value,10);
+let eraser = false;
+
+smoothEl.addEventListener('change',()=>smoothing=parseFloat(smoothEl.value));
+brushEl.addEventListener('change',()=>brushBase=parseInt(brushEl.value,10));
+
+function drawLine(x1,y1,x2,y2,w,col,erase=false){
+  pctx.save();
+  pctx.lineCap = 'round';
+  pctx.lineJoin = 'round';
+  pctx.globalCompositeOperation = erase ? 'destination-out' : 'source-over';
+  pctx.strokeStyle = col;
+  pctx.lineWidth = w;
+  pctx.beginPath();
+  pctx.moveTo(x1,y1);
+  pctx.lineTo(x2,y2);
+  pctx.stroke();
+  pctx.restore();
+}
+
+// Gesture detection & state
+let isPinching = false;
+let pinchStart = null;
+let lastPaintPoint = null;
+let palmOpenStart = 0;
+let camera = null;
+
+function distance(a,b){
+  const dx=a.x-b.x, dy=a.y-b.y; return Math.hypot(dx,dy);
+}
+
+// Convert normalized landmark to canvas coords (mirror X for natural drawing)
+function lmToPoint(lm, canvas){
+  return {x: (1 - lm.x) * canvas.width, y: lm.y * canvas.height};
+}
+
+// Cycle color index
+let colorIndex = 0;
+function cycleColor(dir=1){ colorIndex = (colorIndex + dir + colors.length) % colors.length; color = colors[colorIndex]; }
+
+// Open palm detection (simple heuristic: all finger-tip distances from wrist > threshold)
+function isOpenPalm(landmarks){
+  const wrist = landmarks[0];
+  let count=0; for(const tipIdx of [4,8,12,16,20]){
+    if(distance(landmarks[tipIdx], wrist) > 0.22) count++;
+  }
+  return count >= 4; // most fingers extended
+}
+
+// Setup MediaPipe Hands
+const hands = new Hands({locateFile: (file)=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+hands.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:0.75,minTrackingConfidence:0.6});
+hands.onResults(onHands);
+
+async function startCamera(){
+  if(camera) try{camera.stop()}catch(e){}
+  try{
+    camera = new Camera(video, {onFrame: async ()=>{await hands.send({image: video});}, width:1280, height:720});
+    await camera.start();
+    fitCanvases();
+    document.getElementById('toggleCam').innerText='Stop Camera';
+  }catch(e){alert('Camera start failed. Check permission and that you are on https.');}
+}
+startCamera();
+
+function toggleCam(){if(camera){camera.stop(); camera=null; document.getElementById('toggleCam').innerText='Start Camera'} else startCamera();}
+
+// Main handler
+function onHands(results){
+  // prepare guide canvas
+  gctx.clearRect(0,0,guide.width,guide.height);
+
+  if(!results.multiHandLandmarks || !results.multiHandLandmarks.length) {
+    // no hand — reset some states
+    isPinching=false; last=null; lastPaintPoint=null; palmOpenStart=0; return;
+  }
+
+  const lm = results.multiHandLandmarks[0];
+  // draw landmarks for guidance
+  for(let i=0;i<lm.length;i++){
+    const p=lmToPoint(lm[i], guide);
+    gctx.beginPath(); gctx.arc(p.x,p.y,4,0,Math.PI*2); gctx.fillStyle='rgba(255,255,255,0.08)'; gctx.fill();
+  }
+
+  const thumb = lm[4], index = lm[8], middle = lm[12];
+  const dThumbIndex = distance(thumb,index);
+  const dIndexMiddle = distance(index,middle);
+
+  // determine pinch using normalized distance threshold (works across sizes because mediaPipe normalizes)
+  const PINCH_THRESHOLD = 0.05;
+  const ERASER_MIDDLE_THRESHOLD = 0.06;
+
+  const now = performance.now();
+
+  // Open palm gesture: if open palm held for > 1000ms clear canvas
+  if(isOpenPalm(lm)){
+    if(!palmOpenStart) palmOpenStart = now;
+    else if(now - palmOpenStart > 1000){ pushStack(); pctx.clearRect(0,0,paint.width,paint.height); palmOpenStart = 0; }
+  } else palmOpenStart = 0;
+
+  // Pinch logic
+  if(dThumbIndex < PINCH_THRESHOLD){
+    // if just started pinch, record start
+    if(!isPinching){
+      isPinching = true; pinchStart = lmToPoint(index, guide); lastPaintPoint = pinchStart; pushStack();
+    }
+
+    // erser if middle finger close to index while pinching
+    eraser = dIndexMiddle < ERASER_MIDDLE_THRESHOLD;
+
+    // determine simulated pressure: smaller dThumbIndex => stronger -> wider stroke
+    const pressure = Math.max(0.02, Math.min(0.08, 0.09 - dThumbIndex)); // normalized
+    const stroke = Math.max(1, Math.round(brushBase * (1 + (pressure*8))));
+
+    // compute smoothed point
+    const raw = lmToPoint(index, guide);
+    if(last == null) last = raw;
+    const smX = last.x * smoothing + raw.x * (1 - smoothing);
+    const smY = last.y * smoothing + raw.y * (1 - smoothing);
+
+    // draw between lastPaintPoint and smoothed
+    if(lastPaintPoint){ drawLine(lastPaintPoint.x, lastPaintPoint.y, smX, smY, stroke, color, eraser); }
+    last = {x: smX, y: smY}; lastPaintPoint = last;
+
+    // detect swipe for color change: a quick horizontal move > threshold since pinchStart
+    const movedX = last.x - pinchStart.x;
+    if(Math.abs(movedX) > 80){ // pixels
+      const dir = movedX > 0 ? 1 : -1;
+      cycleColor(dir);
+      // move pinchStart so cycle won't trigger repeatedly quickly
+      pinchStart.x = last.x; pushStack();
+    }
+
+  } else {
+    // released
+    if(isPinching){ isPinching=false; last=null; lastPaintPoint=null; eraser=false; pinchStart=null; }
+  }
+}
+
+// When camera size changes, resize canvases
+video.addEventListener('loadeddata', ()=>{fitCanvases();});
+
+// Save and load state if user resizes
+window.addEventListener('beforeunload', ()=>{});
+
+</script>
+</body>
+</html>
