@@ -3,84 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Editor</title>
+    <title>Quiz Card Social Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
     <style>
-        body {
-            font-family: 'Roboto Mono', monospace; /* Modern monospaced font */
-            height: 100vh;
+        :root {
+            --background: 231 48% 94%;
+            --foreground: 222 47% 11%;
+            --card: 231 48% 99%;
+            --card-foreground: 222 47% 11%;
+            --primary: 40 96% 56%;
+            --primary-foreground: 222 47% 11%;
+            --secondary: 0 0% 100%;
+            --secondary-foreground: 222 47% 11%;
+            --muted: 231 48% 90%;
+            --muted-foreground: 222 47% 40%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 231 48% 88%;
+        }
+
+        .dark {
+            --background: 218 18% 12%;
+            --foreground: 225 27% 98%;
+            --card: 222 14% 16%;
+            --card-foreground: 225 27% 98%;
+            --primary: 40 96% 56%;
+            --primary-foreground: 222 47% 11%;
+            --secondary: 0 0% 100%;
+            --secondary-foreground: 222 47% 11%;
+            --muted: 222 14% 20%;
+            --muted-foreground: 225 27% 70%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 225 27% 98%;
+            --border: 222 14% 22%;
+        }
+
+        * {
             margin: 0;
-            background-color: #1e1f28; /* Dark background */
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background-color: transparent;
+            color: hsl(var(--foreground));
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Hide UI elements when generating image */
+        .image-mode .download-btn {
+            display: none !important;
+        }
+
+        .font-headline {
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 700;
+        }
+
+        .quiz-card-container {
+            width: 1200px;
+            height: 630px;
+            margin: 20px;
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+
+        /* Responsive behavior - scale everything proportionally */
+        @media (max-width: 1280px) {
+            .quiz-card-container {
+                transform: scale(min(1, calc((100vw - 40px) / 1200)));
+                margin: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .quiz-card-container {
+                transform: scale(min(1, calc((100vw - 20px) / 1200)));
+                margin: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quiz-card-container {
+                transform: scale(min(1, calc((100vw - 16px) / 1200)));
+                margin: 8px;
+            }
+        }
+
+        .quiz-card {
+            position: relative;
+            width: 1200px;
+            height: 630px;
+            display: flex;
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+            background-color: hsl(var(--card));
+            flex-direction: row;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(-4px);
+            border-radius: 30px;
+            border: 1px solid hsl(var(--border));
+        }
+
+        .glow-effect {
+            position: absolute;
+            z-index: -10;
+            inset: 0;
+            transition: all 0.5s;
+            opacity: 0.25;
+            background-color: var(--dominant-color, hsl(var(--primary)));
+            filter: blur(60px);
+            transform: scale(1.2);
+        }
+
+        .card-content-wrapper {
+            position: relative;
+            z-index: 0;
+            height: 100%;
+            background-color: hsl(var(--card) / 0.6);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 100%;
+        }
+
+        .content-section {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; /* Align items to the top */
-            color: #abb2bf; /* Light gray text */
-            padding-top: 20px;
+            justify-content: center;
+            width: 50%;
+            height: 100%;
+            padding: 2rem;
+            background: transparent;
         }
-        h2 {
-            color: #c678dd; /* Purple heading */
-            margin-bottom: 20px;
+
+        .quiz-title {
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 700;
+            font-size: 5rem;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+            transition: all 0.3s;
+            color: var(--dominant-color, hsl(var(--primary)));
+            margin-top: 1rem;
+            resize: vertical;
         }
-        textarea {
-            width: 90%; /* Take up more horizontal space */
-            height: 70vh; /* More vertical space */
-            background-color: #282c34; /* Darker editor background */
-            color: #d19a66; /* Light orange/beige code color */
-            border: none;
-            padding: 16px;
-            font-size: 16px;
-            outline: none;
-            resize: vertical; /* Allow vertical resizing */
-            border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-            line-height: 1.5; /* Improved readability */
+
+        .quiz-description {
+            color: hsl(var(--muted-foreground));
+            font-size: 2.5rem;
+            line-height: 3.2rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 7.5rem; /* 3 lines of text at 2.5rem each */
+            resize: vertical; /* Allow the textarea to be resized */
+            min-height: 7.5rem;
+            max-height: 15rem; /* Enough for 10 lines of text */
         }
-        textarea::selection {
-            background-color: #61afef; /* Highlight color */
-            color: #282c34;
-        }
-        button {
-            margin-top: 20px;
-            padding: 12px 24px;
-            background-color: #61afef; /* Blue action button */
-            color: #282c34; /* Dark text on button */
-            border: none;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #98c379; /* Green hover effect */
-            color: #282c34;
-        }
-        .button-container {
+
+        .badges-container {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            align-items: center;
+            gap: 2rem;
+           
+            margin-top: auto;
+            font-size: 1.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            border: 1.5px solid transparent;
+            padding: 1rem 2rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .badge-default {
+            border-color: transparent;
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .badge-default:hover {
+            background-color: hsl(var(--primary) / 0.7);
+        }
+
+        .badge-secondary {
+            border-color: transparent;
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .badge-secondary:hover {
+            background-color: hsl(var(--secondary) / 0.7);
+        }
+
+        .badge-destructive {
+            border-color: transparent;
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+        }
+
+        .badge-destructive:hover {
+            background-color: hsl(var(--destructive) / 0.7);
+        }
+
+        .badge-outline {
+            color: hsl(var(--foreground));
+            border: 2.5px solid hsl(var(--border));
+        }
+
+        .badge-icon {
+            height: 2rem;
+            width: 2rem;
+            margin-right: 1rem;
+        }
+
+        .image-section {
+            position: relative;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .quiz-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+
+        /* Icons as SVG */
+        .icon {
+            width: 1rem;
+            height: 1rem;
+            fill: currentColor;
+            margin-right: 0.25rem;
+        }
+
+        /* Download button */
+        .download-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            border-radius: 8px;
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .download-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h2>Code Editor</h2>
-    <textarea id="codeEditor" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html lang=&quot;en&quot;&gt;&#10;&lt;head&gt;&#10;    &lt;meta charset=&quot;UTF-8&quot;&gt;&#10;    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;&#10;    &lt;title&gt;Document&lt;/title&gt;&#10;&lt;/head&gt;&#10;&lt;body&gt;&#10;    &lt;h1&gt;Hello World!&lt;/h1&gt;&#10;&lt;/body&gt;&#10;&lt;/html&gt;"></textarea>
-    <div class="button-container">
-        <button onclick="saveCode()">Save Code</button>
-        <button onclick="window.open('pre.html', '_blank')">Open Preview</button>
+    <button class="download-btn" onclick="downloadImage()" style="display: none;">Download PNG</button>
+    <div class="quiz-card-container">
+        <div class="quiz-card" style="--dominant-color: #3b82f6;">
+            <!-- Glow Effect -->
+            <div class="glow-effect"></div>
+            
+            <!-- Content Wrapper -->
+            <div class="card-content-wrapper">
+                <!-- Left: Content Section -->
+                <div class="content-section">
+                    <h3 class="quiz-title" id="quiz-title">JavaScript Fundamentals</h3>
+                    <p class="quiz-description" id="quiz-description">Test your knowledge of JavaScript basics including variables, functions, arrays, and object-oriented programming concepts.</p>
+                    <div class="badges-container">
+                        <div class="badge badge-outline">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14,2 14,8 20,8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                                <polyline points="10,9 9,9 8,9"/>
+                            </svg>
+                            <span id="questions-text">15 Questions</span>
+                        </div>
+                        <div class="badge badge-outline" id="time-badge">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12,6 12,12 16,14"/>
+                            </svg>
+                            <span id="time-text">20 min</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Image Section -->
+                <div class="image-section">
+                    <img src="" alt="Quiz Image" class="quiz-image" id="quiz-image" crossorigin="anonymous">
+                </div>
+                
+            </div>
+        </div>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            if (localStorage.getItem("savedCode")) {
-                document.getElementById("codeEditor").value = localStorage.getItem("savedCode");
+        // Dominant color extraction from image
+        function extractDominantColor(imageElement) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = imageElement.naturalWidth || imageElement.width;
+                canvas.height = imageElement.naturalHeight || imageElement.height;
+                
+                ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+                
+                try {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    
+                    // Sample pixels and count colors
+                    const colorCount = {};
+                    const step = 5; // Sample every 5th pixel for performance
+                    
+                    for (let i = 0; i < data.length; i += 4 * step) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        const alpha = data[i + 3];
+                        
+                        // Skip transparent pixels
+                        if (alpha < 128) continue;
+                        
+                        // Skip very light or very dark colors
+                        const brightness = (r + g + b) / 3;
+                        if (brightness < 30 || brightness > 220) continue;
+                        
+                        // Group similar colors
+                        const colorKey = `${Math.floor(r/20)*20},${Math.floor(g/20)*20},${Math.floor(b/20)*20}`;
+                        colorCount[colorKey] = (colorCount[colorKey] || 0) + 1;
+                    }
+                    
+                    // Find the most common color
+                    let dominantColor = null;
+                    let maxCount = 0;
+                    
+                    for (const [color, count] of Object.entries(colorCount)) {
+                        if (count > maxCount) {
+                            maxCount = count;
+                            dominantColor = color;
+                        }
+                    }
+                    
+                    if (dominantColor) {
+                        const [r, g, b] = dominantColor.split(',').map(Number);
+                        resolve(`rgb(${r}, ${g}, ${b})`);
+                    } else {
+                        // Fallback to primary color
+                        resolve('hsl(40, 96%, 56%)');
+                    }
+                } catch (error) {
+                    console.warn('Could not extract color from image:', error);
+                    resolve('hsl(40, 96%, 56%)');
+                }
+            });
+        }
+
+        // Set dominant color from image
+        async function setDominantColorFromImage() {
+            const img = document.querySelector('.quiz-image');
+            
+            if (img.complete) {
+                const color = await extractDominantColor(img);
+                document.querySelector('.quiz-card').style.setProperty('--dominant-color', color);
+            } else {
+                img.addEventListener('load', async () => {
+                    const color = await extractDominantColor(img);
+                    document.querySelector('.quiz-card').style.setProperty('--dominant-color', color);
+                });
+            }
+        }
+
+        // Download functionality using html-to-image
+        async function downloadImage() {
+            const button = document.querySelector('.download-btn');
+            const preview = document.querySelector('.quiz-card');
+            
+            if (!preview) return;
+            
+            try {
+                button.disabled = true;
+                button.textContent = 'Generating...';
+                
+                // Wait for fonts to load
+                await document.fonts.ready;
+                
+                // Get the actual dimensions of the card
+                const rect = preview.getBoundingClientRect();
+                const scale = 1200 / rect.width; // Scale to ensure 1200px width
+                
+                // Generate PNG using html-to-image
+                const dataUrl = await htmlToImage.toPng(preview, {
+                    cacheBust: true,
+                    backgroundColor: 'transparent',
+                    width: 1200,
+                    height: 630,
+                    style: {
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                        width: '1200px',
+                        height: '630px'
+                    },
+                    pixelRatio: 1
+                });
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.download = getDownloadFilename();
+                link.href = dataUrl;
+                link.click();
+                
+            } catch (error) {
+                console.error('Error generating image:', error);
+                alert('Failed to generate image. Please try again.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Download PNG';
+            }
+        }
+
+        // Parse URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                title: params.get('title') || 'JavaScript Fundamentals',
+                description: params.get('description') || params.get('deskreption') || 'Test your knowledge of JavaScript basics including variables, functions, arrays, and object-oriented programming concepts.',
+                imageurl: params.get('imageurl') || params.get('image') || 'https://quiz-lt.pages.dev/lt-ai.png',
+                questions: params.get('questions') || '15',
+                time: params.get('time') || '20',
+            };
+        }
+
+        // Update content based on URL parameters
+        function updateContentFromUrl() {
+            const params = getUrlParams();
+            
+            // Update title
+            document.getElementById('quiz-title').textContent = params.title;
+            document.title = `${params.title} - Quiz Card Preview`;
+            
+            // Update description
+            document.getElementById('quiz-description').textContent = params.description;
+            
+            // Update image
+            const img = document.getElementById('quiz-image');
+            img.src = params.imageurl;
+            img.alt = params.title;
+            
+            
+            // Update questions
+            document.getElementById('questions-text').textContent = `${params.questions} Questions`;
+            
+            // Update time (hide if not provided or 0)
+            const timeBadge = document.getElementById('time-badge');
+            const timeText = document.getElementById('time-text');
+            if (params.time && params.time !== '0') {
+                timeText.textContent = `${params.time} min`;
+                timeBadge.style.display = 'inline-flex';
+            } else {
+                timeBadge.style.display = 'none';
+            }
+            
+        }
+
+        // Update download filename to use dynamic title
+        function getDownloadFilename() {
+            const params = getUrlParams();
+            const filename = params.title.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
+            return `${filename || 'quiz-card'}-preview.png`;
+        }
+
+        // Auto-generate image and return as blob URL
+        async function generateImageBlob() {
+            const preview = document.querySelector('.quiz-card');
+            if (!preview) return null;
+            
+            try {
+                // Wait for fonts and image to load
+                await document.fonts.ready;
+                await new Promise(resolve => {
+                    const img = document.getElementById('quiz-image');
+                    if (img.complete) {
+                        resolve();
+                    } else {
+                        img.addEventListener('load', resolve);
+                        img.addEventListener('error', resolve);
+                    }
+                });
+                
+                // Add image mode class to hide UI
+                document.body.classList.add('image-mode');
+                
+                // Generate PNG
+                const dataUrl = await htmlToImage.toPng(preview, {
+                    cacheBust: true,
+                    backgroundColor: 'transparent',
+                    width: 1200,
+                    height: 630,
+                    pixelRatio: 1
+                });
+                
+                return dataUrl;
+            } catch (error) {
+                console.error('Error generating image:', error);
+                return null;
+            }
+        }
+
+        // Wait for all content to be ready
+        async function waitForContentReady() {
+            // Wait for fonts
+            await document.fonts.ready;
+            
+            // Wait for image to load and color extraction to complete
+            const img = document.getElementById('quiz-image');
+            if (img.src) {
+                await new Promise(resolve => {
+                    if (img.complete) {
+                        resolve();
+                    } else {
+                        img.addEventListener('load', resolve);
+                        img.addEventListener('error', resolve);
+                    }
+                });
+                
+                // Wait for color extraction and DOM updates
+                await setDominantColorFromImage();
+                
+                // Give extra time for DOM updates and style application
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+
+        // Check if we should return image directly
+        async function handleImageMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnImage = urlParams.get('return') === 'image' || urlParams.get('format') === 'png';
+            
+            if (returnImage) {
+                // Wait for everything to be ready
+                await waitForContentReady();
+                
+                // Generate and return image
+                const imageDataUrl = await generateImageBlob();
+                if (imageDataUrl) {
+                    // Convert data URL to blob
+                    const response = await fetch(imageDataUrl);
+                    const blob = await response.blob();
+                    
+                    // Create object URL and redirect
+                    const objectUrl = URL.createObjectURL(blob);
+                    window.location.replace(objectUrl);
+                }
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', async () => {
+            updateContentFromUrl();
+            
+            // Check if we need to return image mode
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnImage = urlParams.get('return') === 'image' || urlParams.get('format') === 'png';
+            
+            if (returnImage) {
+                await handleImageMode();
+            } else {
+                // Normal mode - just set color
+                await setDominantColorFromImage();
             }
         });
-
-        function saveCode() {
-            const code = document.getElementById("codeEditor").value;
-            localStorage.setItem("savedCode", code);
-        }
     </script>
 </body>
 </html>
